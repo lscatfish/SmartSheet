@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <xlnt/xlnt.hpp>
+#include <xlnt/workbook/workbook.hpp>
 
 /*
  * @brief 从一个文件下获取所有的文件

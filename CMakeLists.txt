@@ -29,5 +29,5 @@ add_executable(SmartSheet
 "include/ChineseEncoding.h"
 "include/PersonnelInformation.h"
 "include/Files.h"
-"src/Files.cpp")
+"src/Files.cpp" "include/QingziClass.h" "src/QingziClass.cpp")
 target_link_libraries(SmartSheet PRIVATE xlnt)
