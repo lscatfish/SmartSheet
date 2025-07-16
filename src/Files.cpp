@@ -52,7 +52,7 @@ bool get_filepath_from_folder(
  * @param 储存表格的二维数组（按照row，column的形式）
  * @param 文件的路径
  */
-void get_sheet_from_file(
+void load_sheet_from_file(
     std::vector< std::vector< std::string > > &aSheet,
     std::string                                pathAndName) {
     xlnt::workbook wb;
