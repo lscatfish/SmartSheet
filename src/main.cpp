@@ -19,7 +19,7 @@ int main( ) {
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
     xlnt::workbook wb;                      // 创建一个工作簿对象
-    wb.load(anycode_to_utf8("我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
+    wb.load(anycode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
     auto ws = wb.active_sheet( );           // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
@@ -42,7 +42,7 @@ int main( ) {
         for (auto cell : row) {
             std::cout << "将该单元格添加到当前行向量..." << std::endl;
             // cell.to_string() 把数字、日期、公式等统一转为字符串
-            aSingleRow.push_back(cell.to_string( ));
+            aSingleRow.push_back(anycode_to_utf8(cell.to_string( )));
         }
 
         std::cout << "将该整行添加到总向量..." << std::endl;
@@ -63,8 +63,8 @@ int main( ) {
 
     xlnt::workbook wss;
 
-    wss.active_sheet( ).cell("B6").value(anycode_to_utf8("中国"));
-    wss.save("out.xlsx");
+    wss.active_sheet( ).cell("B6").value(anycode_to_utf8("1中国234"));
+    wss.save(anycode_to_utf8("./1我/ou操.xlsx"));
 
     return 0;    // 程序正常结束
 }

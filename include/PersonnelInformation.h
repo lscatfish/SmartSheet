@@ -7,6 +7,7 @@
  * 此文件用于定义人员信息
  */
 
+#include <map>
 #include <string>
 
 /*
@@ -27,6 +28,8 @@ public:
     bool        ifcheck;             // 是否签到
     bool        ifsign;              // 是否报名
 
+    std::map< std::string, std::string > information;    // 不标准的表用此map来储存
+
     // @brief 基本构造函数
     DefPerson( );
 
@@ -44,7 +47,7 @@ public:
         std::string _studentID,
         std::string _academy,
         std::string _phonenumber);
-   
+
     /*
      * @brief 析构函数
      */

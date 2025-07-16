@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 project(SmartSheet)
 
-# 放在 project() 之后即可
+# 使用ninja编译时强制定义以下宏
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
     add_definitions(-D_AMD64_)
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
@@ -27,5 +27,7 @@ add_executable(SmartSheet
 "src/main.cpp"
 "src/ChineseEncoding.cpp"
 "include/ChineseEncoding.h"
-"include/PersonnelInformation.h")
+"include/PersonnelInformation.h"
+"include/Files.h"
+"src/Files.cpp")
 target_link_libraries(SmartSheet PRIVATE xlnt)
