@@ -51,10 +51,10 @@ DefStdPerson::DefStdPerson(
     ifsign      = false;
 }
 
-/*
- * @brief 析构函数
- */
-DefStdPerson::~DefStdPerson( ) {}
+///*
+// * @brief 析构函数
+// */
+//DefStdPerson::~DefStdPerson( ) {}
 
 
 // @brief 基本构造函数
@@ -87,7 +87,7 @@ DefUnstdPerson::DefUnstdPerson(
     information[anycode_to_utf8("联系电话")] = anycode_to_utf8(_phonenumber);
 }
 
-/*
- * @brief 析构函数
- */
-DefUnstdPerson::~DefUnstdPerson( ) {}
+///*
+// * @brief 析构函数
+// */
+//DefUnstdPerson::~DefUnstdPerson( ) {}

@@ -1,5 +1,6 @@
 ﻿
 #include "ChineseEncoding.h"
+#include "Files.h"
 #include "PersonnelInformation.h"
 #include < consoleapi2.h>
 #include <iostream>
@@ -18,9 +19,9 @@ int main( ) {
     SetConsoleCP(65001);          // 输入代码页也设为 UTF-8
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
-    xlnt::workbook wb;                      // 创建一个工作簿对象
+    xlnt::workbook wb;                         // 创建一个工作簿对象
     wb.load(anycode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
-    auto ws = wb.active_sheet( );           // 获取当前激活的工作表（第一张）
+    auto ws = wb.active_sheet( );              // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
     std::cout << "正在处理电子表格..." << std::endl;
@@ -65,6 +66,11 @@ int main( ) {
 
     wss.active_sheet( ).cell("B6").value(anycode_to_utf8("1中国234"));
     wss.save(anycode_to_utf8("./1我/ou操.xlsx"));
+
+
+    std::vector< std::string > className_;          // 班级名字
+    std::vector< std::string > filePathAndName_;    // 每个xlsx文件的位置
+    get_filepath_from_folder(className_, filePathAndName_, anycode_to_utf8("./input/all/"));
 
     return 0;    // 程序正常结束
 }

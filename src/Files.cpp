@@ -10,7 +10,7 @@
 
 /*
  * @brief 从一个文件下获取所有的文件
- * @param 返回的文件名
+ * @param 返回的文件名（无格式后缀）
  * @param 返回的文件路径
  * @param 目标文件夹名称
  * @return 错误返回false，读取成功返回true
@@ -35,7 +35,7 @@ bool get_filepath_from_folder(
         return false;
     }
     for (auto it = _name.begin( ); it != _name.end( ); it++) {
-        it->erase(it->end( ) - 4, it->end( ));
+        it->erase(it->end( ) - 5, it->end( ));
     }
     std::cout << anycode_to_utf8("请确认各班（共") << _name.size( ) << anycode_to_utf8("个班）：") << std::endl;
     for (auto &s : _name) {

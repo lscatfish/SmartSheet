@@ -46,10 +46,10 @@ public:
         std::string _academy,
         std::string _phonenumber);
 
-    /*
-     * @brief 析构函数
-     */
-    ~DefStdPerson( );
+    ///*
+    // * @brief 析构函数
+    // */
+    //~DefStdPerson( );
 };
 
 /*
@@ -80,10 +80,10 @@ public:
         std::string _academy,
         std::string _phonenumber);
 
-    /*
-     * @brief 析构函数
-     */
-    ~DefUnstdPerson( );
+    ///*
+    // * @brief 析构函数
+    // */
+    //~DefUnstdPerson( );
 };
 
 #endif    // !PERSONNELINFORMATION_H
