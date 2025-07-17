@@ -74,7 +74,7 @@ void DoQingziClass::start( ) {
     /* 4.加载签到表或是出勤记录表 ============================================================= */
     if (outWhichSheet == 1) {
         // 加载报名表
-        load_applicationSheet_for_attendanceSheet( );
+        make_attendanceSheet( );
     } else if (outWhichSheet == 2) {
     }
 }
@@ -143,9 +143,13 @@ void DoQingziClass::load_personnel_information_list( ) {
 }
 
 /*
- * @brief 加载报名表
+ * @brief 制作签到表
  */
-void DoQingziClass::load_applicationSheet_for_attendanceSheet( ) {
+void DoQingziClass::make_attendanceSheet( ) {
+    std::vector< std::string >    app_classname;          // 班级名称
+    std::vector< std::string >    app_filePathAndName;    // applicationSheet的excel文件的路径
+    std::vector< DefUnstdPerson > app_person;             // 定义从报名表中获得的人员信息
+
     // lambda函数定义========================================================================/
     /*
      * @brief 保存报名表中的信息
@@ -153,18 +157,247 @@ void DoQingziClass::load_applicationSheet_for_attendanceSheet( ) {
      * @param 班级名称
      */
     auto save_application =
-        [](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
-
+        [&app_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+        for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
+            DefUnstdPerson per;
+            per.classname = cn;
+            for (size_t colIndex = 0;
+                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
+                 colIndex++) {
+                per.information[sh[0][colIndex]] = sh[rowIndex][colIndex];
+            }
+            app_person.push_back(per);
+        }
     };
     //=======================================================================================/
 
-    std::vector< std::string >                app_classname;          // 班级名称
-    std::vector< std::string >                app_filePathAndName;    // applicationSheet的excel文件的路径
-    std::vector< std::vector< std::string > > app_sheet;              // 保存读取到的表格
-    std::vector< DefUnstdPerson >             app_person;             // 定义从报名表中获得的人员信息
-
     get_filepath_from_folder(app_classname, app_filePathAndName, anycode_to_utf8("./input/otr/"));
+    for (auto it_app_filepath = app_filePathAndName.begin( ), it_app_classname = app_classname.begin( );
+         it_app_filepath != app_filePathAndName.end( ) && it_app_classname != app_classname.end( );
+         it_app_filepath++, it_app_classname++) {
+        // 保存读取到的表格
+        std::vector< std::vector< std::string > > sheet;
+        load_sheet_from_file(sheet, *it_app_filepath);
+        save_application(sheet, *it_app_classname);
+    }
 
+    /* 制表 */
+    if (perInFormat_ == PersonFormat::STD) {
 
+    } else if (perInFormat_ == PersonFormat::UNSTD) {
+        for (auto it = app_person.begin( ); it != app_person.end( ); it++) {
+        }
+    }
+}
 
+/*
+ * @brief 搜索，从全人员名单中搜素目标人员信息
+ * @param 总名单的一个迭代器
+ * @param 目标的人员信息
+ * @note 可以考虑怎么优化这四个search函数
+ * @shit if很多吧，慢慢看  (^_^)
+ */
+void DoQingziClass::search_person(
+    std::vector< DefStdPerson >::iterator &it_output,
+    DefStdPerson                           _targetPerson) {
+    for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
+        /* 1.优先匹配班级（如果有） */
+        if (_targetPerson.classname.size( ) != 0) {
+            if (_targetPerson.classname == it_all->classname
+                && _targetPerson.name == it_all->name) {
+                if (_targetPerson.studentID.size( ) != 0) {
+                    if (_targetPerson.studentID == it_all->studentID) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        } else {
+            if (_targetPerson.name == it_all->name) {
+                if (_targetPerson.studentID.size( ) != 0) {
+                    if (_targetPerson.studentID == it_all->studentID) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        }
+    }
+}
+
+/*
+ * @brief 搜索，从全人员名单中搜素目标人员信息
+ * @param 总名单的一个迭代器
+ * @param 目标的人员信息
+ * @note 可以考虑怎么优化这四个search函数
+ * @shit if很多吧，慢慢看  (^_^)
+ */
+void DoQingziClass::search_person(
+    std::vector< DefStdPerson >::iterator &it_output,
+    DefUnstdPerson                         _targetPerson) {
+    for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
+        /* 1.优先匹配班级（如果有） */
+        if (_targetPerson.classname.size( ) != 0) {
+            if (_targetPerson.classname == it_all->classname
+                && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
+                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        } else {
+            if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
+                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        }
+    }
+}
+
+/*
+ * @brief 搜索，从全人员名单中搜素目标人员信息
+ * @param 总名单的一个迭代器
+ * @param 目标的人员信息
+ * @note 可以考虑怎么优化这四个search函数
+ * @shit if很多吧，慢慢看  (^_^)
+ */
+void DoQingziClass::search_person(
+    std::vector< DefUnstdPerson >::iterator &it_output,
+    DefStdPerson                             _targetPerson) {
+    for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
+        /* 1.优先匹配班级（如果有） */
+        if (_targetPerson.classname.size( ) != 0) {
+            if (_targetPerson.classname == it_all->classname
+                && _targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
+                if (_targetPerson.studentID.size( ) != 0) {
+                    if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        } else {
+            if (_targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
+                if (_targetPerson.studentID.size( ) != 0) {
+                    if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        }
+    }
+}
+
+/*
+ * @brief 搜索，从全人员名单中搜素目标人员信息
+ * @param 总名单的一个迭代器
+ * @param 目标的人员信息
+ * @note 可以考虑怎么优化这四个search函数
+ * @shit if很多吧，慢慢看  (^_^)
+ */
+void DoQingziClass::search_person(
+    std::vector< DefUnstdPerson >::iterator &it_output,
+    DefUnstdPerson                           _targetPerson) {
+    for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
+        /* 1.优先匹配班级（如果有） */
+        if (_targetPerson.classname.size( ) != 0) {
+            if (_targetPerson.classname == it_all->classname
+                && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
+                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        } else {
+            if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
+                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
+                        it_output = it_all;
+                        return;
+                    } else {
+                        /*添加到疑似列表中*/
+                        continue;
+                    }
+                } else {
+                    // 没有学号？？？
+                    it_output = it_all;
+                    return;
+                }
+            } else {
+                continue;
+            }
+        }
+    }
 }

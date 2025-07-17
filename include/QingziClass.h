@@ -30,15 +30,60 @@ private:
     std::vector< std::string >    filePathAndName_;    // 每个xlsx文件的位置
     std::vector< DefStdPerson >   personStd_;          // 定义的标准人员信息
     std::vector< DefUnstdPerson > personUnstd_;        // 定义的非标准人员信息
+    std::vector< DefUnstdPerson > errorPerson_;        // 定义名单中不存在的人员
     /*
      * @brief 加载全学员表的函数
      */
     void load_personnel_information_list( );
 
     /*
-     * @brief 加载报名表
+     * @brief 制作签到表
      */
-    void load_applicationSheet_for_attendanceSheet( );
+    void make_attendanceSheet( );
+
+    /*
+     * @brief 搜索，从全人员名单中搜素目标人员信息
+     * @param 总名单的一个迭代器
+     * @param 目标的人员信息
+     * @note 可以考虑怎么优化这四个search函数
+     * @shit if很多吧，慢慢看  (^_^)
+     */
+    void search_person(
+        std::vector< DefStdPerson >::iterator &it_output,
+        DefStdPerson                           _targetPerson);
+
+    /*
+     * @brief 搜索，从全人员名单中搜素目标人员信息
+     * @param 总名单的一个迭代器
+     * @param 目标的人员信息
+     * @note 可以考虑怎么优化这四个search函数
+     * @shit if很多吧，慢慢看  (^_^)
+     */
+    void search_person(
+        std::vector< DefStdPerson >::iterator &it_output,
+        DefUnstdPerson                         _targetPerson);
+
+    /*
+     * @brief 搜索，从全人员名单中搜素目标人员信息
+     * @param 总名单的一个迭代器
+     * @param 目标的人员信息
+     * @note 可以考虑怎么优化这四个search函数
+     * @shit if很多吧，慢慢看  (^_^)
+     */
+    void search_person(
+        std::vector< DefUnstdPerson >::iterator &it_output,
+        DefStdPerson                             _targetPerson);
+
+    /*
+     * @brief 搜索，从全人员名单中搜素目标人员信息
+     * @param 总名单的一个迭代器
+     * @param 目标的人员信息
+     * @note 可以考虑怎么优化这四个search函数
+     * @shit if很多吧，慢慢看  (^_^)
+     */
+    void search_person(
+        std::vector< DefUnstdPerson >::iterator &it_output,
+        DefUnstdPerson                           _targetPerson);
 };
 
 
