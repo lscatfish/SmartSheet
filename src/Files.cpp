@@ -49,7 +49,7 @@ bool get_filepath_from_folder(
 }
 
 /*
- * @brief 用于读取表格
+ * @brief 用于读取表格（utf8编码）
  * @param 储存表格的二维数组（按照row，column的形式）
  * @param 文件的路径
  */

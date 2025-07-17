@@ -126,12 +126,13 @@ std::string utf8_to_gbk(const std::string &utf8_str) {
  * @param 任意中文（简体）格式的string
  * @return 转化为utf8格式的string
  */
-std::string anycode_to_utf8(const std::string& anycode) {
+std::string anycode_to_utf8(const std::string &anycode) {
     ChineseEncoding chcode = detect_chinese_encoding(anycode);
 
     switch (chcode) {
         case ChineseEncoding::UNKNOWN:
             /*错误检测*/
+            return "";
             break;
         case ChineseEncoding::UTF8_BOM:
             return anycode;
@@ -143,7 +144,7 @@ std::string anycode_to_utf8(const std::string& anycode) {
             return anycode;
             break;
         default:
-            //没有default
+            // 没有default
             break;
     }
 }
