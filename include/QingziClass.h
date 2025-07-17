@@ -36,7 +36,7 @@ private:
     void load_personnel_information_list( );
 
     /*
-     * @brief 加载签到表（报名表）
+     * @brief 加载报名表
      */
     void load_applicationSheet_for_attendanceSheet( );
 };

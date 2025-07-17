@@ -53,12 +53,12 @@ void DoQingziClass::start( ) {
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
     a                 = 0;
-    int outWhichSheet = 1;    // 生成那一张表：1签到表  2出勤表
+    int outWhichSheet = 1;    // 生成那一张表：1签到表  2出勤记录表
     while (a != 1 && a != 2) {
         system("cls");
         std::cout << anycode_to_utf8("请选择要生成excel表的类型：") << std::endl
                   << anycode_to_utf8("1. 活动签到表") << std::endl;
-        std::cout << anycode_to_utf8("2. 出勤表") << std::endl;
+        std::cout << anycode_to_utf8("2. 出勤记录表") << std::endl;
         std::cout << anycode_to_utf8("请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
         std::cin >> a;
         if (a == 1) {
@@ -71,9 +71,11 @@ void DoQingziClass::start( ) {
         }
     }
 
-    /* 4.加载签到表或是出勤表 ============================================================= */
+    /* 4.加载签到表或是出勤记录表 ============================================================= */
     if (outWhichSheet == 1) {
+        // 加载报名表
         load_applicationSheet_for_attendanceSheet( );
+    } else if (outWhichSheet == 2) {
     }
 }
 
@@ -141,9 +143,28 @@ void DoQingziClass::load_personnel_information_list( ) {
 }
 
 /*
- * @brief 加载签到表（报名表）
+ * @brief 加载报名表
  */
 void DoQingziClass::load_applicationSheet_for_attendanceSheet( ) {
+    // lambda函数定义========================================================================/
+    /*
+     * @brief 保存报名表中的信息
+     * @param 表格信息
+     * @param 班级名称
+     */
+    auto save_application =
+        [](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+
+    };
+    //=======================================================================================/
+
+    std::vector< std::string >                app_classname;          // 班级名称
+    std::vector< std::string >                app_filePathAndName;    // applicationSheet的excel文件的路径
+    std::vector< std::vector< std::string > > app_sheet;              // 保存读取到的表格
+    std::vector< DefUnstdPerson >             app_person;             // 定义从报名表中获得的人员信息
+
+    get_filepath_from_folder(app_classname, app_filePathAndName, anycode_to_utf8("./input/otr/"));
+
 
 
 }
