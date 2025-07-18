@@ -11,6 +11,21 @@
 #include <vector>
 #include <Windows.h>
 
+/*
+ * @brief 将整数类型转化为string类型
+ * @param 输入的整型
+ */
+static std::string trans_integer_to_string(int in) {
+    int         a   = in;
+    std::string out = "";
+    while (a > 0) {
+        char temp = '0' + a % 10;
+        out += temp;
+        a = a / 10;
+    }
+    return out;
+}
+
 DoQingziClass::DoQingziClass( ) {
     perInFormat_ = PersonFormat::STD;
 }
@@ -204,7 +219,40 @@ void DoQingziClass::make_attendanceSheet( ) {
  * @brief 保存签到表
  */
 void DoQingziClass::save_attendanceSheet( ) {
+    for (auto it_classname = className_.begin( ); it_classname != className_.end( ); it_classname++) {
+        std::string                               sheetTitle = *it_classname + anycode_to_utf8("签到表");
+        std::string                               sheetPath  = "./output/app_out/" + (*it_classname) + ".xlsx";
+        std::vector< std::vector< std::string > > sheet      = {
+            { anycode_to_utf8("序号"), anycode_to_utf8("姓名"), anycode_to_utf8("学号"), anycode_to_utf8("签到") }
+        };
 
+        if (perInFormat_ == PersonFormat::STD) {
+            int serialNum = 1;
+            for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++, serialNum++) {
+                if (it_person->classname == *it_classname && it_person->ifsign == true) {
+                    std::vector< std::string > aRow;
+                    aRow.push_back(trans_integer_to_string(serialNum));
+                    aRow.push_back(it_person->name);
+                    aRow.push_back(it_person->studentID);
+                    aRow.push_back("");
+                    sheet.push_back(aRow);
+                }
+            }
+        } else if (perInFormat_ == PersonFormat::UNSTD) {
+            int serialNum = 1;
+            for (auto it_person = personUnstd_.begin( ); it_person != personUnstd_.end( ); it_person++, serialNum++) {
+                if (it_person->classname == *it_classname && it_person->ifsign == true) {
+                    std::vector< std::string > aRow;
+                    aRow.push_back(trans_integer_to_string(serialNum));
+                    aRow.push_back(it_person->information[anycode_to_utf8("姓名")]);
+                    aRow.push_back(it_person->information[anycode_to_utf8("学号")]);
+                    aRow.push_back("");
+                    sheet.push_back(aRow);
+                }
+            }
+        }
+        save_sheet_to_file(sheet, sheetPath, sheetTitle);
+    }
 }
 
 /*
