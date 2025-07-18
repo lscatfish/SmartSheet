@@ -27,12 +27,19 @@ bool get_filepath_from_folder(
  * @param 文件的路径
  */
 void load_sheet_from_file(
-    std::vector< std::vector< std::string > > &aSheet,
-    std::string                                pathAndName);
+    std::vector< std::vector< std::string > > &_aSheet,
+    std::string                                _pathAndName);
 
 /*
-* @brief 标准表格的储存
-*/
+ * @brief 表格的储存
+ * @param 储存表格的二维数组
+ * @param 文件的路径
+ * @param 表格标题的名称
+ */
+void save_sheet_to_file(
+    std::vector< std::vector< std::string > > &_aSheet,
+    std::string                                _pathAndName,
+    std::string                                _titleName);
 
 
 

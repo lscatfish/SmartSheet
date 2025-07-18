@@ -73,9 +73,12 @@ void DoQingziClass::start( ) {
 
     /* 4.加载签到表或是出勤记录表 ============================================================= */
     if (outWhichSheet == 1) {
-        // 加载报名表
+        // 制作签到表
         make_attendanceSheet( );
     } else if (outWhichSheet == 2) {
+        // 制作考勤统计表
+        make_attendanceSheet( );
+        make_statisticsSheet( );
     }
 }
 
@@ -171,7 +174,7 @@ void DoQingziClass::make_attendanceSheet( ) {
     };
     //=======================================================================================/
 
-    get_filepath_from_folder(app_classname, app_filePathAndName, anycode_to_utf8("./input/otr/"));
+    get_filepath_from_folder(app_classname, app_filePathAndName, anycode_to_utf8("./input/app/"));
     for (auto it_app_filepath = app_filePathAndName.begin( ), it_app_classname = app_classname.begin( );
          it_app_filepath != app_filePathAndName.end( ) && it_app_classname != app_classname.end( );
          it_app_filepath++, it_app_classname++) {
@@ -183,11 +186,76 @@ void DoQingziClass::make_attendanceSheet( ) {
 
     /* 制表 */
     if (perInFormat_ == PersonFormat::STD) {
-
+        for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
+            std::vector< DefStdPerson >::iterator it_search;
+            search_person(it_search, *it_app_person);
+            it_search->ifsign = true;
+        }
     } else if (perInFormat_ == PersonFormat::UNSTD) {
-        for (auto it = app_person.begin( ); it != app_person.end( ); it++) {
+        for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
+            std::vector< DefUnstdPerson >::iterator it_search;
+            search_person(it_search, *it_app_person);
+            it_search->ifsign = true;
         }
     }
+}
+
+/*
+ * @brief 保存签到表
+ */
+void DoQingziClass::save_attendanceSheet( ) {
+
+}
+
+/*
+ * @brief 制作考勤统计表
+ */
+void DoQingziClass::make_statisticsSheet( ) {
+    std::vector< std::string >    att_classname;          // 班级名称
+    std::vector< std::string >    att_filePathAndName;    // 签到表的excel文件的路径
+    std::vector< DefUnstdPerson > att_person;             // 定义从签到表中获得的人员信息
+
+    // lambda函数定义========================================================================/
+    /*
+     * @brief 保存签到表中的信息
+     * @param 表格信息
+     * @param 班级名称
+     */
+    auto save_application =
+        [&att_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+        for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
+            DefUnstdPerson per;
+            per.classname = cn;
+            for (size_t colIndex = 0;
+                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
+                 colIndex++) {
+                per.information[sh[0][colIndex]] = sh[rowIndex][colIndex];
+            }
+            att_person.push_back(per);
+        }
+    };
+    //=======================================================================================/
+
+    get_filepath_from_folder(att_classname, att_filePathAndName, anycode_to_utf8("./input/att/"));
+    for (auto it_att_filepath = att_filePathAndName.begin( ), it_att_classname = att_classname.begin( );
+         it_att_filepath != att_filePathAndName.end( ) && it_att_classname != att_classname.end( );
+         it_att_filepath++, it_att_classname++) {
+        // 保存读取到的表格
+        std::vector< std::vector< std::string > > sheet;
+        load_sheet_from_file(sheet, *it_att_filepath);
+        save_application(sheet, *it_att_classname);
+    }
+
+    /* 制表 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
+    /* 待制作 */
 }
 
 /*
@@ -198,7 +266,7 @@ void DoQingziClass::make_attendanceSheet( ) {
  * @shit if很多吧，慢慢看  (^_^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefStdPerson >::iterator &it_output,
+    std::vector< DefStdPerson >::iterator &_it_output,
     DefStdPerson                           _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
@@ -207,7 +275,7 @@ void DoQingziClass::search_person(
                 && _targetPerson.name == it_all->name) {
                 if (_targetPerson.studentID.size( ) != 0) {
                     if (_targetPerson.studentID == it_all->studentID) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -215,7 +283,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -225,7 +293,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.name == it_all->name) {
                 if (_targetPerson.studentID.size( ) != 0) {
                     if (_targetPerson.studentID == it_all->studentID) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -233,7 +301,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -251,7 +319,7 @@ void DoQingziClass::search_person(
  * @shit if很多吧，慢慢看  (^_^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefStdPerson >::iterator &it_output,
+    std::vector< DefStdPerson >::iterator &_it_output,
     DefUnstdPerson                         _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
@@ -260,7 +328,7 @@ void DoQingziClass::search_person(
                 && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
                     if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -268,7 +336,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -278,7 +346,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
                     if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -286,7 +354,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -304,7 +372,7 @@ void DoQingziClass::search_person(
  * @shit if很多吧，慢慢看  (^_^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefUnstdPerson >::iterator &it_output,
+    std::vector< DefUnstdPerson >::iterator &_it_output,
     DefStdPerson                             _targetPerson) {
     for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
@@ -313,7 +381,7 @@ void DoQingziClass::search_person(
                 && _targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.studentID.size( ) != 0) {
                     if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -321,7 +389,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -331,7 +399,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.studentID.size( ) != 0) {
                     if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -339,7 +407,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -357,7 +425,7 @@ void DoQingziClass::search_person(
  * @shit if很多吧，慢慢看  (^_^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefUnstdPerson >::iterator &it_output,
+    std::vector< DefUnstdPerson >::iterator &_it_output,
     DefUnstdPerson                           _targetPerson) {
     for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
@@ -366,7 +434,7 @@ void DoQingziClass::search_person(
                 && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
                     if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -374,7 +442,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {
@@ -384,7 +452,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
                     if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
-                        it_output = it_all;
+                        _it_output = it_all;
                         return;
                     } else {
                         /*添加到疑似列表中*/
@@ -392,7 +460,7 @@ void DoQingziClass::search_person(
                     }
                 } else {
                     // 没有学号？？？
-                    it_output = it_all;
+                    _it_output = it_all;
                     return;
                 }
             } else {

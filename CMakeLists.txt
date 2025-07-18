@@ -19,6 +19,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories("D:/code/xlnt/include")
 include_directories("./include")
+link_directories("D:/code/xlnt/build/source/Debug")
 link_directories("D:/code/xlnt/build/source/Release")
 
 add_executable(SmartSheet
@@ -31,6 +32,10 @@ add_executable(SmartSheet
 "include/Files.h"
 "src/Files.cpp"
 "include/QingziClass.h"
-"src/QingziClass.cpp")
+"src/QingziClass.cpp" "src/test.cpp" "include/test.h")
 
-target_link_libraries(SmartSheet PRIVATE xlnt)
+# 根据构建类型选择正确的库名
+target_link_libraries(SmartSheet PRIVATE
+    $<$<CONFIG:Debug>:xlntd>
+    $<$<CONFIG:Release>:xlnt>
+)

@@ -42,6 +42,16 @@ private:
     void make_attendanceSheet( );
 
     /*
+     * @brief 制作考勤统计表
+     */
+    void make_statisticsSheet( );
+
+    /*
+    * @brief 保存签到表
+    */
+    void save_attendanceSheet( );
+
+    /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
      * @param 总名单的一个迭代器
      * @param 目标的人员信息
@@ -49,7 +59,7 @@ private:
      * @shit if很多吧，慢慢看  (^_^)
      */
     void search_person(
-        std::vector< DefStdPerson >::iterator &it_output,
+        std::vector< DefStdPerson >::iterator &_it_output,
         DefStdPerson                           _targetPerson);
 
     /*
@@ -60,7 +70,7 @@ private:
      * @shit if很多吧，慢慢看  (^_^)
      */
     void search_person(
-        std::vector< DefStdPerson >::iterator &it_output,
+        std::vector< DefStdPerson >::iterator &_it_output,
         DefUnstdPerson                         _targetPerson);
 
     /*
@@ -71,7 +81,7 @@ private:
      * @shit if很多吧，慢慢看  (^_^)
      */
     void search_person(
-        std::vector< DefUnstdPerson >::iterator &it_output,
+        std::vector< DefUnstdPerson >::iterator &_it_output,
         DefStdPerson                             _targetPerson);
 
     /*
@@ -82,7 +92,7 @@ private:
      * @shit if很多吧，慢慢看  (^_^)
      */
     void search_person(
-        std::vector< DefUnstdPerson >::iterator &it_output,
+        std::vector< DefUnstdPerson >::iterator &_it_output,
         DefUnstdPerson                           _targetPerson);
 };
 
