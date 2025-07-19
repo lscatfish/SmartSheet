@@ -23,8 +23,6 @@ link_directories("D:/code/xlnt/build/source/Debug")
 link_directories("D:/code/xlnt/build/source/Release")
 
 add_executable(SmartSheet
-"SmartSheet.cpp"
-"SmartSheet.h"
 "src/main.cpp"
 "src/ChineseEncoding.cpp"
 "include/ChineseEncoding.h"
@@ -32,7 +30,9 @@ add_executable(SmartSheet
 "include/Files.h"
 "src/Files.cpp"
 "include/QingziClass.h"
-"src/QingziClass.cpp" "src/test.cpp" "include/test.h")
+"src/QingziClass.cpp"
+"src/test.cpp"
+"include/test.h")
 
 # 根据构建类型选择正确的库名
 target_link_libraries(SmartSheet PRIVATE

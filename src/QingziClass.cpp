@@ -16,14 +16,7 @@
  * @param 输入的整型
  */
 static std::string trans_integer_to_string(int in) {
-    int         a   = in;
-    std::string out = "";
-    while (a > 0) {
-        char temp = '0' + a % 10;
-        out += temp;
-        a = a / 10;
-    }
-    return out;
+    return std::to_string(in);
 }
 
 DoQingziClass::DoQingziClass( ) {
@@ -90,6 +83,7 @@ void DoQingziClass::start( ) {
     if (outWhichSheet == 1) {
         // 制作签到表
         make_attendanceSheet( );
+        save_attendanceSheet( );
     } else if (outWhichSheet == 2) {
         // 制作考勤统计表
         make_attendanceSheet( );
@@ -195,6 +189,9 @@ void DoQingziClass::make_attendanceSheet( ) {
          it_app_filepath++, it_app_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
+#if true
+        std::cout << *it_app_filepath << std::endl;
+#endif
         load_sheet_from_file(sheet, *it_app_filepath);
         save_application(sheet, *it_app_classname);
     }
@@ -202,15 +199,17 @@ void DoQingziClass::make_attendanceSheet( ) {
     /* 制表 */
     if (perInFormat_ == PersonFormat::STD) {
         for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
-            std::vector< DefStdPerson >::iterator it_search;
+            std::vector< DefStdPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
             search_person(it_search, *it_app_person);
-            it_search->ifsign = true;
+            if (it_search != personStd_.end( ))
+                it_search->ifsign = true;
         }
     } else if (perInFormat_ == PersonFormat::UNSTD) {
         for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
-            std::vector< DefUnstdPerson >::iterator it_search;
+            std::vector< DefUnstdPerson >::iterator it_search = personUnstd_.end( );    // 赋值到哨兵迭代器
             search_person(it_search, *it_app_person);
-            it_search->ifsign = true;
+            if (it_search != personUnstd_.end( ))
+                it_search->ifsign = true;
         }
     }
 }
@@ -228,7 +227,7 @@ void DoQingziClass::save_attendanceSheet( ) {
 
         if (perInFormat_ == PersonFormat::STD) {
             int serialNum = 1;
-            for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++, serialNum++) {
+            for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
                 if (it_person->classname == *it_classname && it_person->ifsign == true) {
                     std::vector< std::string > aRow;
                     aRow.push_back(trans_integer_to_string(serialNum));
@@ -236,11 +235,12 @@ void DoQingziClass::save_attendanceSheet( ) {
                     aRow.push_back(it_person->studentID);
                     aRow.push_back("");
                     sheet.push_back(aRow);
+                    serialNum++;
                 }
             }
         } else if (perInFormat_ == PersonFormat::UNSTD) {
             int serialNum = 1;
-            for (auto it_person = personUnstd_.begin( ); it_person != personUnstd_.end( ); it_person++, serialNum++) {
+            for (auto it_person = personUnstd_.begin( ); it_person != personUnstd_.end( ); it_person++) {
                 if (it_person->classname == *it_classname && it_person->ifsign == true) {
                     std::vector< std::string > aRow;
                     aRow.push_back(trans_integer_to_string(serialNum));
@@ -248,6 +248,7 @@ void DoQingziClass::save_attendanceSheet( ) {
                     aRow.push_back(it_person->information[anycode_to_utf8("学号")]);
                     aRow.push_back("");
                     sheet.push_back(aRow);
+                    serialNum++;
                 }
             }
         }

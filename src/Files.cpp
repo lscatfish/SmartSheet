@@ -132,7 +132,7 @@ void save_sheet_to_file(
     ws.column_properties(4).width        = 23.92;
     ws.column_properties(4).custom_width = true;
     for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
-        ws.row_properties(r + 1).height        = 24;    // 24
+        ws.row_properties(r + 1).height        = 24;    // 24pt
         ws.row_properties(r + 1).custom_height = true;
     }
 
@@ -142,7 +142,7 @@ void save_sheet_to_file(
     f_title.size(24);
     ws.insert_rows(1, 1);
     ws.merge_cells("A1:D1");
-    ws.row_properties(1).height        = 40;    // 40
+    ws.row_properties(1).height        = 40;    // 40pt
     ws.row_properties(1).custom_height = true;
     ws.cell("A1").value(_titleName);
     ws.cell("A1").font(f_title);
