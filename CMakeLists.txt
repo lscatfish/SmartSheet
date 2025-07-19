@@ -1,4 +1,13 @@
 ﻿cmake_minimum_required(VERSION 3.20)
+
+# 如果支持，请为 MSVC 编译器启用热重载。
+if(POLICY CMP0141)
+    cmake_policy(SET CMP0141 NEW)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+        set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:DEBUG,RELWITHDEBINFO>:EditAndContinue>")
+    endif()
+endif()
+
 project(SmartSheet)
 
 # 使用ninja编译时强制定义以下宏
@@ -17,10 +26,13 @@ set(CMAKE_SYSTEM_VERSION "10.0.22621.0" CACHE STRING "" FORCE)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories("D:/code/xlnt/include")
 include_directories("./include")
-link_directories("D:/code/xlnt/build/source/Debug")
-link_directories("D:/code/xlnt/build/source/Release")
+
+# 如果可以，请使用绝对路径
+# 如果可以，请更改的xlnt调用的路径
+include_directories("./xlnt/include")
+link_directories("./lib/Debug")
+link_directories("./lib/Release")
 
 add_executable(SmartSheet
 "src/main.cpp"
@@ -37,5 +49,4 @@ add_executable(SmartSheet
 # 根据构建类型选择正确的库名
 target_link_libraries(SmartSheet PRIVATE
     $<$<CONFIG:Debug>:xlntd>
-    $<$<CONFIG:Release>:xlnt>
-)
+    $<$<CONFIG:Release>:xlnt>)
