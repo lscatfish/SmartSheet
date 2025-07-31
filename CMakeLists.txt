@@ -35,7 +35,7 @@ link_directories("./lib/Debug")
 link_directories("./lib/Release")
 
 add_executable(SmartSheet
-"src/main.cpp"
+"main.cpp"
 "src/ChineseEncoding.cpp"
 "include/ChineseEncoding.h"
 "include/PersonnelInformation.h"

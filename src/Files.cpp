@@ -46,6 +46,7 @@ bool get_filepath_from_folder(
     std::cout << std::endl
               << anycode_to_utf8("按 Enter 键继续...");
     std::cin.get( );    // 等待用户按回车
+    std::cin.get( );    // 等待用户按回车
 
     return true;
 }
@@ -123,11 +124,11 @@ void save_sheet_to_file(
     }
 
     // 列宽
-    ws.column_properties(1).width = 7.92;     // 8字符宽
-    ws.column_properties(1).custom_width=true;
-    ws.column_properties(2).width = 23.92;    // 24字符宽
-    ws.column_properties(2).custom_width = true; 
-    ws.column_properties(3).width = 23.92;
+    ws.column_properties(1).width        = 7.92;    // 8字符宽
+    ws.column_properties(1).custom_width = true;
+    ws.column_properties(2).width        = 23.92;    // 24字符宽
+    ws.column_properties(2).custom_width = true;
+    ws.column_properties(3).width        = 23.92;
     ws.column_properties(3).custom_width = true;
     ws.column_properties(4).width        = 23.92;
     ws.column_properties(4).custom_width = true;
