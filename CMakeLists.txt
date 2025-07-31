@@ -30,9 +30,9 @@ include_directories("./include")
 
 # 如果可以，请使用绝对路径
 # 如果可以，请更改的xlnt调用的路径
-include_directories("./xlnt/include")
-link_directories("./xlnt/lib/Debug")
-link_directories("./xlnt/lib/Release")
+include_directories("./third_party/xlnt/include")
+link_directories("./third_party/xlnt/lib/Debug")
+link_directories("./third_party/xlnt/lib/Release")
 
 add_executable(SmartSheet
 "main.cpp"
@@ -50,3 +50,10 @@ add_executable(SmartSheet
 target_link_libraries(SmartSheet PRIVATE
     $<$<CONFIG:Debug>:xlntd>
     $<$<CONFIG:Release>:xlnt>)
+
+# 根据配置选择复制哪个 DLL
+add_custom_command(TARGET SmartSheet POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/third_party/xlnt/lib/$<CONFIG>/xlnt$<$<CONFIG:Debug>:d>.dll"
+            $<TARGET_FILE_DIR:SmartSheet>
+)
