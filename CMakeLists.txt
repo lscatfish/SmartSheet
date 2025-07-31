@@ -55,5 +55,4 @@ target_link_libraries(SmartSheet PRIVATE
 add_custom_command(TARGET SmartSheet POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${CMAKE_SOURCE_DIR}/third_party/xlnt/lib/$<CONFIG>/xlnt$<$<CONFIG:Debug>:d>.dll"
-            $<TARGET_FILE_DIR:SmartSheet>
-)
+            $<TARGET_FILE_DIR:SmartSheet>)
