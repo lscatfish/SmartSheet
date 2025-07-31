@@ -31,8 +31,8 @@ include_directories("./include")
 # 如果可以，请使用绝对路径
 # 如果可以，请更改的xlnt调用的路径
 include_directories("./xlnt/include")
-link_directories("./lib/Debug")
-link_directories("./lib/Release")
+link_directories("./xlnt/lib/Debug")
+link_directories("./xlnt/lib/Release")
 
 add_executable(SmartSheet
 "main.cpp"
