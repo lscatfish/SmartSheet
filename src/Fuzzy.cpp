@@ -107,8 +107,10 @@ bool fuzzy_search(
         }
     }
 
-
-    return false;
+    if (s == 0)
+        return false;
+    else
+        return true;
 }
 
 }    // namespace fuzzy
