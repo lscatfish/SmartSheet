@@ -72,7 +72,7 @@ struct DefPPOCRDirs {
  * @param 输入的模型与字典库的path或dir
  */
 bool ppocr(std::vector< std::vector< OCRPredictResult > > &_out,
-           std::string                                         _inputImg,
+           std::string                                     _inputImg,
            DefPPOCRDirs                                   &_dirs);
 
 

@@ -51,6 +51,14 @@ std::string gbk_to_utf8(const std::string &gbk_str);
 std::string utf8_to_gbk(const std::string &utf8_str);
 
 /*
+ * @brief utf8转wstring
+ * @param utf8编码的string
+ * @return 宽字符wstring（win里面实际是utf-16）
+ * @note 只能在windows编译
+ **/
+std::wstring utf8_to_wstring_win(const std::string u8);
+
+/*
  * @brief 将任意中文（简体）格式转化为utf8
  * @param 任意中文（简体）格式的string
  * @return 转化为utf8格式的string

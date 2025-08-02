@@ -1,11 +1,12 @@
 ﻿
-#include "ChineseEncoding.h"
-#include "Files.h"
-#include "QingziClass.h"
+#include <ChineseEncoding.h>
 #include <chrono>
 #include <cstdlib>
+#include <Files.h>
 #include <iostream>
 #include <PersonnelInformation.h>
+#include <ppocr_API.h>
+#include <QingziClass.h>
 #include <string>
 #include <thread>
 #include <vector>

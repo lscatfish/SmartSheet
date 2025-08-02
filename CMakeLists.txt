@@ -47,7 +47,7 @@ add_executable(${PROJECT_NAME}
 "src/test.cpp"
 "include/test.h" 
 "include/ppocr_API.h" 
-"src/ppocr_API.cpp")
+"src/ppocr_API.cpp" "include/Fuzzy.h" "src/Fuzzy.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE 

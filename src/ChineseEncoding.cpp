@@ -122,6 +122,21 @@ std::string utf8_to_gbk(const std::string &utf8_str) {
 }
 
 /*
+ * @brief utf8转wstring
+ * @param utf8编码的string
+ * @return 宽字符wstring（win里面实际是utf-16）
+ * @note 只能在windows编译
+ **/
+std::wstring utf8_to_wstring_win(const std::string u8) {
+    if (u8.empty( )) return { };
+    int          len = MultiByteToWideChar(CP_UTF8, 0, u8.c_str( ), -1, nullptr, 0);
+    std::wstring out(len, 0);
+    MultiByteToWideChar(CP_UTF8, 0, u8.c_str( ), -1, &out[0], len);
+    out.pop_back( );    // 去掉结尾 L'\0'
+    return out;
+}
+
+/*
  * @brief 将任意中文（简体）格式转化为utf8
  * @param 任意中文（简体）格式的string
  * @return 转化为utf8格式的string

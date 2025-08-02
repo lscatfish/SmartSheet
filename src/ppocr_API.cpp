@@ -1,7 +1,7 @@
 ﻿#include <ppocr_API.h>
 
 /*========================================================
- * 3. 工具函数：加载 DLL
+ *    工具函数：加载 DLL
  *    参数：DLL 的完整路径（宽字符）
  *    返回：模块句柄；失败返回 nullptr
  *--------------------------------------------------------*/
@@ -15,15 +15,15 @@ HMODULE LoadDll(const std::wstring &dllPath) {
 }
 
 /*========================================================
- * 4. 工具函数：获取 DLL 导出函数地址
+ *    工具函数：获取 DLL 导出函数地址
  *    模板函数，支持任意返回类型
  *--------------------------------------------------------*/
 template < typename FuncPtr >
 bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
     outFn = reinterpret_cast< FuncPtr >(::GetProcAddress(h, procName));
     if (!outFn) {
-        cerr << "GetProcAddress failed for " << procName
-             << ", error: " << GetLastError( ) << endl;
+        std::cerr << "GetProcAddress failed for " << procName
+                  << ", error: " << GetLastError( ) << std::endl;
         return false;
     }
     return true;
@@ -77,14 +77,14 @@ bool ppocr(std::vector< std::vector< OCRPredictResult > > &_out,
     bool                                           ok = getOcr(img, results);
 
     // 打印识别结果
-    std::cout << "OCR success: " << ok << ", result count: " << results.size( ) << std::endl;
-    for (const auto &page : results)    // 可能有多页（但通常一页）
-    {
-        for (const auto &line : page)    // 每行文本
-        {
-            std::cout << line.text << std::endl;    // 直接输出文字
-        }
-    }
+    //std::cout << "OCR success: " << ok << ", result count: " << results.size( ) << std::endl;
+    //for (const auto &page : results)    // 可能有多页（但通常一页）
+    //{
+    //    for (const auto &line : page)    // 每行文本
+    //    {
+    //        std::cout << line.text << std::endl;    // 直接输出文字
+    //    }
+    //}
     _out = results;
     // 释放资源
     FreeLibrary(hDll);

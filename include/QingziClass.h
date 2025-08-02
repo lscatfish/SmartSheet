@@ -3,9 +3,9 @@
 #ifndef QINGZICLASS_H
 #define QINGZICLASS_H
 
-#include "ChineseEncoding.h"
-#include "Files.h"
-#include "PersonnelInformation.h"
+#include <ChineseEncoding.h>
+#include <Files.h>
+#include <PersonnelInformation.h>
 #include <string>
 #include <vector>
 
@@ -47,8 +47,8 @@ private:
     void make_statisticsSheet( );
 
     /*
-    * @brief 保存签到表
-    */
+     * @brief 保存签到表
+     */
     void save_attendanceSheet( );
 
     /*

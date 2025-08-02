@@ -1,6 +1,6 @@
 ﻿
-#include "ChineseEncoding.h"
-#include "Files.h"
+#include <ChineseEncoding.h>
+#include <Files.h>
 #include <filesystem>
 #include <iostream>
 #include <string>

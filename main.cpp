@@ -1,29 +1,29 @@
 ﻿
-#include "ChineseEncoding.h"
-#include "Files.h"
-#include "PersonnelInformation.h"
-#include "QingziClass.h"
-#include "test.h"
+#include <ChineseEncoding.h>
 #include <consoleapi2.h>
+#include <Files.h>
+#include <ios>
 #include <iostream>
+#include <limits>
+#include <minwindef.h>
+#include <PersonnelInformation.h>
+#include <QingziClass.h>
 #include <string>
 #include <stringapiset.h>
+#include <test.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
-#include <ios>
-#include <limits>
-#include<minwindef.h>
 
 /*
-* @brief 按回车键继续
-*/
+ * @brief 按回车键继续
+ */
 static void pause( ) {
     std::cout << std::endl;
     std::cout << anycode_to_utf8("请按 Enter 键继续...") << std::endl;
     std::cin.ignore((std::numeric_limits< std::streamsize >::max)( ), '\n');
-    //这里实际上是std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
-    //加一个括号防止windows.h的宏污染
+    // 这里实际上是std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
+    // 加一个括号防止windows.h的宏污染
 }
 
 int main( ) {
