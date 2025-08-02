@@ -5,9 +5,17 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <xlnt/cell/cell.hpp>
 #include <xlnt/cell/cell_reference.hpp>
+#include <xlnt/styles/alignment.hpp>
+#include <xlnt/styles/border.hpp>
+#include <xlnt/styles/color.hpp>
 #include <xlnt/styles/font.hpp>
+#include <xlnt/utils/optional.hpp>
 #include <xlnt/workbook/workbook.hpp>
+#include <xlnt/worksheet/column_properties.hpp>
+#include <xlnt/worksheet/row_properties.hpp>
+#include <xlnt/worksheet/worksheet.hpp>
 #include <xlnt/xlnt.hpp>
 
 /*

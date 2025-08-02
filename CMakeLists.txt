@@ -23,18 +23,19 @@ endif()
 
 # Windows SDK 可保留
 set(CMAKE_SYSTEM_VERSION "10.0.22621.0" CACHE STRING "" FORCE)
-
 set(CMAKE_CXX_STANDARD 17)
+
+set(Xlnt_DIR "${CMAKE_SOURCE_DIR}/third_party/xlnt/x64-Release/lib/cmake/xlnt")
+
+# 找包
+find_package(OpenCV REQUIRED)
+find_package(Xlnt REQUIRED)
 
 include_directories("./include")
 
-# 如果可以，请使用绝对路径
-# 如果可以，请更改的xlnt调用的路径
-include_directories("./third_party/xlnt/include")
-link_directories("./third_party/xlnt/lib/Debug")
-link_directories("./third_party/xlnt/lib/Release")
 
-add_executable(SmartSheet
+# 添加执行文件
+add_executable(${PROJECT_NAME}
 "main.cpp"
 "src/ChineseEncoding.cpp"
 "include/ChineseEncoding.h"
@@ -46,13 +47,16 @@ add_executable(SmartSheet
 "src/test.cpp"
 "include/test.h")
 
-# 根据构建类型选择正确的库名
-target_link_libraries(SmartSheet PRIVATE
-    $<$<CONFIG:Debug>:xlntd>
-    $<$<CONFIG:Release>:xlnt>)
+target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+xlnt::xlnt
+${OpenCV_LIBS})
 
-# 根据配置选择复制哪个 DLL
+# message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
+# message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
+
+# 复制 DLL
 add_custom_command(TARGET SmartSheet POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/third_party/xlnt/lib/$<CONFIG>/xlnt$<$<CONFIG:Debug>:d>.dll"
+            $<TARGET_FILE:xlnt::xlnt>
             $<TARGET_FILE_DIR:SmartSheet>)
