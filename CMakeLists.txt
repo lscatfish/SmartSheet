@@ -45,7 +45,9 @@ add_executable(${PROJECT_NAME}
 "include/QingziClass.h"
 "src/QingziClass.cpp"
 "src/test.cpp"
-"include/test.h")
+"include/test.h" 
+"include/ppocr_API.h" 
+"src/ppocr_API.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE 
