@@ -68,6 +68,7 @@ void load_sheet_from_file(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName) {
     xlnt::workbook wb;
+    std::cout << _pathAndName << std::endl;
     wb.load(_pathAndName);
     auto ws = wb.active_sheet( );    // 获取当前激活的工作表（唯一一张）
 

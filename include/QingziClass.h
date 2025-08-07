@@ -5,6 +5,7 @@
 
 #include <ChineseEncoding.h>
 #include <Files.h>
+#include <map>
 #include <PersonnelInformation.h>
 #include <string>
 #include <vector>
@@ -30,11 +31,16 @@ private:
     std::vector< std::string >    filePathAndName_;    // 每个xlsx文件的位置
     std::vector< DefStdPerson >   personStd_;          // 定义的标准人员信息
     std::vector< DefUnstdPerson > personUnstd_;        // 定义的非标准人员信息
-    std::vector< DefUnstdPerson > errorPerson_;        // 定义名单中不存在的人员
+    std::vector< DefUnstdPerson > errorPerson_;        // 定义名单中不存在的人员(直接对比)
+
+    // 不存在人员的模糊搜寻结果
+    std::map< std::vector< DefUnstdPerson >::iterator, std::vector< DefUnstdPerson > > fuzzyPerson_;
+
     /*
      * @brief 加载全学员表的函数
      */
-    void load_personnel_information_list( );
+    void
+    load_personnel_information_list( );
 
     /*
      * @brief 制作签到表
@@ -94,6 +100,12 @@ private:
     void search_person(
         std::vector< DefUnstdPerson >::iterator &_it_output,
         DefUnstdPerson                           _targetPerson);
+
+    /*
+     * @brief 比较学号
+     * @return 相同返回true  不同返回false
+     */
+    bool compare_studentID(const std::string &a, const std::string &b);
 };
 
 

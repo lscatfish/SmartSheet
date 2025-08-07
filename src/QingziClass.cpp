@@ -142,16 +142,49 @@ void DoQingziClass::load_personnel_information_list( ) {
         [&](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefStdPerson per;
-            per.classname        = cn;
-            per.name             = sh[rowIndex][1];
-            per.gender           = sh[rowIndex][2];
-            per.grade            = sh[rowIndex][3];
-            per.studentID        = sh[rowIndex][4];
-            per.politicaloutlook = sh[rowIndex][5];
-            per.academy          = sh[rowIndex][6];
-            per.majors           = sh[rowIndex][7];
-            per.phonenumber      = sh[rowIndex][8];
-            per.qqnumber         = sh[rowIndex][9];
+            per.classname = cn;
+          //  std::cout << anycode_to_utf8("加载std") << std::endl;
+            for (size_t colIndex = 0;
+                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
+                 colIndex++) {
+                if (sh[0][colIndex] == anycode_to_utf8("姓名")) {
+                    per.name = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("性别")) {
+                    per.gender = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("年级")) {
+                    per.grade = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("学号")) {
+                    per.studentID = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("政治面貌")) {
+                    per.politicaloutlook = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("学院")) {
+                    per.academy = sh[rowIndex][colIndex];
+                    continue;
+                } else if (sh[0][colIndex] == anycode_to_utf8("专业")) {
+                    per.majors = sh[rowIndex][colIndex];
+                    continue;
+                } else if ((sh[0][colIndex] == anycode_to_utf8("电话"))
+                           || (sh[0][colIndex] == anycode_to_utf8("联系方式"))
+                           || (sh[0][colIndex] == anycode_to_utf8("联系电话"))
+                           || (sh[0][colIndex] == anycode_to_utf8("电话号码"))) {
+                    per.phonenumber = sh[rowIndex][colIndex];
+                    continue;
+                } else if ((sh[0][colIndex] == anycode_to_utf8("QQ号"))
+                           || (sh[0][colIndex] == anycode_to_utf8("qq号"))
+                           || (sh[0][colIndex] == anycode_to_utf8("qq"))
+                           || (sh[0][colIndex] == anycode_to_utf8("QQ"))) {
+                    per.qqnumber = sh[rowIndex][colIndex];
+                    continue;
+                } else {
+                    per.otherInformation[sh[0][rowIndex]] = sh[rowIndex][colIndex];
+                    continue;
+                }
+            }
             personStd_.push_back(per);
         }
     };
@@ -263,11 +296,18 @@ void DoQingziClass::make_attendanceSheet( ) {
         }
     }
     // 标定没有搜索到的人
-    for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
+    for (auto it_app_person = app_person.begin( );
+         it_app_person != app_person.end( );
+         it_app_person++) {
         if (it_app_person->ifcheck == false) {
             if (it_app_person->information[anycode_to_utf8("姓名")].size( ) != 0)
                 errorPerson_.push_back(*it_app_person);
         }
+    }
+    // 模糊匹配没有搜到的人
+    for (auto it_errorPerson = errorPerson_.begin( );
+         it_errorPerson != errorPerson_.end( );
+         it_errorPerson++) {
     }
 }
 
@@ -369,7 +409,7 @@ void DoQingziClass::make_statisticsSheet( ) {
  * @param 总名单的一个迭代器
  * @param 目标的人员信息
  * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^_^)
+ * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
     std::vector< DefStdPerson >::iterator &_it_output,
@@ -380,7 +420,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.classname == it_all->classname
                 && _targetPerson.name == it_all->name) {
                 if (_targetPerson.studentID.size( ) != 0) {
-                    if (_targetPerson.studentID == it_all->studentID) {
+                    if (compare_studentID(_targetPerson.studentID, it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -398,7 +438,7 @@ void DoQingziClass::search_person(
         } else {
             if (_targetPerson.name == it_all->name) {
                 if (_targetPerson.studentID.size( ) != 0) {
-                    if (_targetPerson.studentID == it_all->studentID) {
+                    if (compare_studentID(_targetPerson.studentID, it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -422,7 +462,7 @@ void DoQingziClass::search_person(
  * @param 总名单的一个迭代器
  * @param 目标的人员信息
  * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^_^)
+ * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
     std::vector< DefStdPerson >::iterator &_it_output,
@@ -433,7 +473,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.classname == it_all->classname
                 && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
+                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -451,7 +491,7 @@ void DoQingziClass::search_person(
         } else {
             if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->studentID) {
+                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -475,7 +515,7 @@ void DoQingziClass::search_person(
  * @param 总名单的一个迭代器
  * @param 目标的人员信息
  * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^_^)
+ * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
     std::vector< DefUnstdPerson >::iterator &_it_output,
@@ -486,7 +526,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.classname == it_all->classname
                 && _targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.studentID.size( ) != 0) {
-                    if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
+                    if (compare_studentID(_targetPerson.studentID, it_all->information[anycode_to_utf8("学号")])) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -504,7 +544,7 @@ void DoQingziClass::search_person(
         } else {
             if (_targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.studentID.size( ) != 0) {
-                    if (_targetPerson.studentID == it_all->information[anycode_to_utf8("学号")]) {
+                    if (compare_studentID(_targetPerson.studentID, it_all->information[anycode_to_utf8("学号")])) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -528,7 +568,7 @@ void DoQingziClass::search_person(
  * @param 总名单的一个迭代器
  * @param 目标的人员信息
  * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^_^)
+ * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
     std::vector< DefUnstdPerson >::iterator &_it_output,
@@ -539,7 +579,7 @@ void DoQingziClass::search_person(
             if (_targetPerson.classname == it_all->classname
                 && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
+                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->information[anycode_to_utf8("学号")])) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -557,7 +597,7 @@ void DoQingziClass::search_person(
         } else {
             if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
                 if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (_targetPerson.information[anycode_to_utf8("学号")] == it_all->information[anycode_to_utf8("学号")]) {
+                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->information[anycode_to_utf8("学号")])) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -574,4 +614,30 @@ void DoQingziClass::search_person(
             }
         }
     }
+}
+
+/*
+ * @brief 比较学号
+ * @return 相同返回true  不同返回false
+ */
+bool DoQingziClass::compare_studentID(const std::string &a, const std::string &b) {
+    // 关键是最后一位的T的大小写
+    if (a.size( ) == b.size( )) {
+        auto ita_cr = a.crbegin( );
+        auto itb_cr = b.crbegin( );
+        if ((*ita_cr == 't' || *ita_cr == 'T') && (*itb_cr == 't' || *itb_cr == 'T')) {
+            for (int index = 0; index < a.size( ) - 1; index++) {
+                if (a[index] != b[index]) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            if (a == b)
+                return true;
+            else
+                return false;
+        }
+    } else
+        return false;
 }

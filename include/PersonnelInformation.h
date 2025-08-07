@@ -28,6 +28,9 @@ public:
     bool        ifcheck;             // 是否签到
     bool        ifsign;              // 是否报名
 
+    std::map< std::string, std::string > otherInformation;    // 其他信息
+
+
     // @brief 基本构造函数
     DefStdPerson( ) {
         classname.erase( );

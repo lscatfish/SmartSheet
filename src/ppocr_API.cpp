@@ -1,5 +1,7 @@
 ﻿#include <ppocr_API.h>
+#include <vector>
 
+namespace ppocr {
 /*========================================================
  *    工具函数：加载 DLL
  *    参数：DLL 的完整路径（宽字符）
@@ -35,9 +37,9 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
  * @param 输入的图片
  * @param 输入的模型与字典库的path或dir
  */
-bool ppocr(std::vector< std::vector< OCRPredictResult > > &_out,
-           std::string                                     _inputImgPath,
-           DefPPOCRDirs                                   &_dirs) {
+bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
+         std::string                                     _inputImgPath,
+         DefPPOCRDirs                                   &_dirs) {
 
     // 准备 DLL 路径
     const std::wstring dllPath = L"ppocr.dll";
@@ -76,9 +78,9 @@ bool ppocr(std::vector< std::vector< OCRPredictResult > > &_out,
     std::vector< std::vector< OCRPredictResult > > results;
     bool                                           ok = getOcr(img, results);
 
-    // 打印识别结果
-    //std::cout << "OCR success: " << ok << ", result count: " << results.size( ) << std::endl;
-    //for (const auto &page : results)    // 可能有多页（但通常一页）
+    //// 打印识别结果
+    // std::cout << "OCR success: " << ok << ", result count: " << results.size( ) << std::endl;
+    // for (const auto &page : results)    // 可能有多页（但通常一页）
     //{
     //    for (const auto &line : page)    // 每行文本
     //    {
@@ -91,3 +93,4 @@ bool ppocr(std::vector< std::vector< OCRPredictResult > > &_out,
     // system("pause");
     return true;
 }
+}    // namespace ocr
