@@ -8,6 +8,7 @@
 #include <ppocr_API.h>
 #include <QingziClass.h>
 #include <string>
+#include <test.h>
 #include <thread>
 #include <vector>
 #include <Windows.h>
@@ -140,49 +141,53 @@ void DoQingziClass::load_personnel_information_list( ) {
      */
     auto save_information_std =
         [&](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+#ifdef DO_TEST
+        for (size_t rowIndex = 0; rowIndex < sh.size( ); rowIndex++) {
+            for (size_t colIndex = 0;
+                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
+                 colIndex++) {
+                std::cout << sh[rowIndex][colIndex] << "  ";
+            }
+            std::cout << std::endl;
+        }
+#endif    // true
+
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefStdPerson per;
             per.classname = cn;
-          //  std::cout << anycode_to_utf8("加载std") << std::endl;
+            //  std::cout << anycode_to_utf8("加载std") << std::endl;
             for (size_t colIndex = 0;
                  colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
                  colIndex++) {
                 if (sh[0][colIndex] == anycode_to_utf8("姓名")) {
                     per.name = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("性别")) {
                     per.gender = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("年级")) {
                     per.grade = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("学号")) {
                     per.studentID = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("政治面貌")) {
                     per.politicaloutlook = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("学院")) {
                     per.academy = sh[rowIndex][colIndex];
-                    continue;
                 } else if (sh[0][colIndex] == anycode_to_utf8("专业")) {
                     per.majors = sh[rowIndex][colIndex];
-                    continue;
                 } else if ((sh[0][colIndex] == anycode_to_utf8("电话"))
                            || (sh[0][colIndex] == anycode_to_utf8("联系方式"))
                            || (sh[0][colIndex] == anycode_to_utf8("联系电话"))
                            || (sh[0][colIndex] == anycode_to_utf8("电话号码"))) {
                     per.phonenumber = sh[rowIndex][colIndex];
-                    continue;
                 } else if ((sh[0][colIndex] == anycode_to_utf8("QQ号"))
                            || (sh[0][colIndex] == anycode_to_utf8("qq号"))
                            || (sh[0][colIndex] == anycode_to_utf8("qq"))
                            || (sh[0][colIndex] == anycode_to_utf8("QQ"))) {
                     per.qqnumber = sh[rowIndex][colIndex];
-                    continue;
                 } else {
-                    per.otherInformation[sh[0][rowIndex]] = sh[rowIndex][colIndex];
-                    continue;
+                    per.otherInformation[sh[0][colIndex]] = sh[rowIndex][colIndex];
+#ifdef DO_TEST
+                    std::cout << "row" << rowIndex << ": " << sh[0][colIndex] << "  " << sh[rowIndex][colIndex] << std::endl;
+#endif
                 }
             }
             personStd_.push_back(per);

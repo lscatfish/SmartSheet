@@ -25,14 +25,15 @@ endif()
 set(CMAKE_SYSTEM_VERSION "10.0.22621.0" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 17)
 
-set(Xlnt_DIR "${CMAKE_SOURCE_DIR}/third_party/xlnt/x64-Release/lib/cmake/xlnt")
 
 # 找包
 find_package(OpenCV REQUIRED)
-find_package(Xlnt REQUIRED)
+# 这里xlnt包不知道什么原因win没法安装，只能分步了
+#set(Xlnt_DIR "")
+#find_package(Xlnt REQUIRED)
 
-include_directories("./include")
-
+include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/third_party/xlnt/include/")
 
 # 添加执行文件
 add_executable(${PROJECT_NAME}
@@ -50,15 +51,31 @@ add_executable(${PROJECT_NAME}
 "src/ppocr_API.cpp" "include/Fuzzy.h" "src/Fuzzy.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-xlnt::xlnt
-${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.lib>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.lib>
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
 
 # 复制 DLL
-add_custom_command(TARGET SmartSheet POST_BUILD
+#add_custom_command(TARGET SmartSheet POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#            $<TARGET_FILE:xlnt::xlnt>
+#            $<TARGET_FILE_DIR:SmartSheet>)
+
+# 根据当前配置选择 DLL
+set(XLNT_DLL_PATH
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.dll>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.dll>
+)
+
+# 把 DLL 拷贝到目标可执行文件目录
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_FILE:xlnt::xlnt>
-            $<TARGET_FILE_DIR:SmartSheet>)
+            ${XLNT_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying xlnt dll to output directory"
+)
