@@ -13,7 +13,7 @@
 /*
  * 此结构体用于定义标准人员信息
  */
-struct DefStdPerson {
+struct DefPerson {
 public:
     std::string classname;           // 班级名字
     std::string name;                // 姓名
@@ -32,7 +32,7 @@ public:
 
 
     // @brief 基本构造函数
-    DefStdPerson( ) {
+    DefPerson( ) {
         classname.erase( );
         name.erase( );
         gender.erase( );
@@ -55,7 +55,7 @@ public:
      * @param 学院
      * @param 电话
      */
-    DefStdPerson(
+    DefPerson(
         std::string _classname,
         std::string _name,
         std::string _studentID,
@@ -83,13 +83,13 @@ public:
     /*
      * @brief 析构函数
      */
-    ~DefStdPerson( ) {};
+    ~DefPerson( ) {};
 };
 
 /*
- * 此结构体用于定义非标准的人员信息
+ * 此结构体用于定义非标准的人员信息(sheet中的一行)
  */
-struct DefUnstdPerson {
+struct DefLine {
 public:
     std::string                          classname;    // 班级名字
     std::map< std::string, std::string > information;
@@ -97,7 +97,7 @@ public:
     bool                                 ifsign;     // 是否报名
 
     // @brief 基本构造函数
-    DefUnstdPerson( ) {
+    DefLine( ) {
         classname.erase( );
         ifcheck = false;
         ifsign  = false;
@@ -111,7 +111,7 @@ public:
      * @param 学院
      * @param 电话
      */
-    DefUnstdPerson(
+    DefLine(
         std::string _classname,
         std::string _name,
         std::string _studentID,
@@ -129,7 +129,7 @@ public:
     /*
      * @brief 析构函数
      */
-    ~DefUnstdPerson( ) {};
+    ~DefLine( ) {};
 };
 
 #endif    // !PERSONNELINFORMATION_H

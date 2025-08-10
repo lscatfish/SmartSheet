@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <Files.h>
+#include <helper.h>
 #include <iostream>
 #include <PersonnelInformation.h>
 #include <ppocr_API.h>
@@ -11,6 +12,7 @@
 #include <test.h>
 #include <thread>
 #include <vector>
+#include<Fuzzy.h>
 #include <Windows.h>
 
 /*
@@ -22,7 +24,6 @@ static std::string trans_integer_to_string(int in) {
 }
 
 DoQingziClass::DoQingziClass( ) {
-    perInFormat_ = PersonFormat::STD;
 }
 
 DoQingziClass::~DoQingziClass( ) {
@@ -35,7 +36,7 @@ DoQingziClass::~DoQingziClass( ) {
 void DoQingziClass::start( ) {
     /* 1.选择要载入的人员名单的类型 ======================================================= */
     int a = 0;
-    while (a != 1 && a != 2) {
+    /*while (a != 1 && a != 2) {
         system("cls");
         std::cout << anycode_to_utf8("请选择名单类型：") << std::endl
                   << anycode_to_utf8("1. 标准名单") << std::endl
@@ -56,9 +57,11 @@ void DoQingziClass::start( ) {
             std::cout << anycode_to_utf8("你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-    }
+    }*/
 
     /* 2.加载全学员表 ===================================================================== */
+    system("cls");
+    std::cout << anycode_to_utf8("加载全学员信息表...") << std::endl;
     load_personnel_information_list( );
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
@@ -86,7 +89,7 @@ void DoQingziClass::start( ) {
         // 制作签到表
         make_attendanceSheet( );
         save_attendanceSheet( );
-        if (errorPerson_.size( ) >= 1) {
+        if (unknownPerson_.size( ) >= 1) {
             std::cout << std::endl
                       << std::endl
                       << "\033[43;30mWARNING!!!\033[0m" << std::endl;
@@ -95,14 +98,27 @@ void DoQingziClass::start( ) {
             std::cout << anycode_to_utf8("以下的人员不在全学员名单中");
             std::cout << " ###ATTENTION###";
             std::cout << std::endl;
-            for (auto it_errorPerson = errorPerson_.begin( ); it_errorPerson != errorPerson_.end( ); it_errorPerson++) {
-                if (it_errorPerson->ifcheck == false) {
-                    std::cout << it_errorPerson->classname << "    ";
-                    std::cout << it_errorPerson->information[anycode_to_utf8("姓名")] << "    ";
-                    if (it_errorPerson->information.find(anycode_to_utf8("学号")) != it_errorPerson->information.end( )) {
-                        std::cout << it_errorPerson->information[anycode_to_utf8("学号")] << "    ";
+            for (auto it_unknownPerson = unknownPerson_.begin( );
+                it_unknownPerson != unknownPerson_.end( );
+                it_unknownPerson++) {
+                if (it_unknownPerson->personStd.ifcheck == false) {
+                    std::cout << anycode_to_utf8("Unknown:  ");
+                    std::cout << it_unknownPerson->personStd.classname << "    ";
+                    std::cout << it_unknownPerson->personStd.name<< "    ";
+                    if (it_unknownPerson->personStd.studentID.size() !=0 ) {
+                        std::cout << it_unknownPerson->personStd.studentID << "    ";
                     } else {
                         std::cout << anycode_to_utf8("？学号不存在？") << " ";
+                    }
+                    std::cout << std::endl;
+                    if (it_unknownPerson->likelyPerson.size( ) != 0) {
+                        for (const auto &likelyPer : it_unknownPerson->likelyPerson) {
+                            std::cout << anycode_to_utf8("-likely:  ");
+                            std::cout << likelyPer.classname << "    ";
+                            std::cout << likelyPer.name << "    ";
+                            std::cout << likelyPer.studentID << "    ";
+                            std::cout << std::endl;
+                        }
                     }
                     std::cout << std::endl;
                 }
@@ -150,10 +166,11 @@ void DoQingziClass::load_personnel_information_list( ) {
             }
             std::cout << std::endl;
         }
-#endif    // true
+#endif    // DO_TEST
 
+        // 这里实际上应该先转成defline，在转成defperson
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
-            DefStdPerson per;
+            DefPerson per;
             per.classname = cn;
             //  std::cout << anycode_to_utf8("加载std") << std::endl;
             for (size_t colIndex = 0;
@@ -193,24 +210,8 @@ void DoQingziClass::load_personnel_information_list( ) {
             personStd_.push_back(per);
         }
     };
-    /*
-     * @brief 保存非标准的人员信息
-     * @param 二维向量用于储存表格信息
-     * @param 青字班的名字
-     */
-    auto save_information_unstd =
-        [&](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
-        for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
-            DefUnstdPerson per;
-            per.classname = cn;
-            for (size_t colIndex = 0;
-                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
-                 colIndex++) {
-                per.information[sh[0][colIndex]] = sh[rowIndex][colIndex];
-            }
-            personUnstd_.push_back(per);
-        }
-    };
+
+
     //=======================================================================================/
     std::cout << std::endl
               << anycode_to_utf8("读取全学院名单...") << std::endl;
@@ -223,11 +224,7 @@ void DoQingziClass::load_personnel_information_list( ) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
         load_sheet_from_file(sheet, *it_filePathAndName);
-        if (perInFormat_ == PersonFormat::STD) {
-            save_information_std(sheet, *it_className);
-        } else if (perInFormat_ == PersonFormat::UNSTD) {
-            save_information_unstd(sheet, *it_className);
-        }
+        save_information_std(sheet, *it_className);
     }
 }
 
@@ -235,9 +232,9 @@ void DoQingziClass::load_personnel_information_list( ) {
  * @brief 制作签到表
  */
 void DoQingziClass::make_attendanceSheet( ) {
-    std::vector< std::string >    app_classname;          // 班级名称
-    std::vector< std::string >    app_filePathAndName;    // applicationSheet的excel文件的路径
-    std::vector< DefUnstdPerson > app_person;             // 定义从报名表中获得的人员信息
+    std::vector< std::string > app_classname;          // 班级名称
+    std::vector< std::string > app_filePathAndName;    // applicationSheet的excel文件的路径
+    std::vector< DefLine >     app_person;             // 定义从报名表中获得的人员信息
 
     // lambda函数定义========================================================================/
     /*
@@ -248,7 +245,7 @@ void DoQingziClass::make_attendanceSheet( ) {
     auto save_application_to_vector =
         [&app_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
-            DefUnstdPerson per;
+            DefLine per;
             per.classname = cn;
             for (size_t colIndex = 0;
                  colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
@@ -269,50 +266,38 @@ void DoQingziClass::make_attendanceSheet( ) {
          it_app_filepath++, it_app_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-#if false
-        std::cout << *it_app_filepath << std::endl;
-#endif
         load_sheet_from_file(sheet, *it_app_filepath);
         save_application_to_vector(sheet, *it_app_classname);
     }
 
     /* 制表 */
-    if (perInFormat_ == PersonFormat::STD) {
-        for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
-            std::vector< DefStdPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
-            search_person(it_search, *it_app_person);
-            if (it_search != personStd_.end( )) {    // 说明搜索到了
-                it_search->ifsign      = true;
-                it_app_person->ifcheck = true;    // 这里的ifcheck说明报了名的人已经匹配
-            } else {
-                it_app_person->ifcheck = false;    // 没有搜索到
-            }
-        }
-    } else if (perInFormat_ == PersonFormat::UNSTD) {
-        for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
-            std::vector< DefUnstdPerson >::iterator it_search = personUnstd_.end( );    // 赋值到哨兵迭代器
-            search_person(it_search, *it_app_person);
-            if (it_search != personUnstd_.end( )) {    // 说明搜索到了
-                it_search->ifsign      = true;
-                it_app_person->ifcheck = true;    // 这里的ifcheck说明报了名的人已经匹配
-            } else {
-                it_app_person->ifcheck = false;    // 没有搜索到
-            }
+    for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
+        std::vector< DefPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
+        search_person(it_search, *it_app_person);
+        if (it_search != personStd_.end( )) {    // 说明搜索到了
+            it_search->ifsign      = true;
+            it_app_person->ifcheck = true;    // 这里的ifcheck说明报了名的人已经匹配
+        } else {
+            it_app_person->ifcheck = false;    // 没有搜索到
         }
     }
+
     // 标定没有搜索到的人
     for (auto it_app_person = app_person.begin( );
          it_app_person != app_person.end( );
          it_app_person++) {
         if (it_app_person->ifcheck == false) {
-            if (it_app_person->information[anycode_to_utf8("姓名")].size( ) != 0)
-                errorPerson_.push_back(*it_app_person);
+            if (it_app_person->information[anycode_to_utf8("姓名")].size( ) != 0) {
+                DefUnknownPerson un1;
+                un1.personLine = *it_app_person;
+                trans_line_to_person(un1.personLine, un1.personStd);
+                unknownPerson_.push_back(un1);
+            }
         }
     }
     // 模糊匹配没有搜到的人
-    for (auto it_errorPerson = errorPerson_.begin( );
-         it_errorPerson != errorPerson_.end( );
-         it_errorPerson++) {
+    for (auto &unknownPerson : unknownPerson_) {
+        fuzzy::search_for_person(unknownPerson.likelyPerson, unknownPerson.personStd, personStd_);
     }
 }
 
@@ -326,34 +311,19 @@ void DoQingziClass::save_attendanceSheet( ) {
         std::vector< std::vector< std::string > > sheet      = {
             { anycode_to_utf8("序号"), anycode_to_utf8("姓名"), anycode_to_utf8("学号"), anycode_to_utf8("签到") }
         };
-
-        if (perInFormat_ == PersonFormat::STD) {
-            int serialNum = 1;
-            for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
-                if (it_person->classname == *it_classname && it_person->ifsign == true) {
-                    std::vector< std::string > aRow;
-                    aRow.push_back(trans_integer_to_string(serialNum));
-                    aRow.push_back(it_person->name);
-                    aRow.push_back(it_person->studentID);
-                    aRow.push_back("");
-                    sheet.push_back(aRow);
-                    serialNum++;
-                }
-            }
-        } else if (perInFormat_ == PersonFormat::UNSTD) {
-            int serialNum = 1;
-            for (auto it_person = personUnstd_.begin( ); it_person != personUnstd_.end( ); it_person++) {
-                if (it_person->classname == *it_classname && it_person->ifsign == true) {
-                    std::vector< std::string > aRow;
-                    aRow.push_back(trans_integer_to_string(serialNum));
-                    aRow.push_back(it_person->information[anycode_to_utf8("姓名")]);
-                    aRow.push_back(it_person->information[anycode_to_utf8("学号")]);
-                    aRow.push_back("");
-                    sheet.push_back(aRow);
-                    serialNum++;
-                }
+        int serialNum = 1;
+        for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
+            if (it_person->classname == *it_classname && it_person->ifsign == true) {
+                std::vector< std::string > aRow;
+                aRow.push_back(trans_integer_to_string(serialNum));
+                aRow.push_back(it_person->name);
+                aRow.push_back(it_person->studentID);
+                aRow.push_back("");
+                sheet.push_back(aRow);
+                serialNum++;
             }
         }
+
         save_sheet_to_file(sheet, sheetPath, sheetTitle);
     }
 }
@@ -362,9 +332,9 @@ void DoQingziClass::save_attendanceSheet( ) {
  * @brief 制作考勤统计表
  */
 void DoQingziClass::make_statisticsSheet( ) {
-    std::vector< std::string >    att_classname;          // 班级名称
-    std::vector< std::string >    att_filePathAndName;    // 签到表的excel文件的路径
-    std::vector< DefUnstdPerson > att_person;             // 定义从签到表中获得的人员信息
+    std::vector< std::string > att_classname;          // 班级名称
+    std::vector< std::string > att_filePathAndName;    // 签到表的excel文件的路径
+    std::vector< DefLine >     att_person;             // 定义从签到表中获得的人员信息
 
     // lambda函数定义========================================================================/
     /*
@@ -375,7 +345,7 @@ void DoQingziClass::make_statisticsSheet( ) {
     auto save_application =
         [&att_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
-            DefUnstdPerson per;
+            DefLine per;
             per.classname = cn;
             for (size_t colIndex = 0;
                  colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
@@ -417,8 +387,8 @@ void DoQingziClass::make_statisticsSheet( ) {
  * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefStdPerson >::iterator &_it_output,
-    DefStdPerson                           _targetPerson) {
+    std::vector< DefPerson >::iterator &_it_output,
+    DefPerson                           _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
         if (_targetPerson.classname.size( ) != 0) {
@@ -470,8 +440,8 @@ void DoQingziClass::search_person(
  * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(
-    std::vector< DefStdPerson >::iterator &_it_output,
-    DefUnstdPerson                         _targetPerson) {
+    std::vector< DefPerson >::iterator &_it_output,
+    DefLine                             _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
         if (_targetPerson.classname.size( ) != 0) {
@@ -516,112 +486,6 @@ void DoQingziClass::search_person(
 }
 
 /*
- * @brief 搜索，从全人员名单中搜素目标人员信息
- * @param 总名单的一个迭代器
- * @param 目标的人员信息
- * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^-^)
- */
-void DoQingziClass::search_person(
-    std::vector< DefUnstdPerson >::iterator &_it_output,
-    DefStdPerson                             _targetPerson) {
-    for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
-        /* 1.优先匹配班级（如果有） */
-        if (_targetPerson.classname.size( ) != 0) {
-            if (_targetPerson.classname == it_all->classname
-                && _targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
-                if (_targetPerson.studentID.size( ) != 0) {
-                    if (compare_studentID(_targetPerson.studentID, it_all->information[anycode_to_utf8("学号")])) {
-                        _it_output = it_all;
-                        return;
-                    } else {
-                        /*添加到疑似列表中*/
-                        continue;
-                    }
-                } else {
-                    // 没有学号？？？
-                    _it_output = it_all;
-                    return;
-                }
-            } else {
-                continue;
-            }
-        } else {
-            if (_targetPerson.name == it_all->information[anycode_to_utf8("姓名")]) {
-                if (_targetPerson.studentID.size( ) != 0) {
-                    if (compare_studentID(_targetPerson.studentID, it_all->information[anycode_to_utf8("学号")])) {
-                        _it_output = it_all;
-                        return;
-                    } else {
-                        /*添加到疑似列表中*/
-                        continue;
-                    }
-                } else {
-                    // 没有学号？？？
-                    _it_output = it_all;
-                    return;
-                }
-            } else {
-                continue;
-            }
-        }
-    }
-}
-
-/*
- * @brief 搜索，从全人员名单中搜素目标人员信息
- * @param 总名单的一个迭代器
- * @param 目标的人员信息
- * @note 可以考虑怎么优化这四个search函数
- * @shit if很多吧，慢慢看  (^-^)
- */
-void DoQingziClass::search_person(
-    std::vector< DefUnstdPerson >::iterator &_it_output,
-    DefUnstdPerson                           _targetPerson) {
-    for (auto it_all = personUnstd_.begin( ); it_all != personUnstd_.end( ); it_all++) {
-        /* 1.优先匹配班级（如果有） */
-        if (_targetPerson.classname.size( ) != 0) {
-            if (_targetPerson.classname == it_all->classname
-                && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
-                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->information[anycode_to_utf8("学号")])) {
-                        _it_output = it_all;
-                        return;
-                    } else {
-                        /*添加到疑似列表中*/
-                        continue;
-                    }
-                } else {
-                    // 没有学号？？？
-                    _it_output = it_all;
-                    return;
-                }
-            } else {
-                continue;
-            }
-        } else {
-            if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->information[anycode_to_utf8("姓名")]) {
-                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->information[anycode_to_utf8("学号")])) {
-                        _it_output = it_all;
-                        return;
-                    } else {
-                        /*添加到疑似列表中*/
-                        continue;
-                    }
-                } else {
-                    // 没有学号？？？
-                    _it_output = it_all;
-                    return;
-                }
-            } else {
-                continue;
-            }
-        }
-    }
-}
-
-/*
  * @brief 比较学号
  * @return 相同返回true  不同返回false
  */
@@ -645,4 +509,76 @@ bool DoQingziClass::compare_studentID(const std::string &a, const std::string &b
         }
     } else
         return false;
+}
+
+/*
+ * @brief 一行信息转化为标准人员信息
+ * @param 一行信息
+ * @param 标准的人员信息
+ */
+void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_outperStd) {
+    DefPerson per;
+    per.classname = _inperLine.classname;
+    per.ifcheck   = _inperLine.ifcheck;
+    per.ifsign    = _inperLine.ifcheck;
+    for (auto it_inperLine = _inperLine.information.begin( );
+         it_inperLine != _inperLine.information.end( );
+         it_inperLine++) {
+        if (it_inperLine->first == anycode_to_utf8("姓名")) {
+            per.name = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("性别")) {
+            per.gender = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("年级")) {
+            per.grade = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("学号")) {
+            per.studentID = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("政治面貌")) {
+            per.politicaloutlook = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("学院")) {
+            per.academy = it_inperLine->second;
+        } else if (it_inperLine->first == anycode_to_utf8("专业")) {
+            per.majors = it_inperLine->second;
+        } else if ((it_inperLine->first == anycode_to_utf8("电话"))
+                   || (it_inperLine->first == anycode_to_utf8("联系方式"))
+                   || (it_inperLine->first == anycode_to_utf8("联系电话"))
+                   || (it_inperLine->first == anycode_to_utf8("电话号码"))) {
+            per.phonenumber = it_inperLine->second;
+        } else if ((it_inperLine->first == anycode_to_utf8("QQ号"))
+                   || (it_inperLine->first == anycode_to_utf8("qq号"))
+                   || (it_inperLine->first == anycode_to_utf8("qq"))
+                   || (it_inperLine->first == anycode_to_utf8("QQ"))) {
+            per.qqnumber = it_inperLine->second;
+        } else {
+            per.otherInformation[it_inperLine->first] = it_inperLine->second;
+        }
+    }
+    _outperStd = per;
+}
+
+/*
+ * @brief 标准人员信息转化为一行信息
+ * @param 标准的人员信息
+ * @param 一行信息
+ */
+void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _outperLine) {
+    DefLine per;
+    per.classname                                = _inperStd.classname;
+    per.information[anycode_to_utf8("姓名")]     = _inperStd.name;
+    per.information[anycode_to_utf8("性别")]     = _inperStd.gender;
+    per.information[anycode_to_utf8("年级")]     = _inperStd.grade;
+    per.information[anycode_to_utf8("学号")]     = _inperStd.studentID;
+    per.information[anycode_to_utf8("政治面貌")] = _inperStd.politicaloutlook;
+    per.information[anycode_to_utf8("学院")]     = _inperStd.academy;
+    per.information[anycode_to_utf8("专业")]     = _inperStd.majors;
+    per.information[anycode_to_utf8("QQ号")]     = _inperStd.qqnumber;
+    per.ifcheck                                  = _inperStd.ifcheck;
+    per.ifsign                                   = _inperStd.ifcheck;
+    if (_inperStd.otherInformation.size( ) != 0) {
+        for (auto it_in = _inperStd.otherInformation.begin( );
+             it_in != _inperStd.otherInformation.end( );
+             it_in++) {
+            per.information[it_in->first] = it_in->second;
+        }
+    }
+    _outperLine = per;
 }

@@ -9,9 +9,6 @@
 #define DO_TEST
 #endif    // true
 
-
 void test_main( );
-
-
 
 #endif    // !TEST_H

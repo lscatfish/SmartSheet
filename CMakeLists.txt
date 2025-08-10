@@ -35,20 +35,11 @@ find_package(OpenCV REQUIRED)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 include_directories("${CMAKE_SOURCE_DIR}/third_party/xlnt/include/")
 
+# 找到 src 文件夹下所有的 .cpp 文件
+file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp")
+
 # 添加执行文件
-add_executable(${PROJECT_NAME}
-"main.cpp"
-"src/ChineseEncoding.cpp"
-"include/ChineseEncoding.h"
-"include/PersonnelInformation.h"
-"include/Files.h"
-"src/Files.cpp"
-"include/QingziClass.h"
-"src/QingziClass.cpp"
-"src/test.cpp"
-"include/test.h" 
-"include/ppocr_API.h" 
-"src/ppocr_API.cpp" "include/Fuzzy.h" "src/Fuzzy.cpp")
+add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -59,12 +50,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${OpenCV_LIBS})
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
-
-# 复制 DLL
-#add_custom_command(TARGET SmartSheet POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#            $<TARGET_FILE:xlnt::xlnt>
-#            $<TARGET_FILE_DIR:SmartSheet>)
 
 # 根据当前配置选择 DLL
 set(XLNT_DLL_PATH

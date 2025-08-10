@@ -5,17 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <xlnt/cell/cell.hpp>
-#include <xlnt/cell/cell_reference.hpp>
-#include <xlnt/styles/alignment.hpp>
-#include <xlnt/styles/border.hpp>
-#include <xlnt/styles/color.hpp>
-#include <xlnt/styles/font.hpp>
-#include <xlnt/utils/optional.hpp>
-#include <xlnt/workbook/workbook.hpp>
-#include <xlnt/worksheet/column_properties.hpp>
-#include <xlnt/worksheet/row_properties.hpp>
-#include <xlnt/worksheet/worksheet.hpp>
+#include<helper.h>
 #include <xlnt/xlnt.hpp>
 
 /*
@@ -51,10 +41,7 @@ bool get_filepath_from_folder(
     for (auto &s : _name) {
         std::cout << s << std::endl;
     }
-    std::cout << std::endl
-              << anycode_to_utf8("按 Enter 键继续...");
-    std::cin.get( );    // 等待用户按回车
-    std::cin.get( );    // 等待用户按回车
+    pause();    // 等待用户按回车
 
     return true;
 }

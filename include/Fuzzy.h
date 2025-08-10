@@ -17,6 +17,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <PersonnelInformation.h>
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -40,7 +41,7 @@ enum class LEVEL {
  * @param 匹配度
  * @return 系列可能的答案
  */
-std::vector< std::string > fuzzy_search(
+std::vector< std::string > search(
     std::string                       _target,
     const std::vector< std::string > &_searchingLib,
     LEVEL                             _matchLevel);
@@ -54,14 +55,23 @@ std::vector< std::string > fuzzy_search(
  * @param 匹配度
  * @return 是否搜索成功
  */
-bool fuzzy_search(
+bool search(
     std::vector< std::string >       &_outList,
     std::string                       _target,
     const std::vector< std::string > &_searchingLib,
     LEVEL                             _matchLevel);
 
-
-
+/*
+* @brief 模糊搜索人员信息
+* @param 系列可能的人员信息
+* @param 搜索目标
+* @param 搜索库
+* @retrun 是否搜索成功
+*/
+bool search_for_person(
+    std::vector< DefPerson >       &_outList,
+    DefPerson                       _target,
+    const std::vector< DefPerson > &_searchingLib);
 
 
 

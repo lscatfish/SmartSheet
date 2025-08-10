@@ -5,6 +5,8 @@
 #include <Files.h>
 #include <filesystem>
 #include <fstream>
+#include <helper.h>
+#include <iomanip>
 #include <ios>
 #include <iostream>
 #include <limits>
@@ -18,18 +20,7 @@
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
-#include <iomanip>
 
-/*
- * @brief 按回车键继续
- */
-static void pause( ) {
-    std::cout << std::endl;
-    std::cout << anycode_to_utf8("请按 Enter 键继续...") << std::endl;
-    std::cin.ignore((std::numeric_limits< std::streamsize >::max)( ), '\n');
-    // 这里实际上是std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
-    // 加一个括号防止windows.h的宏污染
-}
 
 int main( ) {
 
