@@ -73,7 +73,7 @@ struct DefDirs {
  * @param 输入的模型与字典库的path或dir
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
-         cv::Mat                                        &_img,
+         cv::Mat                                         _img,
          DefDirs                                        &_dirs);
 
 
