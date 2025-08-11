@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+/*
+ * @brief 直接操作xlsx的文件
+ */
+
 #ifndef FILES_H
 #define FILES_H
 
@@ -26,7 +30,7 @@ bool get_filepath_from_folder(
  * @param 储存表格的二维数组
  * @param 文件的路径
  */
-void load_sheet_from_file(
+void load_sheet_from_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName);
 
@@ -36,10 +40,11 @@ void load_sheet_from_file(
  * @param 文件的路径
  * @param 表格标题的名称
  */
-void save_sheet_to_file(
+void save_sheet_to_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName,
     std::string                                _titleName);
+
 
 
 

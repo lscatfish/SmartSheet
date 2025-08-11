@@ -223,7 +223,7 @@ void DoQingziClass::load_personnel_information_list( ) {
          it_className++, it_filePathAndName++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_file(sheet, *it_filePathAndName);
+        load_sheet_from_xlsx(sheet, *it_filePathAndName);
         save_information_std(sheet, *it_className);
     }
 }
@@ -266,7 +266,7 @@ void DoQingziClass::make_attendanceSheet( ) {
          it_app_filepath++, it_app_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_file(sheet, *it_app_filepath);
+        load_sheet_from_xlsx(sheet, *it_app_filepath);
         save_application_to_vector(sheet, *it_app_classname);
     }
 
@@ -324,7 +324,7 @@ void DoQingziClass::save_attendanceSheet( ) {
             }
         }
 
-        save_sheet_to_file(sheet, sheetPath, sheetTitle);
+        save_sheet_to_xlsx(sheet, sheetPath, sheetTitle);
     }
 }
 
@@ -363,7 +363,7 @@ void DoQingziClass::make_statisticsSheet( ) {
          it_att_filepath++, it_att_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_file(sheet, *it_att_filepath);
+        load_sheet_from_xlsx(sheet, *it_att_filepath);
         save_application(sheet, *it_att_classname);
     }
 

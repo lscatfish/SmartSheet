@@ -8,6 +8,7 @@
 #include <vector>
 #include <xlnt/xlnt.hpp>
 
+
 /*
  * @brief 从一个文件下获取所有的文件
  * @param 返回的文件名（无格式后缀）
@@ -34,9 +35,22 @@ bool get_filepath_from_folder(
         std::cerr << e.what( ) << '\n';
         return false;
     }
+
+    // 删除后缀
+    auto removeTrailingSubstring = [](const std::string &input) -> std::string {
+        // 找到最后一个 '.' 的位置
+        size_t pos = input.find_last_of('.');
+        // 如果没有找到 '.'，返回原字符
+        if (pos == std::string::npos) {
+            return input;
+        }
+        // 返回从字符串开始到 '.' 的子字符串
+        return input.substr(0, pos);
+    };
     for (auto it = _name.begin( ); it != _name.end( ); it++) {
-        it->erase(it->end( ) - 5, it->end( ));
+        *it = removeTrailingSubstring(*it);
     }
+
     std::cout << anycode_to_utf8("请确认各班（共") << _name.size( ) << anycode_to_utf8("个班）：") << std::endl;
     for (auto &s : _name) {
         std::cout << s << std::endl;
@@ -51,7 +65,7 @@ bool get_filepath_from_folder(
  * @param 储存表格的二维数组（按照row，column的形式）
  * @param 文件的路径
  */
-void load_sheet_from_file(
+void load_sheet_from_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName) {
     xlnt::workbook wb;
@@ -78,7 +92,7 @@ void load_sheet_from_file(
  * @param 文件的路径
  * @param 表格的名称
  */
-void save_sheet_to_file(
+void save_sheet_to_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName,
     std::string                                _titleName) {
@@ -141,14 +155,25 @@ void save_sheet_to_file(
     xlnt::font f_title;
     f_title.name(anycode_to_utf8("宋体"));
     f_title.size(24);
-    ws.insert_rows(1, 1);
-    ws.merge_cells("A1:D1");
+    ws.insert_rows(1, 1);    // 插入行
+
+    // 合并单元格
+    std::string end_col;
+    int         temp = maxCol;
+    while (temp > 0) {
+        int remainder = (temp - 1) % 26;
+        end_col       = char('A' + remainder) + end_col;
+        temp          = (temp - 1) / 26;
+    }
+    // 构建合并单元格的范围字符串（例如 "A1:D1"）
+    std::string merRange = "A1:" + end_col + "1";
+    ws.merge_cells(merRange);
+
     ws.row_properties(1).height        = 40;    // 40pt
     ws.row_properties(1).custom_height = true;
     ws.cell("A1").value(_titleName);
     ws.cell("A1").font(f_title);
     ws.cell("A1").alignment(align);
-
 
     wb.save(_pathAndName);
 }

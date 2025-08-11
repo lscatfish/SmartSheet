@@ -79,5 +79,5 @@ void test_main( ) {
         { anycode_to_utf8("3"), anycode_to_utf8("李四"), anycode_to_utf8("324234"), "" },
 
     };
-    save_sheet_to_file(test1, "test1.xlsx", anycode_to_utf8("测试签到表"));
+    save_sheet_to_xlsx(test1, "test1.xlsx", anycode_to_utf8("测试签到表"));
 }

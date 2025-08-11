@@ -17,7 +17,7 @@ namespace ppocr {
  *    与 DLL 中返回的结构体字段保持一致
  *--------------------------------------------------------*/
 struct OCRPredictResult {
-    std::vector< std::vector< int > > box;                  // 文本框 4 个顶点坐标
+    std::vector< std::vector< int > > box;                  // 文本框 4 个顶点坐标[左上][右上][右下][左下]
     std::string                       text;                 // 识别出的文字
     float                             score     = -1.0f;    // 置信度
     float                             cls_score = 0.0f;     // 方向分类置信度
@@ -59,7 +59,7 @@ template < typename FuncPtr >
 bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn);
 
 // 要传入的模型与字典库的地址
-struct DefPPOCRDirs {
+struct DefDirs {
     const char *rec_char_dict_path;    // 字典库地址
     const char *det_model_dir;
     const char *rec_model_dir;
@@ -73,8 +73,8 @@ struct DefPPOCRDirs {
  * @param 输入的模型与字典库的path或dir
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
-         cv::Mat                                     &_img,
-         DefPPOCRDirs                                   &_dirs);
+         cv::Mat                                        &_img,
+         DefDirs                                        &_dirs);
 
 
 

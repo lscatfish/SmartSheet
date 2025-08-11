@@ -40,7 +40,7 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
          cv::Mat                                        &_img,
-         DefPPOCRDirs                                   &_dirs) {
+         DefDirs                                   &_dirs) {
 
     // 准备 DLL 路径
     const std::wstring dllPath = L"ppocr.dll";
