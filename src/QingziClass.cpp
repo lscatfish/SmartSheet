@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <Files.h>
+#include <Fuzzy.h>
 #include <helper.h>
 #include <iostream>
 #include <PersonnelInformation.h>
@@ -12,7 +13,6 @@
 #include <test.h>
 #include <thread>
 #include <vector>
-#include<Fuzzy.h>
 #include <Windows.h>
 
 /*
@@ -99,13 +99,13 @@ void DoQingziClass::start( ) {
             std::cout << " ###ATTENTION###";
             std::cout << std::endl;
             for (auto it_unknownPerson = unknownPerson_.begin( );
-                it_unknownPerson != unknownPerson_.end( );
-                it_unknownPerson++) {
+                 it_unknownPerson != unknownPerson_.end( );
+                 it_unknownPerson++) {
                 if (it_unknownPerson->personStd.ifcheck == false) {
                     std::cout << anycode_to_utf8("Unknown:  ");
                     std::cout << it_unknownPerson->personStd.classname << "    ";
-                    std::cout << it_unknownPerson->personStd.name<< "    ";
-                    if (it_unknownPerson->personStd.studentID.size() !=0 ) {
+                    std::cout << it_unknownPerson->personStd.name << "    ";
+                    if (it_unknownPerson->personStd.studentID.size( ) != 0) {
                         std::cout << it_unknownPerson->personStd.studentID << "    ";
                     } else {
                         std::cout << anycode_to_utf8("？学号不存在？") << " ";

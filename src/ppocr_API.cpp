@@ -1,5 +1,6 @@
 ﻿#include <ppocr_API.h>
 #include <vector>
+#include<opencv2/opencv.hpp>
 
 namespace ppocr {
 /*========================================================
@@ -38,7 +39,7 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
  * @param 输入的模型与字典库的path或dir
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
-         std::string                                     _inputImgPath,
+         cv::Mat                                        &_img,
          DefPPOCRDirs                                   &_dirs) {
 
     // 准备 DLL 路径
@@ -66,17 +67,14 @@ bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
     // 设置模型目录
     setModelDir(_dirs.det_model_dir, _dirs.rec_model_dir, _dirs.cls_model_dir, true);
 
-    // 读取待识别图片
-    cv::Mat img = cv::imread(_inputImgPath);
-    if (img.empty( )) {
-        std::cerr << "imread failed: " << _inputImgPath << std::endl;
+    // 调用 OCR 推理
+    std::vector< std::vector< OCRPredictResult > > results;
+    bool                                           ok = getOcr(_img, results);
+    if (!ok) {
+        std::cout << "OCR error!!!" << std::endl;
         FreeLibrary(hDll);
         return false;
     }
-
-    // 调用 OCR 推理
-    std::vector< std::vector< OCRPredictResult > > results;
-    bool                                           ok = getOcr(img, results);
 
     //// 打印识别结果
     // std::cout << "OCR success: " << ok << ", result count: " << results.size( ) << std::endl;
@@ -93,4 +91,4 @@ bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
     // system("pause");
     return true;
 }
-}    // namespace ocr
+}    // namespace ppocr

@@ -2,10 +2,10 @@
 #include <ChineseEncoding.h>
 #include <Files.h>
 #include <filesystem>
+#include <helper.h>
 #include <iostream>
 #include <string>
 #include <vector>
-#include<helper.h>
 #include <xlnt/xlnt.hpp>
 
 /*
@@ -41,7 +41,7 @@ bool get_filepath_from_folder(
     for (auto &s : _name) {
         std::cout << s << std::endl;
     }
-    pause();    // 等待用户按回车
+    pause( );    // 等待用户按回车
 
     return true;
 }
@@ -108,6 +108,8 @@ void save_sheet_to_file(
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
+
+    int maxCol = 1;    // sheet中列的数量
     // 逐行逐列写入
     for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
         for (std::size_t c = 0; c < _aSheet[r].size( ); ++c) {
@@ -117,17 +119,19 @@ void save_sheet_to_file(
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
             // 注意 xlnt 行列从 1 开始
         }
+        if (maxCol < _aSheet[r].size( )) {
+            maxCol = _aSheet[r].size( );
+        }
     }
 
     // 列宽
     ws.column_properties(1).width        = 7.92;    // 8字符宽
     ws.column_properties(1).custom_width = true;
-    ws.column_properties(2).width        = 23.92;    // 24字符宽
-    ws.column_properties(2).custom_width = true;
-    ws.column_properties(3).width        = 23.92;
-    ws.column_properties(3).custom_width = true;
-    ws.column_properties(4).width        = 23.92;
-    ws.column_properties(4).custom_width = true;
+    for (int i = 2; i <= maxCol; i++) {
+        ws.column_properties(i).width        = 23.92;    // 24字符宽
+        ws.column_properties(i).custom_width = true;
+    }
+
     for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
         ws.row_properties(r + 1).height        = 24;    // 24pt
         ws.row_properties(r + 1).custom_height = true;
