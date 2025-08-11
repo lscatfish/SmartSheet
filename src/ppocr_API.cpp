@@ -1,6 +1,6 @@
-﻿#include <ppocr_API.h>
+﻿#include <opencv2/opencv.hpp>
+#include <ppocr_API.h>
 #include <vector>
-#include<opencv2/opencv.hpp>
 
 namespace ppocr {
 /*========================================================
@@ -39,8 +39,8 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
  * @param 输入的模型与字典库的path或dir
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
-         cv::Mat                                        &_img,
-         DefDirs                                   &_dirs) {
+         cv::Mat                                         _img,
+         DefDirs                                        &_dirs) {
 
     // 准备 DLL 路径
     const std::wstring dllPath = L"ppocr.dll";

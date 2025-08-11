@@ -3,7 +3,11 @@
 #include "Files.h"
 #include "PersonnelInformation.h"
 #include "test.h"
+#include <algorithm>
 #include <consoleapi2.h>
+#include <exception>
+#include <helper.h>
+#include <imgs.h>
 #include <iostream>
 #include <string>
 #include <stringapiset.h>
@@ -80,4 +84,103 @@ void test_main( ) {
 
     };
     save_sheet_to_xlsx(test1, "test1.xlsx", anycode_to_utf8("测试签到表"));
+}
+
+// 测试imgs的网格生成模型
+bool test_for_grid( ) {
+    // 生成0-1080范围的测试点列（模拟网格分布）
+    auto generate_test_points = []( ) -> std::vector< GridPoint > {
+        std::vector< GridPoint > points;
+
+        // 模拟一个网格：
+        // x方向：200, 400, 600, 800（间隔200）
+        // y方向：300, 600, 900（间隔300）
+        // 每个点添加±5的随机误差，且故意缺失部分点
+
+        // 第一行（y≈300）
+        points.emplace_back(202, 298);    // x≈200
+        points.emplace_back(401, 303);    // x≈400
+        // 故意缺失x=600的点
+        points.emplace_back(799, 297);    // x≈800
+
+        // 第二行（y≈600）
+        points.emplace_back(203, 602);    // x≈200
+        // 故意缺失x=400的点
+        points.emplace_back(598, 599);    // x≈600
+        points.emplace_back(802, 601);    // x≈800
+
+        // 第三行（y≈900）
+        points.emplace_back(199, 903);    // x≈200
+        points.emplace_back(402, 898);    // x≈400
+        points.emplace_back(601, 901);    // x≈600
+        // 故意缺失x=800的点
+
+        return points;
+    };
+
+    // 模拟输入：含密集点和稀疏点的网格
+    std::vector< GridPoint > points = generate_test_points( );
+    for (const auto &p : points) {
+        std::cout << "(" << p.first << ", " << p.second << ")\n";
+    }
+    std::cout << "\n";
+
+    // 区域范围（0-1080）
+    double x0 = 1080.0;
+    double y0 = 1080.0;
+
+    try {
+        // 自动计算阈值（增大比例系数，设置最小阈值为区域的 1%）
+        auto [epsilon_x, epsilon_y] = auto_calculate_epsilon(points, x0, y0, 0.5, 0.01);
+
+        std::cout << anycode_to_utf8("自动计算的误差阈值：\n");
+        std::cout << "epsilon_x =" << epsilon_x << "\n";
+        std::cout << "epsilon_y =" << epsilon_y << "\n\n";
+        pause( );
+
+        // 计算最小有效间距（避免生成过密网格线）
+        double min_spacing_x = std::max(epsilon_x * 2, 25.0);    // 最小间距
+        double min_spacing_y = std::max(epsilon_y * 2, 25.0);
+
+        // 提取网格（传入最小有效间距）
+        GridResult grid = extract_grid_info(points, epsilon_x, epsilon_y, min_spacing_x, min_spacing_y);
+
+        // 输出结果
+        std::cout << anycode_to_utf8("网格行坐标（y 值）：\n");
+        for (double y : grid.row_coords) {
+            std::cout << y << " ";
+        }
+        std::cout << "\n\n";
+        pause( );
+        std::cout << anycode_to_utf8("网格列坐标（x 值）：\n");
+        for (double x : grid.col_coords) {
+            std::cout << x << " ";
+        }
+        std::cout << "\n\n";
+        pause( );
+
+        std::cout << anycode_to_utf8("网格交点坐标：\n");
+        for (const auto &point : grid.intersections) {
+            std::cout << "(" << point.first << "," << point.second << ")\n";
+        }
+    } catch (const std::exception &e) {
+        std::cerr << anycode_to_utf8("错误：") << e.what( ) << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+
+// 测试load_sheet_from_img
+void test_for__load_sheet_from_img( ) {
+    std::cout << std::endl
+              << std::endl;
+    std::vector< std::vector< std::string > > sheet;
+    load_sheet_from_img(sheet, "2.jpg");
+    for (const auto &row : sheet) {
+        for (const auto &cell : row) {
+            std::cout << cell << "    ";
+        }
+        std::cout << std::endl;
+    }
 }
