@@ -2,33 +2,57 @@
 #include <ChineseEncoding.h>
 #include <Files.h>
 #include <filesystem>
+#include <Fuzzy.h>
 #include <helper.h>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <xlnt/xlnt.hpp>
 
+/*
+ * @brief 解析文件名的后缀与文件名字（不含后缀）
+ * @param _input输入的文件名
+ * @return 文件名字（不含后缀）与 后缀 的pair
+ */
+std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input) {
+    // 找到最后一个 '.' 的位置
+    size_t pos = _input.find_last_of('.');
+    // 如果没有找到 '.'，返回原字符和空字符串
+    if (pos == std::string::npos) {
+        return { _input, "" };
+    }
+    // 返回从字符串开始到 '.' 的子字符串（不包括 '.'）
+    std::string part1 = _input.substr(0, pos);
+    // 返回从 '.' 开始到字符串末尾的子字符串（包括 '.'）
+    std::string part2 = _input.substr(pos);
+    return { part1, part2 };
+}
 
 /*
- * @brief 从一个文件下获取所有的文件
- * @param 返回的文件名（无格式后缀）
- * @param 返回的文件路径
- * @param 目标文件夹名称
+ * @brief 从一个文件下获取所有符合后缀条件的文件
+ * @param _name 返回的文件名（无格式后缀）
+ * @param _path 返回的文件路径
+ * @param _foldername 目标文件夹名称
+ * @param _extension 文件的后缀集合
  * @return 错误返回false，读取成功返回true
  */
 bool get_filepath_from_folder(
-    std::vector< std::string > &_name,
-    std::vector< std::string > &_path,
-    std::string                 _foldername) {
+    std::vector< std::string >       &_name,
+    std::vector< std::string >       &_path,
+    std::string                       _foldername,
+    const std::vector< std::string > &_extension) {
+
     namespace fs = std::filesystem;
 
-    fs::path folder = _foldername;    // 目标目录
+    fs::path                   folder = _foldername;    // 目标目录
+    std::vector< std::string > fileName;                // 文件名(包含后缀)
 
     try {
         for (const auto &entry : fs::recursive_directory_iterator(folder)) {
             if (fs::is_regular_file(entry.status( ))) {
-                _name.emplace_back(anycode_to_utf8(entry.path( ).filename( ).string( )));    // 名字
-                _path.emplace_back(anycode_to_utf8(entry.path( ).string( )));                // 路径
+                fileName.emplace_back(anycode_to_utf8(entry.path( ).filename( ).string( )));    // 名字(包含后缀)
+                _path.emplace_back(anycode_to_utf8(entry.path( ).string( )));                   // 路径
             }
         }
     } catch (const fs::filesystem_error &e) {
@@ -36,19 +60,13 @@ bool get_filepath_from_folder(
         return false;
     }
 
-    // 删除后缀
-    auto removeTrailingSubstring = [](const std::string &input) -> std::string {
-        // 找到最后一个 '.' 的位置
-        size_t pos = input.find_last_of('.');
-        // 如果没有找到 '.'，返回原字符
-        if (pos == std::string::npos) {
-            return input;
+    for (auto &aFileName : fileName) {
+        // 文件名/后缀
+        auto [a, b] = split_filename_and_extension(aFileName);
+        if (fuzzy::search(_extension, b, fuzzy::LEVEL::High)) {
+            // 匹配才加入
+            _name.push_back(a);
         }
-        // 返回从字符串开始到 '.' 的子字符串
-        return input.substr(0, pos);
-    };
-    for (auto it = _name.begin( ); it != _name.end( ); it++) {
-        *it = removeTrailingSubstring(*it);
     }
 
     std::cout << anycode_to_utf8("请确认各班（共") << _name.size( ) << anycode_to_utf8("个班）：") << std::endl;
@@ -59,6 +77,7 @@ bool get_filepath_from_folder(
 
     return true;
 }
+
 
 /*
  * @brief 用于读取表格（utf8编码）

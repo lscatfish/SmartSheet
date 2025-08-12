@@ -62,6 +62,19 @@ bool search(
     LEVEL                             _matchLevel);
 
 /*
+ * @brief 模糊搜索函数,没有返回可能匹配的答案
+ * @note 用于支持部分文字编码、数字编码的模糊搜索
+ * @param _searchingLib 索引库
+ * @param _target 搜索目标
+ * @param _matchLevel 匹配度
+ * @return 是否搜索成功
+ */
+bool search(
+    const std::vector< std::string > &_searchingLib,
+    std::string                       _target,
+    LEVEL                             _matchLevel);
+
+/*
 * @brief 模糊搜索人员信息
 * @param 系列可能的人员信息
 * @param 搜索目标
@@ -72,9 +85,6 @@ bool search_for_person(
     std::vector< DefPerson >       &_outList,
     DefPerson                       _target,
     const std::vector< DefPerson > &_searchingLib);
-
-
-
 
 }    // namespace fuzzy
 
