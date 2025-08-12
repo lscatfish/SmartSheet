@@ -35,7 +35,9 @@ DoQingziClass::~DoQingziClass( ) {
  */
 void DoQingziClass::start( ) {
     /* 1.选择要载入的人员名单的类型 ======================================================= */
+
     int a = 0;
+
     /*while (a != 1 && a != 2) {
         system("cls");
         std::cout << anycode_to_utf8("请选择名单类型：") << std::endl
@@ -210,12 +212,16 @@ void DoQingziClass::load_personnel_information_list( ) {
             personStd_.push_back(per);
         }
     };
-
-
     //=======================================================================================/
+
+
     std::cout << std::endl
               << anycode_to_utf8("读取全学院名单...") << std::endl;
-    get_filepath_from_folder(className_, filePathAndName_, anycode_to_utf8("./input/all/"));
+    get_filepath_from_folder(
+        className_,
+        filePathAndName_,
+        anycode_to_utf8("./input/all/"),
+        std::vector< std::string >{ ".xlsx" });
     std::cout << std::endl;
     // 按文件读取每个青字班的信息表
     for (auto it_className = className_.begin( ), it_filePathAndName = filePathAndName_.begin( );
@@ -242,7 +248,7 @@ void DoQingziClass::make_attendanceSheet( ) {
      * @param 表格信息
      * @param 班级名称
      */
-    auto save_application_to_vector =
+    auto extract_application_to_vector =
         [&app_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefLine per;
@@ -258,7 +264,11 @@ void DoQingziClass::make_attendanceSheet( ) {
     //=======================================================================================/
     std::cout << std ::endl
               << anycode_to_utf8("读取各班的报名表...") << std::endl;
-    get_filepath_from_folder(app_classname, app_filePathAndName, anycode_to_utf8("./input/app/"));
+    get_filepath_from_folder(
+        app_classname,
+        app_filePathAndName,
+        anycode_to_utf8("./input/app/"),
+        std::vector< std::string >{ ".xlsx" });
     std::cout << std::endl;
 
     for (auto it_app_filepath = app_filePathAndName.begin( ), it_app_classname = app_classname.begin( );
@@ -267,7 +277,7 @@ void DoQingziClass::make_attendanceSheet( ) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
         load_sheet_from_xlsx(sheet, *it_app_filepath);
-        save_application_to_vector(sheet, *it_app_classname);
+        extract_application_to_vector(sheet, *it_app_classname);
     }
 
     /* 制表 */
@@ -323,7 +333,6 @@ void DoQingziClass::save_attendanceSheet( ) {
                 serialNum++;
             }
         }
-
         save_sheet_to_xlsx(sheet, sheetPath, sheetTitle);
     }
 }
@@ -332,17 +341,29 @@ void DoQingziClass::save_attendanceSheet( ) {
  * @brief 制作考勤统计表
  */
 void DoQingziClass::make_statisticsSheet( ) {
-    std::vector< std::string > att_classname;          // 班级名称
-    std::vector< std::string > att_filePathAndName;    // 签到表的excel文件的路径
+
+    /*  ===================================================================
+     *				================
+     *				||函数工作说明||
+     *				================
+     * @brief 路径"./input/att/"中拉取图片的路径与名称
+     * 图片的命名规则：青x班1   青x班2    (末尾的数字是某班级签到表照片的第i张)
+     *
+     * ----------------------------------------------------------------- */
+
+
+    std::vector< std::string > att_classname;          // 图片中的班级名称
+    std::vector< std::string > att_fileName;           // 图片的文件名
+    std::vector< std::string > att_filePathAndName;    // 图片-签到表文件的路径
     std::vector< DefLine >     att_person;             // 定义从签到表中获得的人员信息
 
     // lambda函数定义========================================================================/
     /*
-     * @brief 保存签到表中的信息
+     * @brief 提取签到表中的信息
      * @param 表格信息
      * @param 班级名称
      */
-    auto save_application =
+    auto extract_attendance_to_vector =
         [&att_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefLine per;
@@ -357,14 +378,22 @@ void DoQingziClass::make_statisticsSheet( ) {
     };
     //=======================================================================================/
 
-    get_filepath_from_folder(att_classname, att_filePathAndName, anycode_to_utf8("./input/att/"));
+    // 1.拉取文件夹中的所有照片
+    get_filepath_from_folder(
+        att_fileName,
+        att_filePathAndName,
+        anycode_to_utf8("./input/att/"),
+        std::vector< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
+                                    ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+
+
     for (auto it_att_filepath = att_filePathAndName.begin( ), it_att_classname = att_classname.begin( );
          it_att_filepath != att_filePathAndName.end( ) && it_att_classname != att_classname.end( );
          it_att_filepath++, it_att_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
         load_sheet_from_xlsx(sheet, *it_att_filepath);
-        save_application(sheet, *it_att_classname);
+        extract_attendance_to_vector(sheet, *it_att_classname);
     }
 
     /* 制表 */
@@ -372,6 +401,16 @@ void DoQingziClass::make_statisticsSheet( ) {
     /* 待制作 */
     /* 待制作 */
     /* 待制作 */
+
+
+
+
+
+
+
+
+
+
     /* 待制作 */
     /* 待制作 */
     /* 待制作 */

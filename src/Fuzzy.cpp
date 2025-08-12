@@ -117,6 +117,49 @@ bool search(
 }
 
 /*
+ * @brief 模糊搜索函数,没有返回可能匹配的答案
+ * @note 用于支持部分文字编码、数字编码的模糊搜索
+ * @param _searchingLib 索引库
+ * @param _target 搜索目标
+ * @param _matchLevel 匹配度
+ * @return 是否搜索成功
+ */
+bool search(
+    const std::vector< std::string > &_searchingLib,
+    std::string                       _target,
+    LEVEL                             _matchLevel) {
+
+    int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
+    if (_matchLevel == LEVEL::High) {
+        // 直接比较
+        for (auto &libstr : _searchingLib) {
+            if (libstr == _target) {
+                s++;
+                return true;
+            }
+        }
+        if (s > 0)
+            return true;
+        else
+            return false;
+    }
+
+    // 目标wstring
+    std::wstring targrt = utf8_to_wstring_win(_target);
+    for (auto &libstr : _searchingLib) {
+        if (ifmatch_levenshtein(levenshtein_distance(targrt, utf8_to_wstring_win(libstr)), _matchLevel)) {
+            s++;
+            return true;
+        }
+    }
+
+    if (s == 0)
+        return false;
+    else
+        return true;
+}
+
+/*
  * @brief 模糊搜索人员信息
  * @param 系列可能的人员信息
  * @param 搜索目标

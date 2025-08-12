@@ -11,19 +11,29 @@
  * 此文件用于操作文件
  */
 #include <string>
+#include <utility>
 #include <vector>
 
 /*
- * @brief 从一个文件下获取所有的文件
- * @param 返回的文件名
- * @param 返回的文件路径
- * @param 目标文件夹名称
+ * @brief 解析文件名字的后缀与文件名字（不含后缀）
+ * @param _input输入的文件名
+ * @return 文件名字（不含后缀）与 后缀 的pair
+ */
+std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input);
+
+/*
+ * @brief 从一个文件下获取所有符合后缀条件的文件
+ * @param _name 返回的文件名（无格式后缀）
+ * @param _path 返回的文件路径
+ * @param _foldername 目标文件夹名称
+ * @param _extension 文件的后缀集合
  * @return 错误返回false，读取成功返回true
  */
 bool get_filepath_from_folder(
-    std::vector< std::string > &_name,
-    std::vector< std::string > &_path,
-    std::string                 _foldername);
+    std::vector< std::string >       &_name,
+    std::vector< std::string >       &_path,
+    std::string                       _foldername,
+    const std::vector< std::string > &_extension);
 
 /*
  * @brief 用于读取表格

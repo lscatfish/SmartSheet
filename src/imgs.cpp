@@ -10,6 +10,7 @@
 #include <map>
 #include <numeric>
 #include <ppocr_API.h>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -208,16 +209,16 @@ std::pair< double, double > auto_calculate_epsilon(
     double ratio,                  // 增大比例系数（原 0.3→0.5）
     double min_epsilon_ratio) {    // 最小阈值为区域的 1%
     if (max_x <= 0 || max_y <= 0) {
-        throw std::invalid_argument("区域大小 max_x 和 y0 必须为正数");
+        throw std::invalid_argument(anycode_to_utf8("区域大小 max_x 和 y0 必须为正数"));
     }
     if (ratio <= 0 || ratio >= 1) {
-        throw std::invalid_argument("比例参数 ratio 必须在 (0,1) 范围内");
+        throw std::invalid_argument(anycode_to_utf8("比例参数 ratio 必须在 (0,1) 范围内"));
     }
 
     std::vector< double > x_vals, y_vals;
     for (const auto &point : points) {
         if (point.first < 0 || point.first > max_x || point.second < 0 || point.second > max_y) {
-            throw std::invalid_argument("点坐标超出指定区域范围或为负数");
+            throw std::invalid_argument(anycode_to_utf8("点坐标超出指定区域范围或为负数"));
         }
         x_vals.push_back(point.first);
         y_vals.push_back(point.second);
@@ -267,6 +268,7 @@ std::pair< double, double > auto_calculate_epsilon(
     return { epsilon_x, epsilon_y };
 }
 
+// 判断a（x,y）是否存在
 static bool exists(const std::vector< std::vector< std::string > > &a, int x, int y) {
     return (x >= 0 && x < a.size( ) && y >= 0 && y < a[x].size( ));
 }
@@ -306,13 +308,6 @@ static std::pair< size_t, size_t > get_closest_grid_point(
     }
     if (row == _gridStd.row_coords.size( )) row--;
     return { row, col };
-
-    // 以前的想法
-    // 求距离
-    /* auto get_distance = [](const GridPoint &p1, const GridPoint &p2) -> double {
-         return std::sqrt(std::pow(p1.first - p2.first, 2) + std::pow(p1.second - p2.second, 2));
-     };*/
-    // 设定最小的距离
 }
 
 
@@ -348,10 +343,6 @@ void load_sheet_from_img(
     for (auto &it_sovocr : sovocr) {
         corePoints.push_back(it_sovocr.corePoint);
     }
-
-    // 设置不同的误差阈值
-    // double epsilon_x = img.row( ) / ;    // x方向误差阈值（精度较高），对应横轴（cols）宽度
-    // double epsilon_y = 0.3;              // y方向误差阈值（精度较低），对应竖轴（rows）高度
 
     try {
         // 自动计算阈值
@@ -400,11 +391,4 @@ void load_sheet_from_img(
         std::cerr << anycode_to_utf8("错误：") << e.what( ) << std::endl;
         return;
     }
-
-
-
-    // ----------------关键算法----------------------------------------------
-    // **********************************************************************
-
-    // ----------------关键算法----------------------------------------------
 }

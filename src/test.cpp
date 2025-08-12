@@ -74,7 +74,7 @@ void test_main( ) {
 
     std::vector< std::string > className_;          // 班级名字
     std::vector< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    get_filepath_from_folder(className_, filePathAndName_, anycode_to_utf8("./input/all/"));
+    get_filepath_from_folder(className_, filePathAndName_, anycode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
 
     std::vector< std::vector< std::string > > test1 = {
         { anycode_to_utf8("序号"), anycode_to_utf8("姓名"), anycode_to_utf8("学号"), anycode_to_utf8("签到") },
