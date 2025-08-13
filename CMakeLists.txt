@@ -37,6 +37,7 @@ set(CMAKE_CXX_STANDARD 17)
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${CMAKE_SOURCE_DIR}/third_party/xlnt/include/")
 include_directories("${CMAKE_SOURCE_DIR}/third_party/opencv/include/")
+include_directories("${CMAKE_SOURCE_DIR}/third_party/uchardet/include/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp")
@@ -71,6 +72,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100.lib>
 )
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.dll>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.dll>
+)
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
@@ -80,10 +85,13 @@ set(XLNT_DLL_PATH
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.dll>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.dll>
 )
-
 set(OPENCV_DLL_PATH
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100d.dll>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100.dll>
+)
+set(UCHARDET_DLL_PATH
+    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.dll>
+    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.dll>
 )
 
 # 把 DLL 拷贝到目标可执行文件目录
@@ -93,10 +101,15 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying xlnt dll to output directory"
 )
-
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${OPENCV_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying opencv dll to output directory"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${UCHARDET_DLL_PATH}
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying opencv dll to output directory"
 )

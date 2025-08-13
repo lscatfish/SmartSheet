@@ -319,16 +319,22 @@ static std::pair< size_t, size_t > get_closest_grid_point(
 void load_sheet_from_img(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName) {
+    std::cout << anycode_to_utf8("加载图片: ") << _pathAndName << anycode_to_utf8(" 中") << std::endl
+              << std::endl;
 
     // 打开图片
     cv::Mat img = cv::imread(_pathAndName);
     if (img.empty( )) {
-        std::cout << anycode_to_utf8("图片 ") << _pathAndName << anycode_to_utf8(" 打开失败") << std::endl;
+        std::cout << u8"图片 " << _pathAndName << anycode_to_utf8(" 打开失败") << std::endl;
         return;
     }
     // ocr操作,读取img
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字line]
     ppocr::ocr(ocrPR, img.clone( ), _ppocrDir_);                    // 这里返回的text为utf8编码
+
+    std::cout << std::endl
+              << anycode_to_utf8("图片: ") << _pathAndName << anycode_to_utf8(" 加载结束...") << std::endl
+              << std::endl;
 
     // 这里只有一页，所以只有文字
     std::vector< DefSolveOCRResult > sovocr;    // solveOCR

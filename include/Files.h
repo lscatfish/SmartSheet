@@ -19,7 +19,7 @@
  * @param _input输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
-std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input);
+std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input);
 
 /*
  * @brief 从一个文件下获取所有符合后缀条件的文件

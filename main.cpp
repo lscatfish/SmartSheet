@@ -11,6 +11,7 @@
 #include <iostream>
 #include <limits>
 #include <minwindef.h>
+#include <opencv2/opencv.hpp>
 #include <PersonnelInformation.h>
 #include <QingziClass.h>
 #include <string>
@@ -21,13 +22,40 @@
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
 
-
 int main( ) {
 
-    SetConsoleOutputCP(65001);    // 输出代码页设为 UTF-8
-    SetConsoleCP(65001);          // 输入代码页也设为 UTF-8
+    SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
+    SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
 
-#if true
+    //// 测试“图片”的编码检测结果
+    //std::string     test_str = "图片";    // 假设源代码以 GBK 保存
+    //ChineseEncoding code     = detect_chinese_encoding(test_str);
+    //std::cout << anycode_to_utf8("编码检测结果：");
+    //switch (code) {
+    //    case ChineseEncoding::UTF8: std::cout << "UTF8\n"; break;
+    //    case ChineseEncoding::GBKorGB2312: std::cout << "GBK/GB2312\n"; break;
+    //    default: std::cout << "UNKNOWN\n";
+    //}
+    //pause( );
+
+    //// 测试“图片”的编码检测结果
+    //test_str =anycode_to_utf8 ("姓名");    // 假设源代码以 GBK 保存
+    //code     = detect_chinese_encoding(test_str);
+    //std::cout << anycode_to_utf8("编码检测结果：");
+    //switch (code) {
+    //    case ChineseEncoding::UTF8: std::cout << "UTF8\n"; break;
+    //    case ChineseEncoding::GBKorGB2312: std::cout << "GBK/GB2312\n"; break;
+    //    default: std::cout << "UNKNOWN\n";
+    //}
+
+    //std::cout << test_str << std::endl;
+    //pause( );
+    //std::cout << anycode_to_utf8("图片") << std::endl;
+    //pause( );
+
+    test_for_uchardet( );
+
+#if false
     DoQingziClass qClass;
     qClass.start( );
 #else
@@ -37,7 +65,7 @@ int main( ) {
 
 
     std::cout << std::endl
-              << anycode_to_utf8("程序结束...");
+              << u8"程序结束...";
     pause( );
     return 0;    // 程序正常结束
 }

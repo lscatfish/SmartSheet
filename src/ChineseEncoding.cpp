@@ -18,24 +18,30 @@
  */
 bool is_valid_utf8(const std::string &str) {
     for (size_t i = 0; i < str.size( );) {
-        unsigned char c   = str[i];
+        unsigned char c   = static_cast< unsigned char >(str[i]);
         int           len = 0;
 
-        if ((c & 0x80) == 0)
-            len = 1;    // ASCII
-        else if ((c & 0xE0) == 0xC0)
-            len = 2;    // 2字节
-        else if ((c & 0xF0) == 0xE0)
-            len = 3;    // 3字节（中文）
-        else if ((c & 0xF8) == 0xF0)
-            len = 4;    // 4字节
-        else
-            return false;    // 非法UTF-8
+        if ((c & 0x80) == 0) {
+            len = 1;    // ASCII (0x00-0x7F)
+        } else if ((c & 0xE0) == 0xC0) {
+            len = 2;    // 双字节 (0xC0-0xDF)
+        } else if ((c & 0xF0) == 0xE0) {
+            len = 3;    // 三字节 (0xE0-0xEF)
+        } else if ((c & 0xF8) == 0xF0) {
+            // 四字节：必须在 0xF0-0xF4 范围内（避免超 Unicode 范围）
+            if (c > 0xF4) return false;
+            len = 4;
+        } else {
+            return false;    // 非法首字节（如 0xF8-0xFF）
+        }
 
+        // 检查后续字节是否越界，且均以 0x80 开头
         for (int j = 1; j < len; ++j) {
             if (i + j >= str.size( )) return false;
-            if ((str[i + j] & 0xC0) != 0x80) return false;
+            unsigned char next_c = static_cast< unsigned char >(str[i + j]);
+            if ((next_c & 0xC0) != 0x80) return false;
         }
+
         i += len;
     }
     return true;
@@ -48,15 +54,17 @@ bool is_valid_utf8(const std::string &str) {
  */
 bool is_likely_gbk(const std::string &str) {
     for (size_t i = 0; i < str.size( );) {
-        unsigned char c1 = str[i];
+        unsigned char c1 = static_cast< unsigned char >(str[i]);
         if (c1 <= 0x7F) {
             i++;
-            continue;
-        }    // ASCII
-        if (i + 1 >= str.size( )) return false;    // 不完整
-
-        unsigned char c2 = str[i + 1];
-        if (c1 >= 0x81 && c1 <= 0xFE && ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0x80 && c2 <= 0xFE))) {
+            continue;    // ASCII 字符
+        }
+        // GBK 双字节规则：
+        // 第一个字节：0x81-0xFE（除 0xA1-0xA9 是符号区，但仍属合法）
+        // 第二个字节：0x40-0x7E 或 0x80-0xFE
+        if (i + 1 >= str.size( )) return false;    // 不完整的双字节
+        unsigned char c2 = static_cast< unsigned char >(str[i + 1]);
+        if ((c1 >= 0x81 && c1 <= 0xFE) && ((c2 >= 0x40 && c2 <= 0x7E) || (c2 >= 0x80 && c2 <= 0xFE))) {
             i += 2;
         } else {
             return false;
