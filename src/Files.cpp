@@ -15,7 +15,7 @@
  * @param _input输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
-std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input) {
+std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input) {
     // 找到最后一个 '.' 的位置
     size_t pos = _input.find_last_of('.');
     // 如果没有找到 '.'，返回原字符和空字符串
@@ -62,7 +62,7 @@ bool get_filepath_from_folder(
 
     for (auto &aFileName : fileName) {
         // 文件名/后缀
-        auto [a, b] = split_filename_and_extension(aFileName);
+        auto [a, b] = separate_filename_and_extension(aFileName);
         if (fuzzy::search(_extension, b, fuzzy::LEVEL::High)) {
             // 匹配才加入
             _name.push_back(a);

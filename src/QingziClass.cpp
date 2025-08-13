@@ -1,4 +1,5 @@
 ﻿
+#include <algorithm>
 #include <ChineseEncoding.h>
 #include <chrono>
 #include <cstdlib>
@@ -6,6 +7,7 @@
 #include <Fuzzy.h>
 #include <helper.h>
 #include <iostream>
+#include <map>
 #include <PersonnelInformation.h>
 #include <ppocr_API.h>
 #include <QingziClass.h>
@@ -352,10 +354,10 @@ void DoQingziClass::make_statisticsSheet( ) {
      * ----------------------------------------------------------------- */
 
 
-    std::vector< std::string > att_classname;          // 图片中的班级名称
-    std::vector< std::string > att_fileName;           // 图片的文件名
-    std::vector< std::string > att_filePathAndName;    // 图片-签到表文件的路径
-    std::vector< DefLine >     att_person;             // 定义从签到表中获得的人员信息
+    std::map< std::string, std::vector< std::string > > classname__filePathAndName;    // 班级名称与各班的签到表的匹配
+    std::vector< std::string >                          att_fileName;                  // 图片的文件名(无后缀)
+    std::vector< std::string >                          att_filePathAndName;           // 图片-签到表文件的路径
+    std::vector< DefLine >                              att_person;                    // 定义从签到表中获得的人员信息
 
     // lambda函数定义========================================================================/
     /*
@@ -378,23 +380,38 @@ void DoQingziClass::make_statisticsSheet( ) {
     };
     //=======================================================================================/
 
-    // 1.拉取文件夹中的所有照片
+    // 1.拉取文件夹中的所有照片的地址
     get_filepath_from_folder(
         att_fileName,
         att_filePathAndName,
         anycode_to_utf8("./input/att/"),
         std::vector< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
                                     ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+    // 排序，这样就可以按照班级来
+    std::sort(att_fileName.begin( ), att_fileName.end( ));
+    std::sort(att_filePathAndName.begin( ), att_filePathAndName.end( ));
 
-
-    for (auto it_att_filepath = att_filePathAndName.begin( ), it_att_classname = att_classname.begin( );
-         it_att_filepath != att_filePathAndName.end( ) && it_att_classname != att_classname.end( );
-         it_att_filepath++, it_att_classname++) {
-        // 保存读取到的表格
-        std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_xlsx(sheet, *it_att_filepath);
-        extract_attendance_to_vector(sheet, *it_att_classname);
+    // 2.解析班级的名字与名单的数量，储存到classname__filePathAndName中
+    for (auto it_att_fileName = att_fileName.begin( ), it_att_filePathAndName = att_filePathAndName.begin( );
+         it_att_fileName != att_fileName.end( ) && it_att_filePathAndName != att_filePathAndName.end( );
+         it_att_fileName++, it_att_filePathAndName++) {
+        auto [chinese, number] = split_chinese_and_number(*it_att_fileName);
+        classname__filePathAndName[chinese].push_back(*it_att_filePathAndName);
     }
+
+    //3.
+
+    // for (auto it_att_filepath = att_filePathAndName.begin( ), it_att_classname = att_classname.begin( );
+    //      it_att_filepath != att_filePathAndName.end( ) && it_att_classname != att_classname.end( );
+    //      it_att_filepath++, it_att_classname++) {
+    //     // 保存读取到的表格
+    //     std::vector< std::vector< std::string > > sheet;
+    //     load_sheet_from_xlsx(sheet, *it_att_filepath);
+    //     extract_attendance_to_vector(sheet, *it_att_classname);
+    // }
+
+
+
 
     /* 制表 */
     /* 待制作 */
