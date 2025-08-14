@@ -1,6 +1,6 @@
 ﻿
 #include <algorithm>
-#include <ChineseEncoding.h>
+#include <Encoding.h>
 #include <cmath>
 #include <cstdlib>
 #include <exception>
@@ -209,16 +209,16 @@ std::pair< double, double > auto_calculate_epsilon(
     double ratio,                  // 增大比例系数（原 0.3→0.5）
     double min_epsilon_ratio) {    // 最小阈值为区域的 1%
     if (max_x <= 0 || max_y <= 0) {
-        throw std::invalid_argument(anycode_to_utf8("区域大小 max_x 和 y0 必须为正数"));
+        throw std::invalid_argument(encoding::anycode_to_utf8("区域大小 max_x 和 y0 必须为正数"));
     }
     if (ratio <= 0 || ratio >= 1) {
-        throw std::invalid_argument(anycode_to_utf8("比例参数 ratio 必须在 (0,1) 范围内"));
+        throw std::invalid_argument(encoding::anycode_to_utf8("比例参数 ratio 必须在 (0,1) 范围内"));
     }
 
     std::vector< double > x_vals, y_vals;
     for (const auto &point : points) {
         if (point.first < 0 || point.first > max_x || point.second < 0 || point.second > max_y) {
-            throw std::invalid_argument(anycode_to_utf8("点坐标超出指定区域范围或为负数"));
+            throw std::invalid_argument(encoding::anycode_to_utf8("点坐标超出指定区域范围或为负数"));
         }
         x_vals.push_back(point.first);
         y_vals.push_back(point.second);
@@ -319,13 +319,13 @@ static std::pair< size_t, size_t > get_closest_grid_point(
 void load_sheet_from_img(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName) {
-    std::cout << anycode_to_utf8("加载图片: ") << _pathAndName << anycode_to_utf8(" 中") << std::endl
+    std::cout << u8"加载图片: " << _pathAndName << u8" 中" << std::endl
               << std::endl;
 
     // 打开图片
     cv::Mat img = cv::imread(_pathAndName);
     if (img.empty( )) {
-        std::cout << u8"图片 " << _pathAndName << anycode_to_utf8(" 打开失败") << std::endl;
+        std::cout << u8"图片 " << _pathAndName << u8" 打开失败" << std::endl;
         return;
     }
     // ocr操作,读取img
@@ -333,7 +333,7 @@ void load_sheet_from_img(
     ppocr::ocr(ocrPR, img.clone( ), _ppocrDir_);                    // 这里返回的text为utf8编码
 
     std::cout << std::endl
-              << anycode_to_utf8("图片: ") << _pathAndName << anycode_to_utf8(" 加载结束...") << std::endl
+              << u8"图片: " << _pathAndName << u8" 加载结束..." << std::endl
               << std::endl;
 
     // 这里只有一页，所以只有文字
@@ -374,13 +374,13 @@ void load_sheet_from_img(
             sh.push_back(line);
         }
 
-        std::cout << anycode_to_utf8("总行数：") << sh.size( ) << anycode_to_utf8("   总列数：") << gridResult.col_coords.size( ) << std::endl;
+        std::cout << u8"总行数：" << sh.size( ) << u8"   总列数：" << gridResult.col_coords.size( ) << std::endl;
 
         // 给表格加入值
         for (const auto &cellOCR : sovocr) {
             auto [x, y] = get_closest_grid_point(cellOCR.corePoint, gridResult);
             if (!exists(sh, x, y)) {
-                std::cout << anycode_to_utf8("错误(") << x << "," << y << "):" << "unExist" << std::endl;
+                std::cout << u8"错误(" << x << "," << y << "):" << "unExist" << std::endl;
                 pause( );
                 continue;
             }
@@ -388,13 +388,13 @@ void load_sheet_from_img(
                 // std::cout << "in(" << x << "," << y << ")" << std::endl;
                 sh[x][y] = cellOCR.text;
             } else {
-                std::cout << anycode_to_utf8("错误(") << x << "," << y << "):" << sh[x][y] << std::endl;
+                std::cout << u8"错误(" << x << "," << y << "):" << sh[x][y] << std::endl;
                 pause( );
             }
         }
         _aSheet = sh;
     } catch (const std::exception &e) {
-        std::cerr << anycode_to_utf8("错误：") << e.what( ) << std::endl;
+        std::cerr << u8"错误：" << e.what( ) << std::endl;
         return;
     }
 }

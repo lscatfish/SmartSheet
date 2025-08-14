@@ -1,5 +1,5 @@
 ﻿
-#include "ChineseEncoding.h"
+#include "Encoding.h"
 #include "PersonnelInformation.h"
 
 

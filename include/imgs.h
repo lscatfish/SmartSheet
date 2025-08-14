@@ -69,7 +69,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "ChineseEncoding.h"
 
 extern ppocr::DefDirs _ppocrDir_;
 
@@ -88,7 +87,7 @@ public:
         this->cls_label        = _ocrPR.cls_label;
         this->cls_score        = _ocrPR.cls_score;
         this->score            = _ocrPR.score;
-        this->text             = anycode_to_utf8(_ocrPR.text);
+        this->text             = _ocrPR.text;
         this->corePoint.first  = (_ocrPR.box[0][0] + _ocrPR.box[1][0] + _ocrPR.box[2][0] + _ocrPR.box[3][0]) / 4.0;
         this->corePoint.second = (_ocrPR.box[0][1] + _ocrPR.box[1][1] + _ocrPR.box[2][1] + _ocrPR.box[3][1]) / 4.0;
         // row                    = 0;    // 默认为第0行
