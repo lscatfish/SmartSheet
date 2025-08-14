@@ -5,7 +5,6 @@
 
 #include <string>
 
-
 namespace encoding    // 使用时请用namespace encoding=ec;
 {
 
@@ -76,7 +75,8 @@ std::wstring utf8_to_wstring_win(const std::string u8);
  * @return 转化为utf8格式的string
  */
 std::string chcode_to_utf8(const std::string &_anycode);
-}    // namespace encoding
 
+
+}    // namespace encoding
 
 #endif    // !CHINESEENCODING_H
