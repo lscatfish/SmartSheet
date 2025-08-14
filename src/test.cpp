@@ -1,5 +1,5 @@
 ﻿
-#include "ChineseEncoding.h"
+#include "Encoding.h"
 #include "Files.h"
 #include "PersonnelInformation.h"
 #include "test.h"
@@ -11,10 +11,13 @@
 #include <iostream>
 #include <string>
 #include <stringapiset.h>
+#include <uchardet.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
+
+using namespace encoding;
 
 void test_main( ) {
 
@@ -183,4 +186,30 @@ void test_for__load_sheet_from_img( ) {
         }
         std::cout << std::endl;
     }
+}
+
+
+
+// 使用uchardet检测编码
+//std::string detect_encoding(const std::string &data) {
+//    uchardet_t detector = uchardet_new( );
+//    if (!detector) {
+//        return "unknown";
+//    }
+//
+//    // 处理数据
+//    uchardet_handle_data(detector, data.data( ), data.size( ));
+//    uchardet_data_end(detector);
+//
+//    // 获取检测结果
+//    const char *encoding = uchardet_get_charset(detector);
+//    std::string result(encoding ? encoding : "unknown");
+//
+//    uchardet_delete(detector);
+//    return result;
+//}
+
+// 测试uchardet
+void test_for_uchardet( ) {
+
 }

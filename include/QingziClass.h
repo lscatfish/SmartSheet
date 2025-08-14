@@ -3,8 +3,6 @@
 #ifndef QINGZICLASS_H
 #define QINGZICLASS_H
 
-#include <ChineseEncoding.h>
-#include <Files.h>
 #include <map>
 #include <PersonnelInformation.h>
 #include <string>

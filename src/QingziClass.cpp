@@ -1,6 +1,6 @@
 ﻿
 #include <algorithm>
-#include <ChineseEncoding.h>
+#include <Encoding.h>
 #include <chrono>
 #include <cstdlib>
 #include <Files.h>
@@ -16,6 +16,8 @@
 #include <thread>
 #include <vector>
 #include <Windows.h>
+
+using namespace encoding;
 
 /*
  * @brief 将整数类型转化为string类型

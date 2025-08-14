@@ -1,5 +1,5 @@
 ﻿#include <cctype>    // 用于 std::isdigit
-#include <ChineseEncoding.h>
+#include <Encoding.h>
 #include <helper.h>
 #include <ios>
 #include <iostream>
@@ -19,7 +19,7 @@ void pause( ) {
     }
 
     std::cout << std::endl;
-    std::cout << anycode_to_utf8("请按 Enter 键继续...") << std::endl;
+    std::cout << u8"请按 Enter 键继续..." << std::endl;
     std::cin.ignore((std::numeric_limits< std::streamsize >::max)( ), '\n');
     // 这里实际上是std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
     // 加一个括号防止windows.h的宏污染

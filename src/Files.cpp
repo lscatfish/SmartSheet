@@ -1,5 +1,5 @@
 ﻿
-#include <ChineseEncoding.h>
+#include <Encoding.h>
 #include <Files.h>
 #include <filesystem>
 #include <Fuzzy.h>
@@ -51,8 +51,8 @@ bool get_filepath_from_folder(
     try {
         for (const auto &entry : fs::recursive_directory_iterator(folder)) {
             if (fs::is_regular_file(entry.status( ))) {
-                fileName.emplace_back(anycode_to_utf8(entry.path( ).filename( ).string( )));    // 名字(包含后缀)
-                _path.emplace_back(anycode_to_utf8(entry.path( ).string( )));                   // 路径
+                fileName.emplace_back(encoding::anycode_to_utf8(entry.path( ).filename( ).string( )));    // 名字(包含后缀)
+                _path.emplace_back(encoding::anycode_to_utf8(entry.path( ).string( )));                   // 路径
             }
         }
     } catch (const fs::filesystem_error &e) {
@@ -69,7 +69,7 @@ bool get_filepath_from_folder(
         }
     }
 
-    std::cout << anycode_to_utf8("请确认各班（共") << _name.size( ) << anycode_to_utf8("个班）：") << std::endl;
+    std::cout << u8"请确认各班（共" << _name.size( ) << u8"个班）：" << std::endl;
     for (auto &s : _name) {
         std::cout << s << std::endl;
     }
@@ -99,7 +99,7 @@ void load_sheet_from_xlsx(
         // 遍历当前行的每个单元格
         for (auto cell : row) {
             // cell.to_string() 把数字、日期、公式等统一转为字符串
-            aSingleRow.push_back(anycode_to_utf8(cell.to_string( )));
+            aSingleRow.push_back(cell.to_string( ));
         }
         _aSheet.push_back(aSingleRow);
     }
@@ -118,7 +118,7 @@ void save_sheet_to_xlsx(
 
     // 定义字体
     xlnt::font f;
-    f.name(anycode_to_utf8("仿宋_GB2312"));
+    f.name(u8"仿宋_GB2312");
     f.size(14);
 
     // 创建边框样式
@@ -172,7 +172,7 @@ void save_sheet_to_xlsx(
 
     // 插入表的标题
     xlnt::font f_title;
-    f_title.name(anycode_to_utf8("宋体"));
+    f_title.name(u8"宋体");
     f_title.size(24);
     ws.insert_rows(1, 1);    // 插入行
 
