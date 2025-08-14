@@ -17,8 +17,11 @@ bool test_for_grid( );
 // 测试load_sheet_from_img
 void test_for__load_sheet_from_img( );
 
-//测试uchardet
-void test_for_uchardet( );
+//测试ENCODING
+void test_for_ENCODING( );
+
+// 测试chstring
+void test_for_chstring( );
 
 
 #endif    // !TEST_H
