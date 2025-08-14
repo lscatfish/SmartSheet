@@ -51,8 +51,8 @@ bool get_filepath_from_folder(
     try {
         for (const auto &entry : fs::recursive_directory_iterator(folder)) {
             if (fs::is_regular_file(entry.status( ))) {
-                fileName.emplace_back(encoding::anycode_to_utf8(entry.path( ).filename( ).string( )));    // 名字(包含后缀)
-                _path.emplace_back(encoding::anycode_to_utf8(entry.path( ).string( )));                   // 路径
+                fileName.emplace_back(encoding::chcode_to_utf8(entry.path( ).filename( ).string( )));    // 名字(包含后缀)
+                _path.emplace_back(encoding::chcode_to_utf8(entry.path( ).string( )));                   // 路径
             }
         }
     } catch (const fs::filesystem_error &e) {

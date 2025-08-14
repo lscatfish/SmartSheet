@@ -121,10 +121,10 @@ public:
         ifcheck                                  = false;
         ifsign                                   = false;
         classname                                = _classname;
-        information[u8"姓名"]     =encoding:: anycode_to_utf8(_name);
-        information[u8"学号"]     = encoding::anycode_to_utf8(_studentID);
-        information[u8"学院"]     = encoding::anycode_to_utf8(_academy);
-        information[u8"联系电话"] = encoding::anycode_to_utf8(_phonenumber);
+        information[u8"姓名"]     =encoding:: chcode_to_utf8(_name);
+        information[u8"学号"]     = encoding::chcode_to_utf8(_studentID);
+        information[u8"学院"]     = encoding::chcode_to_utf8(_academy);
+        information[u8"联系电话"] = encoding::chcode_to_utf8(_phonenumber);
     };
 
     /*
