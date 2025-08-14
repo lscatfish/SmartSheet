@@ -210,16 +210,16 @@ std::pair< double, double > auto_calculate_epsilon(
     double ratio,                  // 增大比例系数（原 0.3→0.5）
     double min_epsilon_ratio) {    // 最小阈值为区域的 1%
     if (max_x <= 0 || max_y <= 0) {
-        throw std::invalid_argument(encoding::anycode_to_utf8("区域大小 max_x 和 y0 必须为正数"));
+        throw std::invalid_argument(encoding::chcode_to_utf8("区域大小 max_x 和 y0 必须为正数"));
     }
     if (ratio <= 0 || ratio >= 1) {
-        throw std::invalid_argument(encoding::anycode_to_utf8("比例参数 ratio 必须在 (0,1) 范围内"));
+        throw std::invalid_argument(encoding::chcode_to_utf8("比例参数 ratio 必须在 (0,1) 范围内"));
     }
 
     std::vector< double > x_vals, y_vals;
     for (const auto &point : points) {
         if (point.first < 0 || point.first > max_x || point.second < 0 || point.second > max_y) {
-            throw std::invalid_argument(encoding::anycode_to_utf8("点坐标超出指定区域范围或为负数"));
+            throw std::invalid_argument(encoding::chcode_to_utf8("点坐标超出指定区域范围或为负数"));
         }
         x_vals.push_back(point.first);
         y_vals.push_back(point.second);

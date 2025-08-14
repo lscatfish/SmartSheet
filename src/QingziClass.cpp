@@ -44,30 +44,30 @@ void DoQingziClass::start( ) {
 
     /*while (a != 1 && a != 2) {
         system("cls");
-        std::cout << anycode_to_utf8("请选择名单类型：") << std::endl
-                  << anycode_to_utf8("1. 标准名单") << std::endl
-                  << anycode_to_utf8(" @标准名单按照以下格式排列：") << std::endl
-                  << anycode_to_utf8("  *第一行为  |序号|姓名|性别|年级|学号|政治面貌|学院|专业|联系电话|QQ号|") << std::endl
-                  << anycode_to_utf8("  *有效区域应当全部全部填充，若在有效区域内有未填充的单元格，应当全部用符号“-”填充") << std::endl;
-        std::cout << anycode_to_utf8("2. 非标准名单") << std::endl
-                  << anycode_to_utf8(" @非标准名单按照以下格式排列：") << std::endl
-                  << anycode_to_utf8("  *第一行应当为表头") << std::endl
-                  << anycode_to_utf8("  *有效区域应当全部全部填充，若在有效区域内有未填充的单元格，应当全部用符号“-”填充") << std::endl;
-        std::cout << anycode_to_utf8("请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
+        std::cout << chcode_to_utf8("请选择名单类型：") << std::endl
+                  << chcode_to_utf8("1. 标准名单") << std::endl
+                  << chcode_to_utf8(" @标准名单按照以下格式排列：") << std::endl
+                  << chcode_to_utf8("  *第一行为  |序号|姓名|性别|年级|学号|政治面貌|学院|专业|联系电话|QQ号|") << std::endl
+                  << chcode_to_utf8("  *有效区域应当全部全部填充，若在有效区域内有未填充的单元格，应当全部用符号“-”填充") << std::endl;
+        std::cout << chcode_to_utf8("2. 非标准名单") << std::endl
+                  << chcode_to_utf8(" @非标准名单按照以下格式排列：") << std::endl
+                  << chcode_to_utf8("  *第一行应当为表头") << std::endl
+                  << chcode_to_utf8("  *有效区域应当全部全部填充，若在有效区域内有未填充的单元格，应当全部用符号“-”填充") << std::endl;
+        std::cout << chcode_to_utf8("请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
         std::cin >> a;
         if (a == 1) {
             perInFormat_ = PersonFormat::STD;
         } else if (a == 2) {
             perInFormat_ = PersonFormat::UNSTD;
         } else {
-            std::cout << anycode_to_utf8("你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
+            std::cout << chcode_to_utf8("你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }*/
 
     /* 2.加载全学员表 ===================================================================== */
     system("cls");
-    std::cout << anycode_to_utf8("加载全学员信息表...") << std::endl;
+    std::cout << chcode_to_utf8("加载全学员信息表...") << std::endl;
     load_personnel_information_list( );
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
@@ -75,17 +75,17 @@ void DoQingziClass::start( ) {
     int outWhichSheet = 1;    // 生成那一张表：1签到表  2出勤记录表
     while (a != 1 && a != 2) {
         system("cls");
-        std::cout << anycode_to_utf8("请选择要生成excel表的类型：") << std::endl
-                  << anycode_to_utf8("1. 活动签到表") << std::endl;
-        std::cout << anycode_to_utf8("2. 出勤记录表") << std::endl;
-        std::cout << anycode_to_utf8("请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
+        std::cout << chcode_to_utf8("请选择要生成excel表的类型：") << std::endl
+                  << chcode_to_utf8("1. 活动签到表") << std::endl;
+        std::cout << chcode_to_utf8("2. 出勤记录表") << std::endl;
+        std::cout << chcode_to_utf8("请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
         std::cin >> a;
         if (a == 1) {
             outWhichSheet = 1;
         } else if (a == 2) {
             outWhichSheet = 2;
         } else {
-            std::cout << anycode_to_utf8("你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
+            std::cout << chcode_to_utf8("你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
@@ -101,25 +101,25 @@ void DoQingziClass::start( ) {
                       << "\033[43;30mWARNING!!!\033[0m" << std::endl;
             std::cout << "\033[43;30m";
             std::cout << "###ATTENTION### ";
-            std::cout << anycode_to_utf8("以下的人员不在全学员名单中");
+            std::cout << chcode_to_utf8("以下的人员不在全学员名单中");
             std::cout << " ###ATTENTION###";
             std::cout << std::endl;
             for (auto it_unknownPerson = unknownPerson_.begin( );
                  it_unknownPerson != unknownPerson_.end( );
                  it_unknownPerson++) {
                 if (it_unknownPerson->personStd.ifcheck == false) {
-                    std::cout << anycode_to_utf8("Unknown:  ");
+                    std::cout << chcode_to_utf8("Unknown:  ");
                     std::cout << it_unknownPerson->personStd.classname << "    ";
                     std::cout << it_unknownPerson->personStd.name << "    ";
                     if (it_unknownPerson->personStd.studentID.size( ) != 0) {
                         std::cout << it_unknownPerson->personStd.studentID << "    ";
                     } else {
-                        std::cout << anycode_to_utf8("？学号不存在？") << " ";
+                        std::cout << chcode_to_utf8("？学号不存在？") << " ";
                     }
                     std::cout << std::endl;
                     if (it_unknownPerson->likelyPerson.size( ) != 0) {
                         for (const auto &likelyPer : it_unknownPerson->likelyPerson) {
-                            std::cout << anycode_to_utf8("-likely:  ");
+                            std::cout << chcode_to_utf8("-likely:  ");
                             std::cout << likelyPer.classname << "    ";
                             std::cout << likelyPer.name << "    ";
                             std::cout << likelyPer.studentID << "    ";
@@ -130,21 +130,21 @@ void DoQingziClass::start( ) {
                 }
             }
             std::cout << "###ATTENTION### ";
-            std::cout << anycode_to_utf8("以上的人员不在全学员名单中");
+            std::cout << chcode_to_utf8("以上的人员不在全学员名单中");
             std::cout << " ###ATTENTION###";
             std::cout << "\033[0m";
             std::cout << std::endl
                       << std::endl
                       << std::endl;
         }
-        std::cout << anycode_to_utf8("已完成签到表输出，请在 output/app_out 中查看！") << std::endl
+        std::cout << chcode_to_utf8("已完成签到表输出，请在 output/app_out 中查看！") << std::endl
                   << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
         return;
     } else if (outWhichSheet == 2) {
         // 制作考勤统计表
         std::cout << std::endl
-                  << anycode_to_utf8("此功能还在开发中...") << std::endl;
+                  << chcode_to_utf8("此功能还在开发中...") << std::endl;
         return;
         make_attendanceSheet( );
         make_statisticsSheet( );
@@ -178,33 +178,33 @@ void DoQingziClass::load_personnel_information_list( ) {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefPerson per;
             per.classname = cn;
-            //  std::cout << anycode_to_utf8("加载std") << std::endl;
+            //  std::cout << chcode_to_utf8("加载std") << std::endl;
             for (size_t colIndex = 0;
                  colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
                  colIndex++) {
-                if (sh[0][colIndex] == anycode_to_utf8("姓名")) {
+                if (sh[0][colIndex] == chcode_to_utf8("姓名")) {
                     per.name = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("性别")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("性别")) {
                     per.gender = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("年级")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("年级")) {
                     per.grade = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("学号")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("学号")) {
                     per.studentID = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("政治面貌")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("政治面貌")) {
                     per.politicaloutlook = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("学院")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("学院")) {
                     per.academy = sh[rowIndex][colIndex];
-                } else if (sh[0][colIndex] == anycode_to_utf8("专业")) {
+                } else if (sh[0][colIndex] == chcode_to_utf8("专业")) {
                     per.majors = sh[rowIndex][colIndex];
-                } else if ((sh[0][colIndex] == anycode_to_utf8("电话"))
-                           || (sh[0][colIndex] == anycode_to_utf8("联系方式"))
-                           || (sh[0][colIndex] == anycode_to_utf8("联系电话"))
-                           || (sh[0][colIndex] == anycode_to_utf8("电话号码"))) {
+                } else if ((sh[0][colIndex] == chcode_to_utf8("电话"))
+                           || (sh[0][colIndex] == chcode_to_utf8("联系方式"))
+                           || (sh[0][colIndex] == chcode_to_utf8("联系电话"))
+                           || (sh[0][colIndex] == chcode_to_utf8("电话号码"))) {
                     per.phonenumber = sh[rowIndex][colIndex];
-                } else if ((sh[0][colIndex] == anycode_to_utf8("QQ号"))
-                           || (sh[0][colIndex] == anycode_to_utf8("qq号"))
-                           || (sh[0][colIndex] == anycode_to_utf8("qq"))
-                           || (sh[0][colIndex] == anycode_to_utf8("QQ"))) {
+                } else if ((sh[0][colIndex] == chcode_to_utf8("QQ号"))
+                           || (sh[0][colIndex] == chcode_to_utf8("qq号"))
+                           || (sh[0][colIndex] == chcode_to_utf8("qq"))
+                           || (sh[0][colIndex] == chcode_to_utf8("QQ"))) {
                     per.qqnumber = sh[rowIndex][colIndex];
                 } else {
                     per.otherInformation[sh[0][colIndex]] = sh[rowIndex][colIndex];
@@ -220,11 +220,11 @@ void DoQingziClass::load_personnel_information_list( ) {
 
 
     std::cout << std::endl
-              << anycode_to_utf8("读取全学院名单...") << std::endl;
+              << chcode_to_utf8("读取全学院名单...") << std::endl;
     get_filepath_from_folder(
         className_,
         filePathAndName_,
-        anycode_to_utf8("./input/all/"),
+        chcode_to_utf8("./input/all/"),
         std::vector< std::string >{ ".xlsx" });
     std::cout << std::endl;
     // 按文件读取每个青字班的信息表
@@ -267,11 +267,11 @@ void DoQingziClass::make_attendanceSheet( ) {
     };
     //=======================================================================================/
     std::cout << std ::endl
-              << anycode_to_utf8("读取各班的报名表...") << std::endl;
+              << chcode_to_utf8("读取各班的报名表...") << std::endl;
     get_filepath_from_folder(
         app_classname,
         app_filePathAndName,
-        anycode_to_utf8("./input/app/"),
+        chcode_to_utf8("./input/app/"),
         std::vector< std::string >{ ".xlsx" });
     std::cout << std::endl;
 
@@ -301,7 +301,7 @@ void DoQingziClass::make_attendanceSheet( ) {
          it_app_person != app_person.end( );
          it_app_person++) {
         if (it_app_person->ifcheck == false) {
-            if (it_app_person->information[anycode_to_utf8("姓名")].size( ) != 0) {
+            if (it_app_person->information[chcode_to_utf8("姓名")].size( ) != 0) {
                 DefUnknownPerson un1;
                 un1.personLine = *it_app_person;
                 trans_line_to_person(un1.personLine, un1.personStd);
@@ -320,10 +320,10 @@ void DoQingziClass::make_attendanceSheet( ) {
  */
 void DoQingziClass::save_attendanceSheet( ) {
     for (auto it_classname = className_.begin( ); it_classname != className_.end( ); it_classname++) {
-        std::string                               sheetTitle = *it_classname + anycode_to_utf8("签到表");
+        std::string                               sheetTitle = *it_classname + chcode_to_utf8("签到表");
         std::string                               sheetPath  = "./output/app_out/" + (*it_classname) + ".xlsx";
         std::vector< std::vector< std::string > > sheet      = {
-            { anycode_to_utf8("序号"), anycode_to_utf8("姓名"), anycode_to_utf8("学号"), anycode_to_utf8("签到") }
+            { chcode_to_utf8("序号"), chcode_to_utf8("姓名"), chcode_to_utf8("学号"), chcode_to_utf8("签到") }
         };
         int serialNum = 1;
         for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
@@ -386,7 +386,7 @@ void DoQingziClass::make_statisticsSheet( ) {
     get_filepath_from_folder(
         att_fileName,
         att_filePathAndName,
-        anycode_to_utf8("./input/att/"),
+        chcode_to_utf8("./input/att/"),
         std::vector< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
                                     ".jpe", ".bmp", ".dib", ".webp", ".raw" });
     // 排序，这样就可以按照班级来
@@ -504,9 +504,9 @@ void DoQingziClass::search_person(
         /* 1.优先匹配班级（如果有） */
         if (_targetPerson.classname.size( ) != 0) {
             if (_targetPerson.classname == it_all->classname
-                && _targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
-                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->studentID)) {
+                && _targetPerson.information[chcode_to_utf8("姓名")] == it_all->name) {
+                if (_targetPerson.information.find(chcode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (compare_studentID(_targetPerson.information[chcode_to_utf8("学号")], it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -522,9 +522,9 @@ void DoQingziClass::search_person(
                 continue;
             }
         } else {
-            if (_targetPerson.information[anycode_to_utf8("姓名")] == it_all->name) {
-                if (_targetPerson.information.find(anycode_to_utf8("学号")) != _targetPerson.information.end( )) {
-                    if (compare_studentID(_targetPerson.information[anycode_to_utf8("学号")], it_all->studentID)) {
+            if (_targetPerson.information[chcode_to_utf8("姓名")] == it_all->name) {
+                if (_targetPerson.information.find(chcode_to_utf8("学号")) != _targetPerson.information.end( )) {
+                    if (compare_studentID(_targetPerson.information[chcode_to_utf8("学号")], it_all->studentID)) {
                         _it_output = it_all;
                         return;
                     } else {
@@ -582,29 +582,29 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
     for (auto it_inperLine = _inperLine.information.begin( );
          it_inperLine != _inperLine.information.end( );
          it_inperLine++) {
-        if (it_inperLine->first == anycode_to_utf8("姓名")) {
+        if (it_inperLine->first == chcode_to_utf8("姓名")) {
             per.name = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("性别")) {
+        } else if (it_inperLine->first == chcode_to_utf8("性别")) {
             per.gender = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("年级")) {
+        } else if (it_inperLine->first == chcode_to_utf8("年级")) {
             per.grade = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("学号")) {
+        } else if (it_inperLine->first == chcode_to_utf8("学号")) {
             per.studentID = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("政治面貌")) {
+        } else if (it_inperLine->first == chcode_to_utf8("政治面貌")) {
             per.politicaloutlook = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("学院")) {
+        } else if (it_inperLine->first == chcode_to_utf8("学院")) {
             per.academy = it_inperLine->second;
-        } else if (it_inperLine->first == anycode_to_utf8("专业")) {
+        } else if (it_inperLine->first == chcode_to_utf8("专业")) {
             per.majors = it_inperLine->second;
-        } else if ((it_inperLine->first == anycode_to_utf8("电话"))
-                   || (it_inperLine->first == anycode_to_utf8("联系方式"))
-                   || (it_inperLine->first == anycode_to_utf8("联系电话"))
-                   || (it_inperLine->first == anycode_to_utf8("电话号码"))) {
+        } else if ((it_inperLine->first == chcode_to_utf8("电话"))
+                   || (it_inperLine->first == chcode_to_utf8("联系方式"))
+                   || (it_inperLine->first == chcode_to_utf8("联系电话"))
+                   || (it_inperLine->first == chcode_to_utf8("电话号码"))) {
             per.phonenumber = it_inperLine->second;
-        } else if ((it_inperLine->first == anycode_to_utf8("QQ号"))
-                   || (it_inperLine->first == anycode_to_utf8("qq号"))
-                   || (it_inperLine->first == anycode_to_utf8("qq"))
-                   || (it_inperLine->first == anycode_to_utf8("QQ"))) {
+        } else if ((it_inperLine->first == chcode_to_utf8("QQ号"))
+                   || (it_inperLine->first == chcode_to_utf8("qq号"))
+                   || (it_inperLine->first == chcode_to_utf8("qq"))
+                   || (it_inperLine->first == chcode_to_utf8("QQ"))) {
             per.qqnumber = it_inperLine->second;
         } else {
             per.otherInformation[it_inperLine->first] = it_inperLine->second;
@@ -621,14 +621,14 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
 void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _outperLine) {
     DefLine per;
     per.classname                                = _inperStd.classname;
-    per.information[anycode_to_utf8("姓名")]     = _inperStd.name;
-    per.information[anycode_to_utf8("性别")]     = _inperStd.gender;
-    per.information[anycode_to_utf8("年级")]     = _inperStd.grade;
-    per.information[anycode_to_utf8("学号")]     = _inperStd.studentID;
-    per.information[anycode_to_utf8("政治面貌")] = _inperStd.politicaloutlook;
-    per.information[anycode_to_utf8("学院")]     = _inperStd.academy;
-    per.information[anycode_to_utf8("专业")]     = _inperStd.majors;
-    per.information[anycode_to_utf8("QQ号")]     = _inperStd.qqnumber;
+    per.information[chcode_to_utf8("姓名")]     = _inperStd.name;
+    per.information[chcode_to_utf8("性别")]     = _inperStd.gender;
+    per.information[chcode_to_utf8("年级")]     = _inperStd.grade;
+    per.information[chcode_to_utf8("学号")]     = _inperStd.studentID;
+    per.information[chcode_to_utf8("政治面貌")] = _inperStd.politicaloutlook;
+    per.information[chcode_to_utf8("学院")]     = _inperStd.academy;
+    per.information[chcode_to_utf8("专业")]     = _inperStd.majors;
+    per.information[chcode_to_utf8("QQ号")]     = _inperStd.qqnumber;
     per.ifcheck                                  = _inperStd.ifcheck;
     per.ifsign                                   = _inperStd.ifcheck;
     if (_inperStd.otherInformation.size( ) != 0) {

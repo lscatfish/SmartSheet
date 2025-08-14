@@ -28,7 +28,7 @@ void test_main( ) {
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
     xlnt::workbook wb;                         // 创建一个工作簿对象
-    wb.load(anycode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
+    wb.load(chcode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
     auto ws = wb.active_sheet( );              // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
@@ -51,7 +51,7 @@ void test_main( ) {
         for (auto cell : row) {
             std::cout << "将该单元格添加到当前行向量..." << std::endl;
             // cell.to_string() 把数字、日期、公式等统一转为字符串
-            aSingleRow.push_back(anycode_to_utf8(cell.to_string( )));
+            aSingleRow.push_back(chcode_to_utf8(cell.to_string( )));
         }
 
         std::cout << "将该整行添加到总向量..." << std::endl;
@@ -72,22 +72,22 @@ void test_main( ) {
 
     xlnt::workbook wss;
 
-    wss.active_sheet( ).cell("B6").value(anycode_to_utf8("1中国234"));
-    wss.save(anycode_to_utf8("./1我/ou操.xlsx"));
+    wss.active_sheet( ).cell("B6").value(chcode_to_utf8("1中国234"));
+    wss.save(chcode_to_utf8("./1我/ou操.xlsx"));
 
 
     std::vector< std::string > className_;          // 班级名字
     std::vector< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    get_filepath_from_folder(className_, filePathAndName_, anycode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
+    get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
 
     std::vector< std::vector< std::string > > test1 = {
-        { anycode_to_utf8("序号"), anycode_to_utf8("姓名"), anycode_to_utf8("学号"), anycode_to_utf8("签到") },
-        { anycode_to_utf8("1"), anycode_to_utf8("王二"), anycode_to_utf8("20243546545T"), "" },
-        { anycode_to_utf8("2"), anycode_to_utf8("张三"), anycode_to_utf8("324352532423"), "" },
-        { anycode_to_utf8("3"), anycode_to_utf8("李四"), anycode_to_utf8("324234"), "" },
+        { chcode_to_utf8("序号"), chcode_to_utf8("姓名"), chcode_to_utf8("学号"), chcode_to_utf8("签到") },
+        { chcode_to_utf8("1"), chcode_to_utf8("王二"), chcode_to_utf8("20243546545T"), "" },
+        { chcode_to_utf8("2"), chcode_to_utf8("张三"), chcode_to_utf8("324352532423"), "" },
+        { chcode_to_utf8("3"), chcode_to_utf8("李四"), chcode_to_utf8("324234"), "" },
 
     };
-    save_sheet_to_xlsx(test1, "test1.xlsx", anycode_to_utf8("测试签到表"));
+    save_sheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
 }
 
 // 测试imgs的网格生成模型
@@ -139,7 +139,7 @@ bool test_for_grid( ) {
         // 自动计算阈值（增大比例系数，设置最小阈值为区域的 1%）
         auto [epsilon_x, epsilon_y] = auto_calculate_epsilon(points, x0, y0, 0.5, 0.01);
 
-        std::cout << anycode_to_utf8("自动计算的误差阈值：\n");
+        std::cout << chcode_to_utf8("自动计算的误差阈值：\n");
         std::cout << "epsilon_x =" << epsilon_x << "\n";
         std::cout << "epsilon_y =" << epsilon_y << "\n\n";
         pause( );
@@ -152,25 +152,25 @@ bool test_for_grid( ) {
         GridResult grid = extract_grid_info(points, epsilon_x, epsilon_y, min_spacing_x, min_spacing_y);
 
         // 输出结果
-        std::cout << anycode_to_utf8("网格行坐标（y 值）：\n");
+        std::cout << chcode_to_utf8("网格行坐标（y 值）：\n");
         for (double y : grid.row_coords) {
             std::cout << y << " ";
         }
         std::cout << "\n\n";
         pause( );
-        std::cout << anycode_to_utf8("网格列坐标（x 值）：\n");
+        std::cout << chcode_to_utf8("网格列坐标（x 值）：\n");
         for (double x : grid.col_coords) {
             std::cout << x << " ";
         }
         std::cout << "\n\n";
         pause( );
 
-        std::cout << anycode_to_utf8("网格交点坐标：\n");
+        std::cout << chcode_to_utf8("网格交点坐标：\n");
         for (const auto &point : grid.intersections) {
             std::cout << "(" << point.first << "," << point.second << ")\n";
         }
     } catch (const std::exception &e) {
-        std::cerr << anycode_to_utf8("错误：") << e.what( ) << std::endl;
+        std::cerr << chcode_to_utf8("错误：") << e.what( ) << std::endl;
         return 1;
     }
 
@@ -197,7 +197,7 @@ void test_for_ENCODING( ) {
     std::vector< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
                                     "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
     for (auto &a : str) {
-        std::cout << ec::anycode_to_utf8(a) << std::endl;
+        std::cout << ec::chcode_to_utf8(a) << std::endl;
     }
 }
 

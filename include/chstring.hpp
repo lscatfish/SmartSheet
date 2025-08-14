@@ -4,6 +4,9 @@
  *
  * @brief 用于操作中文编码的文件
  * @note 没有从string派生是因为string没有虚析构函数，因此通过基类指针删除派生类对象可能导致未定义行为
+ * 
+ * 作者：刘思成
+ * 邮箱：2561925435@qq.com
  * ================================================================================= */
 
 #pragma once
@@ -19,10 +22,10 @@ class chstring {
 public:
 
     chstring(std::string _in_) {
-        this->str = encoding::anycode_to_utf8(_in_);    // 使用Encoding库转换编码
+        this->str = encoding::chcode_to_utf8(_in_);    // 使用Encoding库转换编码
     }
     chstring(const char *cstr) {
-        this->str = encoding::anycode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
+        this->str = encoding::chcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
     }
     chstring(const chstring &_in_) {
         this->str = _in_.str;    // 直接复制底层字符串
@@ -72,7 +75,6 @@ public:
 
     // 获取底层字符串
     std::string get_string( ) const;
-
 
 private:
     std::string str;
