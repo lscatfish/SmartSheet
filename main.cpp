@@ -1,5 +1,5 @@
 ﻿
-#include <ChineseEncoding.h>
+#include <Encoding.h>
 #include <consoleapi2.h>
 #include <exception>
 #include <Files.h>
@@ -27,24 +27,26 @@ int main( ) {
     SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
 
-    //// 测试“图片”的编码检测结果
-    //std::string     test_str = "图片";    // 假设源代码以 GBK 保存
-    //ChineseEncoding code     = detect_chinese_encoding(test_str);
+    // 测试“图片”的编码检测结果
+    //std::string     test_str = "姓名";    // 假设源代码以 GBK 保存
+    //ENCODING code     = detect_chinese_encoding(test_str);
     //std::cout << anycode_to_utf8("编码检测结果：");
     //switch (code) {
-    //    case ChineseEncoding::UTF8: std::cout << "UTF8\n"; break;
-    //    case ChineseEncoding::GBKorGB2312: std::cout << "GBK/GB2312\n"; break;
+    //    case ENCODING::UTF8: std::cout << "UTF8\n"; break;
+    //    case ENCODING::GBK: std::cout << "GBK/GB2312\n"; break;
     //    default: std::cout << "UNKNOWN\n";
     //}
-    //pause( );
+
+    test_for_uchardet( );
+    pause( );
 
     //// 测试“图片”的编码检测结果
     //test_str =anycode_to_utf8 ("姓名");    // 假设源代码以 GBK 保存
     //code     = detect_chinese_encoding(test_str);
     //std::cout << anycode_to_utf8("编码检测结果：");
     //switch (code) {
-    //    case ChineseEncoding::UTF8: std::cout << "UTF8\n"; break;
-    //    case ChineseEncoding::GBKorGB2312: std::cout << "GBK/GB2312\n"; break;
+    //    case ENCODING::UTF8: std::cout << "UTF8\n"; break;
+    //    case ENCODING::GBK: std::cout << "GBK/GB2312\n"; break;
     //    default: std::cout << "UNKNOWN\n";
     //}
 
@@ -53,9 +55,8 @@ int main( ) {
     //std::cout << anycode_to_utf8("图片") << std::endl;
     //pause( );
 
-    test_for_uchardet( );
-
-#if false
+    
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else

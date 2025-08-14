@@ -1,4 +1,4 @@
-# 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
+﻿# 语言: None, Cpp, Java, JavaScript, ObjC, Proto, TableGen, TextProto
 Language:	Cpp
 # BasedOnStyle:	LLVM
 # 访问说明符(public、private等)的偏移
