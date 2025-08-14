@@ -1,14 +1,15 @@
 ﻿
 #include <algorithm>
-#include <Encoding.h>
 #include <cmath>
 #include <cstdlib>
+#include <Encoding.h>
 #include <exception>
 #include <helper.h>
 #include <imgs.h>
 #include <iostream>
 #include <map>
 #include <numeric>
+#include <opencv2/opencv.hpp>
 #include <ppocr_API.h>
 #include <stdexcept>
 #include <string>

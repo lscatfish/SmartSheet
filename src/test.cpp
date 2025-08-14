@@ -1,10 +1,11 @@
 ﻿
-#include "Encoding.h"
 #include "Files.h"
 #include "PersonnelInformation.h"
 #include "test.h"
 #include <algorithm>
+#include <chstring.hpp>
 #include <consoleapi2.h>
+#include <Encoding.h>
 #include <exception>
 #include <helper.h>
 #include <imgs.h>
@@ -17,10 +18,10 @@
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
 
-using namespace encoding;
 
 void test_main( ) {
 
+    using namespace encoding;
 
     SetConsoleOutputCP(65001);    // 输出代码页设为 UTF-8
     SetConsoleCP(65001);          // 输入代码页也设为 UTF-8
@@ -91,6 +92,8 @@ void test_main( ) {
 
 // 测试imgs的网格生成模型
 bool test_for_grid( ) {
+    using namespace encoding;
+
     // 生成0-1080范围的测试点列（模拟网格分布）
     auto generate_test_points = []( ) -> std::vector< GridPoint > {
         std::vector< GridPoint > points;
@@ -188,28 +191,22 @@ void test_for__load_sheet_from_img( ) {
     }
 }
 
+// 测试ENCODING
+void test_for_ENCODING( ) {
+    namespace ec = encoding;
+    std::vector< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
+                                    "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
+    for (auto &a : str) {
+        std::cout << ec::anycode_to_utf8(a) << std::endl;
+    }
+}
 
-
-// 使用uchardet检测编码
-//std::string detect_encoding(const std::string &data) {
-//    uchardet_t detector = uchardet_new( );
-//    if (!detector) {
-//        return "unknown";
-//    }
-//
-//    // 处理数据
-//    uchardet_handle_data(detector, data.data( ), data.size( ));
-//    uchardet_data_end(detector);
-//
-//    // 获取检测结果
-//    const char *encoding = uchardet_get_charset(detector);
-//    std::string result(encoding ? encoding : "unknown");
-//
-//    uchardet_delete(detector);
-//    return result;
-//}
-
-// 测试uchardet
-void test_for_uchardet( ) {
-
+// 测试chstring
+void test_for_chstring( ) {
+    namespace ec = encoding;
+    std::vector< chstring > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
+                                 "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
+    for (auto &a : str) {
+        std::cout << a << std::endl;
+    }
 }
