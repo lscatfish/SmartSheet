@@ -11,12 +11,12 @@
 
 #pragma once
 
+#ifndef CHSTRING_HPP
+#define CHSTRING_HPP
+
 #include <iostream>
 #include <string>
 #include <Encoding.h>
-
-#ifndef CHSTRING_HPP
-#define CHSTRING_HPP
 
 class chstring {
 public:

@@ -49,17 +49,19 @@ private:
     std::vector< std::string > filePathAndName_;    // 每个标准xlsx文件的位置
     std::vector< DefPerson >   personStd_;          // 定义的标准人员信息
     // std::vector< DefLine > personUnstd_;        // 定义的非标准人员信息
-    //定义名单中不存在的人员
+
+    // 定义名单中不存在的人员
     struct DefUnknownPerson {
-        DefLine personLine;
-        DefPerson personStd;
-        std::vector< DefPerson > likelyPerson;//相似的人
+        DefLine                  personLine;
+        DefPerson                personStd;
+        std::vector< DefPerson > likelyPerson;    // 相似的人
     };
 
-    std::vector< DefUnknownPerson > unknownPerson_;    // 定义名单中不存在的人员(直接对比)
+    std::vector< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
+    std::vector< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
 
     // 不存在人员的模糊搜寻结果
-   // std::map< std::vector< DefLine >::iterator, std::vector< DefLine > > fuzzyPerson_;
+    // std::map< std::vector< DefLine >::iterator, std::vector< DefLine > > fuzzyPerson_;
 
     /*
      * @brief 加载全学员表的函数
@@ -73,14 +75,19 @@ private:
     void make_attendanceSheet( );
 
     /*
+     * @brief 保存签到表
+     */
+    void save_attendanceSheet( );
+
+    /*
      * @brief 制作考勤统计表
      */
     void make_statisticsSheet( );
 
     /*
-     * @brief 保存签到表
-     */
-    void save_attendanceSheet( );
+    * @brief 保存考勤表
+    */
+    void save_statisticsSheet( );
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
@@ -103,6 +110,16 @@ private:
     void search_person(
         std::vector< DefPerson >::iterator &_it_output,
         DefLine                             _targetPerson);
+
+    /*
+     * @brief 缓存全部报名的人员
+     */
+    void save_signSheet( );
+
+    /*
+     * @brief 加载缓存的全部报名的人员
+     */
+    void load_signSheet( );
 };
 
 

@@ -10,6 +10,7 @@
 #include <helper.h>
 #include <imgs.h>
 #include <iostream>
+#include <opencv2/opencv.hpp>
 #include <string>
 #include <stringapiset.h>
 #include <uchardet.h>
@@ -27,9 +28,9 @@ void test_main( ) {
     SetConsoleCP(65001);          // 输入代码页也设为 UTF-8
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
-    xlnt::workbook wb;                         // 创建一个工作簿对象
+    xlnt::workbook wb;                        // 创建一个工作簿对象
     wb.load(chcode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
-    auto ws = wb.active_sheet( );              // 获取当前激活的工作表（第一张）
+    auto ws = wb.active_sheet( );             // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
     std::cout << "正在处理电子表格..." << std::endl;
@@ -87,7 +88,7 @@ void test_main( ) {
         { chcode_to_utf8("3"), chcode_to_utf8("李四"), chcode_to_utf8("324234"), "" },
 
     };
-    save_sheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
+    save_attSheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
 }
 
 // 测试imgs的网格生成模型
@@ -195,7 +196,8 @@ void test_for__load_sheet_from_img( ) {
 void test_for_ENCODING( ) {
     namespace ec = encoding;
     std::vector< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
-                                    "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
+                                    "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我",
+                                    "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh" };
     for (auto &a : str) {
         std::cout << ec::chcode_to_utf8(a) << std::endl;
     }
@@ -208,5 +210,39 @@ void test_for_chstring( ) {
                                  "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
     for (auto &a : str) {
         std::cout << a << std::endl;
+    }
+}
+
+// 测试opencv
+void test_for_cv( ) {
+    std::string path = "./input/att_imgs/青书班1.jpeg";
+    cv::Mat     img  = cv::imread(path);
+    if (img.empty( )) {
+        std::cout << u8"gbk图片 " << path << u8" 打开失败" << std::endl;
+        return;
+    } else {
+        std::cout << u8"gbk图片 " << path << u8" 打开成功!!!!" << std::endl;
+    }
+
+    std::string u8path = u8"./input/att_imgs/青书班1.jpeg";
+    u8path             = encoding::utf8_to_gbk(u8path);
+    cv::Mat     u8img    = cv::imread(u8path);
+    if (u8img.empty( )) {
+        std::cout << u8"u8图片 " << u8path << u8" 打开失败" << std::endl;
+        return;
+    } else {
+        std::cout << u8"u8图片 " << u8path << u8" 打开成功!!!!" << std::endl;
+    }
+}
+
+//测试融合sheet函数
+void test_for_mergeMultipleSheets( ) {
+    std::vector< std::vector< std::string > > sh1, sh2{ { "kndslnj", "dsn", "dic" }, {"dusbc","cdb","cdb"} }, sh3{ };
+    std::vector< std::vector< std::string > >sh= mergeMultipleSheets(sh1, sh2);
+    for (size_t r = 0; r < sh.size(); r++) {
+        for (size_t c = 0; c < sh[r].size( ); c++) {
+            std::cout << sh[r][c] << "   ";
+        }
+        std::cout << std::endl;
     }
 }

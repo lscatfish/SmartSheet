@@ -48,6 +48,10 @@ file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp"
 #"${CMAKE_SOURCE_DIR}/third_party/uchardet/src/LangModels/*.cpp"
 )
 
+###########################################################################################
+##################################OCR的相关文件############################################
+
+# ppOCR的相关动态链接库
 # 首先检查OCR DLL目录是否存在，然后查找文件
 set(OCR_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/OCRdlls-Release")
 if(NOT EXISTS ${OCR_DLL_DIR})
@@ -64,20 +68,28 @@ else()
     endif()
 endif()
 
+#ppOCR的相关模型，（切勿更改models的文件夹名称）
+set(SOURCE_OCR_MODELS "${CMAKE_SOURCE_DIR}/models")
+
+##################################OCR的相关文件############################################
+###########################################################################################
 
 # 添加执行文件
 add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
 
 
 # 链接lib
+# 链接到xlnt
 target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.lib>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.lib>
 )
+# 链接到opencv
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100.lib>
 )
+# 链接到uchardet
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.lib>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.lib>
@@ -87,14 +99,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
 
 # 根据当前配置选择 DLL
+# xlnt的动态链接库地址
 set(XLNT_DLL_PATH
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.dll>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.dll>
 )
+# opencv的动态链接库地址
 set(OPENCV_DLL_PATH
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100d.dll>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100.dll>
 )
+# uchardet的动态链接库地址
 set(UCHARDET_DLL_PATH
     $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.dll>
     $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.dll>
@@ -120,7 +135,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMENT "Copying opencv dll to output directory"
 )
 
-# 遍历每个 DLL 文件并复制到目标目录 - 只在找到文件时执行
+# 遍历每个 OCR-DLL 文件并复制到目标目录 ： 只在找到文件时执行
 if(OCR_DLL_RELEASE_FILES)
     foreach(DLL_FILE ${OCR_DLL_RELEASE_FILES})
         get_filename_component(DLL_NAME ${DLL_FILE} NAME)
@@ -135,3 +150,15 @@ if(OCR_DLL_RELEASE_FILES)
 else()
     message(WARNING "No OCR DLL files will be copied - none found")
 endif()
+
+# 复制ocr所需的模型
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    # 1. 如果目标文件夹存在则删除
+    COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
+    # 2. 重新创建目标文件夹
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models  # 确保目标文件夹存在
+    COMMAND ${CMAKE_COMMAND} -E copy_directory                # 复制整个文件夹
+        ${SOURCE_OCR_MODELS}
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
+    COMMENT "Copying ${SOURCE_OCR_MODELS} to executable directory"  # 显示提示信息
+)
