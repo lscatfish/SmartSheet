@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <ppocr_API.h>
 #include <stdexcept>
+#include<Encoding.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -320,21 +321,22 @@ static std::pair< size_t, size_t > get_closest_grid_point(
 void load_sheet_from_img(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName) {
-    std::cout << u8"加载图片: " << _pathAndName << u8" 中" << std::endl
-              << std::endl;
+    std::cout << u8"加载图片: " << encoding::chcode_to_utf8(_pathAndName) << u8" 中" << std::endl;
 
     // 打开图片
     cv::Mat img = cv::imread(_pathAndName);
     if (img.empty( )) {
-        std::cout << u8"图片 " << _pathAndName << u8" 打开失败" << std::endl;
+        std::cout << u8"图片 " << encoding::chcode_to_utf8(_pathAndName) << u8" 打开失败" << std::endl;
         return;
     }
     // ocr操作,读取img
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字line]
+
+    std::cout << u8"ppocr工作" << std::endl;
     ppocr::ocr(ocrPR, img.clone( ), _ppocrDir_);                    // 这里返回的text为utf8编码
 
     std::cout << std::endl
-              << u8"图片: " << _pathAndName << u8" 加载结束..." << std::endl
+              << u8"图片: " << encoding::chcode_to_utf8(_pathAndName) << u8" 加载结束..." << std::endl
               << std::endl;
 
     // 这里只有一页，所以只有文字
@@ -389,6 +391,7 @@ void load_sheet_from_img(
                 // std::cout << "in(" << x << "," << y << ")" << std::endl;
                 sh[x][y] = cellOCR.text;
             } else {
+                //x,y初已经被写入
                 std::cout << u8"错误(" << x << "," << y << "):" << sh[x][y] << std::endl;
                 pause( );
             }

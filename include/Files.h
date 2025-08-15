@@ -36,6 +36,22 @@ bool get_filepath_from_folder(
     const std::vector< std::string > &_extension);
 
 /*
+ * @brief 为了cv库,从一个文件下获取所有符合后缀条件的img
+ * @param _path 返回的文件路径，cv使用
+ * @param _u8name 返回的文件名（无格式后缀）
+ * @param _u8path 返回的文件路径
+ * @param _foldername 目标文件夹名称
+ * @param _extension 文件的后缀集合
+ * @return 错误返回false，读取成功返回true
+ */
+bool get_imgpath_from_folder(
+    std::vector< std::string >       &_path,
+    std::vector< std::string >       &_u8name,
+    std::vector< std::string >       &_u8path,
+    std::string                       _foldername,
+    const std::vector< std::string > &_extension);
+
+/*
  * @brief 用于读取表格
  * @param 储存表格的二维数组
  * @param 文件的路径
@@ -45,17 +61,38 @@ void load_sheet_from_xlsx(
     std::string                                _pathAndName);
 
 /*
- * @brief 表格的储存
+ * @brief 签到表表格的储存
  * @param 储存表格的二维数组
  * @param 文件的路径
  * @param 表格标题的名称
  */
-void save_sheet_to_xlsx(
+void save_attSheet_to_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName,
     std::string                                _titleName);
 
+/*
+ * @brief 考勤表表格的储存
+ * @param _aSheet 储存表格的二维数组
+ * @param _path 文件的路径
+ * @param _titleName 表格标题的名称
+ */
+void save_sttSheet_to_xlsx(
+    const std::vector< std::vector< std::string > > &_aSheet,
+    std::string                                     &_path,
+    std::string                                     &_titleName);
 
+/*
+ * @brief 保存报名信息到xlsx
+ * @param _sheet 表格
+ */
+void save_signSheet_to_xlsx(const std::vector< std::vector< std::string > > &_sheet);
+
+/*
+ * @brief 加载缓存报名信息到xlsx
+ * @param _sheet 表格
+ */
+void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet);
 
 
 #endif    // !FILES_H

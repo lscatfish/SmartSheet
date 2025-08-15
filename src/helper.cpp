@@ -7,6 +7,7 @@
 #include <streambuf>
 #include <string>
 #include <utility>
+#include <vector>
 
 /*
  * @brief 按回车键继续
@@ -39,3 +40,8 @@ std::pair< std::string, std::string > split_chinese_and_number(const std::string
 
     return { chinesePart, numberPart };
 }
+
+// 递归终止函数
+void mergeHelper(std::vector< std::vector< std::string > > &result) {}
+
+

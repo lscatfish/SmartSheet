@@ -28,13 +28,13 @@ int main( ) {
     SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
 
-#if false
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else
-    test_for_chstring( );
+    test_for_mergeMultipleSheets( );
     pause( );
-    test_for__load_sheet_from_img( );
+    //test_for__load_sheet_from_img( );
 #endif    // true
 
 

@@ -23,5 +23,11 @@ void test_for_ENCODING( );
 // 测试chstring
 void test_for_chstring( );
 
+// 测试opencv
+void test_for_cv( );
+
+// 测试融合sheet函数
+void test_for_mergeMultipleSheets( );
+
 
 #endif    // !TEST_H
