@@ -499,8 +499,8 @@ void DoQingziClass::make_statisticsSheet( ) {
                                     ".jpe", ".bmp", ".dib", ".webp", ".raw" });
 
     // 排序，这样就可以按照班级来
-    std::sort(att_fileName.begin( ), att_fileName.end( ));
-    std::sort(att_filePathAndName.begin( ), att_filePathAndName.end( ));
+    // std::sort(att_fileName.begin( ), att_fileName.end( ));
+    // std::sort(att_filePathAndName.begin( ), att_filePathAndName.end( ));
 
     // 2.解析班级的名字与名单的数量，储存到classname__filePathAndName中
     for (auto it_att_fileName = att_fileName.begin( ), it_att_filePathAndName = att_filePathAndName.begin( );
@@ -523,7 +523,6 @@ void DoQingziClass::make_statisticsSheet( ) {
         }
         // 打印结果
         sheet_printer(sh);
-        pause( );
         extract_attendance_to_vector(sh, it_cfPAN->first);
     }
 
@@ -573,7 +572,7 @@ void DoQingziClass::save_statisticsSheet( ) {
                 if (it_person->ifcheck) {
                     line.push_back(u8"已签到");
                 } else {
-                    line.push_back("");
+                    line.push_back(u8"缺席");
                 }
                 if (it_person->ifsign) {
                     line.push_back("");
