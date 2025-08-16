@@ -18,11 +18,11 @@
 #include <string>
 #include <stringapiset.h>
 #include <test.h>
+#include <test_for_cv.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
-#include<test_for_cv.h>
 
 int main( ) {
 
@@ -35,7 +35,7 @@ int main( ) {
 #else
     test_for_ppocr( );
     pause( );
-    //test_for__load_sheet_from_img( );
+    // test_for__load_sheet_from_img( );
 #endif    // true
 
 

@@ -100,7 +100,7 @@ bool search(
     const std::vector< std::string > &_searchingLib,
     LEVEL                             _matchLevel) {
     // 目标wstring
-    std::wstring targrt =encoding:: utf8_to_wstring_win(_target);
+    std::wstring targrt = encoding::utf8_to_wstring_win(_target);
 
     int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
     for (auto &libstr : _searchingLib) {
@@ -161,13 +161,15 @@ bool search(
 
 /*
  * @brief 模糊搜索人员信息
- * @param 系列可能的人员信息
- * @param 搜索目标
- * @param 搜索库
+ * @param _outList 系列可能的人员信息
+ * @param _likelyRate 相似度
+ * @param _target 搜索目标
+ * @param _searchingLib 搜索库
  * @retrun 是否搜索成功
  */
 bool search_for_person(
     std::vector< DefPerson >       &_outList,
+    std::vector< double >          &_likelyRate,
     DefPerson                       _target,
     const std::vector< DefPerson > &_searchingLib) {
 
@@ -184,6 +186,7 @@ bool search_for_person(
         if (it_lib.classname == _target.classname) {                                        // 第一优先级
             if (DoQingziClass::compare_studentID(it_lib.studentID, _target.studentID)) {    // high
                 _outList.push_back(it_lib);
+                _likelyRate.push_back(1.0);
                 s++;
             } else {    // low匹配
                 std::string i1 = it_lib.studentID;
@@ -196,12 +199,14 @@ bool search_for_person(
                         levenshtein_distance(encoding::utf8_to_wstring_win(i1), encoding::utf8_to_wstring_win(i2)),
                         LEVEL::Low)) {
                     _outList.push_back(it_lib);
+                    _likelyRate.push_back(0.6);
                     s++;
                 } else {    // 姓名匹配
                     if (ifmatch_levenshtein(
                             levenshtein_distance(encoding::utf8_to_wstring_win(it_lib.name), encoding::utf8_to_wstring_win(_target.name)),
                             LEVEL::Medium)) {
                         _outList.push_back(it_lib);
+                        _likelyRate.push_back(0.7);
                         s++;
                     }
                 }

@@ -75,14 +75,16 @@ bool search(
     LEVEL                             _matchLevel);
 
 /*
-* @brief 模糊搜索人员信息
-* @param 系列可能的人员信息
-* @param 搜索目标
-* @param 搜索库
-* @retrun 是否搜索成功
-*/
+ * @brief 模糊搜索人员信息
+ * @param _outList 系列可能的人员信息
+ * @param _likelyRate 相似度
+ * @param _target 搜索目标
+ * @param _searchingLib 搜索库
+ * @retrun 是否搜索成功
+ */
 bool search_for_person(
     std::vector< DefPerson >       &_outList,
+    std::vector< double >          &_likelyRate,
     DefPerson                       _target,
     const std::vector< DefPerson > &_searchingLib);
 

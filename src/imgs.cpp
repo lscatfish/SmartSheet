@@ -300,7 +300,12 @@ void GridResult::fill_sheet(const std::vector< CELL > &inCellLists) {
         for (auto &line : this->sheet_) {
             for (auto &cell : line) {
                 if (inCell.is_contained(cell)) {
-                    cell.text = inCell.text;
+                    if (cell.text.size( )==0) {
+                        cell.text = inCell.text;
+                    }
+                    else {
+                        cell.text = cell.text + inCell.text;
+                    }
                 }
             }
         }

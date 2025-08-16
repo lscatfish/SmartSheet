@@ -94,5 +94,11 @@ void save_signSheet_to_xlsx(const std::vector< std::vector< std::string > > &_sh
  */
 void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet);
 
+/*
+ * @brief 保存尚未搜索到的成员到xlsx
+ * @param _sheet 表格
+ */
+void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > > &_sheet);
+
 
 #endif    // !FILES_H
