@@ -398,3 +398,18 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
     }
     pause( );
 }
+
+/*
+ * @brief 保存尚未搜索到的成员到xlsx
+ * @param _sheet 表格
+ */
+void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > >& _sheet) {
+    xlnt::workbook wb;
+    auto           ws = wb.active_sheet( );
+    ws.title("Sheet1");
+    // 逐行逐列写入
+    for (std::size_t r = 0; r < _sheet.size( ); ++r)
+        for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    wb.save("./output/unknown.xlsx");
+}

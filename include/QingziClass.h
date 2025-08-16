@@ -55,6 +55,7 @@ private:
         DefLine                  personLine;
         DefPerson                personStd;
         std::vector< DefPerson > likelyPerson;    // 相似的人
+        std::vector< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
     };
 
     std::vector< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
@@ -85,8 +86,8 @@ private:
     void make_statisticsSheet( );
 
     /*
-    * @brief 保存考勤表
-    */
+     * @brief 保存考勤表
+     */
     void save_statisticsSheet( );
 
     /*
@@ -120,6 +121,12 @@ private:
      * @brief 加载缓存的全部报名的人员
      */
     void load_signSheet( );
+
+    /*
+     * @brief 保存尚未搜索到的成员
+     * @param _in_unLists 未搜索到的成员列表
+     */
+    void save_unknown_person(const std::vector< DefUnknownPerson > &_in_unLists);
 };
 
 
