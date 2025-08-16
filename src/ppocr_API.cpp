@@ -34,9 +34,9 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
 
 /*
  * @brief 调用ocr进行检测
- * @param 输出的结果
- * @param 输入的图片
- * @param 输入的模型与字典库的path或dir
+ * @param _out 输出的结果
+ * @param _img 输入的图片
+ * @param _dirs 输入的模型与字典库的path或dir
  */
 bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
          cv::Mat                                         _img,

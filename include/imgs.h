@@ -62,7 +62,7 @@
  * 作者：   刘思成
  * 邮箱：   2561925435@qq.com
  *
- **********************设计思路*******************************************/
+ **********************设计思路****************************************** */
 
 
 #include <ppocr_API.h>
@@ -72,34 +72,6 @@
 
 extern ppocr::DefDirs _ppocrDir_;
 
-// 定义二维点类型，first为x坐标，second为y坐标
-using GridPoint = std::pair< double, double >;
-
-// 派生自 OCRPredictResult
-struct DefSolveOCRResult : public ppocr::OCRPredictResult {
-public:
-    GridPoint corePoint;    // box的中心点坐标
-    // size_t    row;          // 行数，第i行
-
-    // 基于 OCRPredictResult 构造
-    DefSolveOCRResult(ppocr::OCRPredictResult _ocrPR) {
-        this->box              = _ocrPR.box;
-        this->cls_label        = _ocrPR.cls_label;
-        this->cls_score        = _ocrPR.cls_score;
-        this->score            = _ocrPR.score;
-        this->text             = _ocrPR.text;
-        this->corePoint.first  = (_ocrPR.box[0][0] + _ocrPR.box[1][0] + _ocrPR.box[2][0] + _ocrPR.box[3][0]) / 4.0;
-        this->corePoint.second = (_ocrPR.box[0][1] + _ocrPR.box[1][1] + _ocrPR.box[2][1] + _ocrPR.box[3][1]) / 4.0;
-        // row                    = 0;    // 默认为第0行
-    }
-};
-
-// 定义网格结果结构体，包含行坐标、列坐标和所有交点
-struct GridResult {
-    std::vector< double >    row_coords;       // 行坐标（横线的y值）
-    std::vector< double >    col_coords;       // 列坐标（竖线的x值）
-    std::vector< GridPoint > intersections;    // 所有网格交点
-};
 
 /*
  * @brief 用于读取图片的表格（utf8编码）
@@ -110,67 +82,6 @@ void load_sheet_from_img(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName);
 
-/**
- * @brief 对排序后的坐标值进行聚类（将相近的值归为一组）
- *
- * @param sorted_vals 已排序的坐标值集合（可以是x坐标或y坐标）
- * @param epsilon 聚类阈值，小于此值的坐标被视为同一组（同一网格线）
- * @return 每个聚类组的平均值，代表该组对应的网格线坐标
- */
-std::vector< double > cluster_coords(const std::vector< double > &sorted_vals, double epsilon);
-
-/**
- * @brief 从排序后的网格线坐标中检测基础间距（适用于等间距网格）
- *
- * @param sorted_coords 已排序的网格线坐标集合
- * @param epsilon 误差阈值，用于判断两个差值是否属于同一间距
- * @return 检测到的基础间距，若无法检测则返回0.0
- */
-double detect_spacing(const std::vector< double > &sorted_coords, double epsilon);
-
-/**
- * @brief 根据基础间距和范围生成完整的网格线集合
- *
- * @param initial_grid 初步聚类得到的网格线坐标
- * @param spacing 检测到的基础间距
- * @param epsilon 误差阈值，用于处理浮点数精度问题
- * @param min_valid_spacing 生成网格线时过滤过小间距
- * @return 完整的网格线坐标集合
- */
-std::vector< double > generate_complete_grid(
-    const std::vector< double > &initial_grid,
-    double spacing, double epsilon, double min_valid_spacing);
-
-/**
- * @brief 从稀疏的坐标点中提取完整的网格信息（包含行坐标、列坐标和交点）
- *
- * @param points 输入的稀疏坐标点集合
- * @param epsilon_x x方向的误差阈值
- * @param epsilon_y y方向的误差阈值
- * @param min_valid_spacing_x 提取网格信息时传入最小有效间距参数x
- * @param min_valid_spacing_y 提取网格信息时传入最小有效间距参数y
- * @return GridResult 包含行坐标、列坐标和所有交点的结构体
- */
-GridResult extract_grid_info(
-    const std::vector< GridPoint > &points,
-    double epsilon_x, double epsilon_y,
-    double min_valid_spacing_x, double min_valid_spacing_y);
-
-/**
- * @brief 新增函数：根据点列密度自动计算x和y方向的误差阈值
- *
- * @param points 输入的坐标点集合
- * @param x0 区域x方向最大值（点的x坐标≤x0）
- * @param y0 区域y方向最大值（点的y坐标≤y0）
- * @param ratio 阈值与中位数距离的比例（建议0.2~0.5，值越小阈值越严格）
- * @param min_epsilon_ratio 最小阈值区域的比例
- * @return 包含epsilon_x和epsilon_y的 pair （first为x方向阈值，second为y方向阈值）
- */
-std::pair< double, double > auto_calculate_epsilon(
-    const std::vector< GridPoint > &points,
-    double x0, double y0,
-    double ratio             = 0.5,
-    double min_epsilon_ratio = 0.01);
 
 
 #endif    // !IMGS_H

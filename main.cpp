@@ -22,17 +22,18 @@
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
+#include<test_for_cv.h>
 
 int main( ) {
 
     SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
 
-#if true
+#if false
     DoQingziClass qClass;
     qClass.start( );
 #else
-    test_for_mergeMultipleSheets( );
+    test_for_ppocr( );
     pause( );
     //test_for__load_sheet_from_img( );
 #endif    // true
