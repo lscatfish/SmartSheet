@@ -137,8 +137,15 @@ public:
     // 提取垂直网格线的x坐标（带长度和边缘过滤）
     static std::vector< int > get_vertical_lineXs(const cv::Mat &verticalLines, int edgeThreshold = 10);
 
+    // 填充sheet
+    // 可以考虑放在构造函数里面自动解析
+    void fill_sheet(const std::vector< CELL > &inCellLists);
+
     // 返回构成的sheet
     SHEET get_sheet( );
+
+    // 返回只有string的表格
+    std::vector< std::vector< std::string > > get_stringSheet( );
 
 private:
     std::vector< int > horizontalYs_;    // 水平线的y坐标
@@ -287,9 +294,35 @@ void GridResult::parse_grid_to_sheet( ) {
     }
 }
 
+// 填充sheet
+void GridResult::fill_sheet(const std::vector< CELL > &inCellLists) {
+    for (const auto &inCell : inCellLists) {
+        for (auto &line : this->sheet_) {
+            for (auto &cell : line) {
+                if (inCell.is_contained(cell)) {
+                    cell.text = inCell.text;
+                }
+            }
+        }
+    }
+}
+
 // 返回构成的sheet
 SHEET GridResult::get_sheet( ) {
     return this->sheet_;
+}
+
+// 返回只有string的表格
+std::vector< std::vector< std::string > > GridResult::get_stringSheet( ) {
+    std::vector< std::vector< std::string > > sh;
+    for (auto &line : this->sheet_) {
+        std::vector< std::string > l;
+        for (auto &cell : line) {
+            l.push_back(cell.text);
+        }
+        sh.push_back(l);
+    }
+    return sh;
 }
 
 /*
@@ -349,6 +382,8 @@ void load_sheet_from_img(
     }
 
     // 还原表格
+    grid.fill_sheet(solveOCR);
+    _aSheet = grid.get_stringSheet( );
 }
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
