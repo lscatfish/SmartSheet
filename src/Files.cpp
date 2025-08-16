@@ -121,7 +121,7 @@ bool get_imgpath_from_folder(
         }
     }
 
-    std::cout << u8"请确认各班（共" << _u8name.size( ) << u8"个班）：" << std::endl;
+    std::cout << u8"请确认各图片（共" << _u8name.size( ) << u8"张图片）：" << std::endl;
     for (auto &s : _u8name) {
         std::cout << s << std::endl;
     }
