@@ -11,23 +11,20 @@
 
 void test_main( );
 
-//测试imgs的网格生成模型
-bool test_for_grid( );
-
-// 测试load_sheet_from_img
-void test_for__load_sheet_from_img( );
-
 //测试ENCODING
 void test_for_ENCODING( );
 
 // 测试chstring
 void test_for_chstring( );
 
-// 测试opencv
-void test_for_cv( );
+// 测试opencv的imread
+void test_for_cv_imread( );
 
 // 测试融合sheet函数
 void test_for_mergeMultipleSheets( );
+
+// 测试ppocr
+void test_for_ppocr( );
 
 
 #endif    // !TEST_H

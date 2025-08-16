@@ -238,7 +238,11 @@ void DoQingziClass::load_personnel_information_list( ) {
 #endif
                 }
             }
-            personStd_.push_back(per);
+            // 推送之前检查
+            if (per.name.size( ) == 0)
+                continue;
+            else
+                personStd_.push_back(per);
         }
     };
     //=======================================================================================/

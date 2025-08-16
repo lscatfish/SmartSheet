@@ -378,8 +378,8 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
         return;
     }
     xlnt::workbook wb;
+    wb.load(path);
     std::cout << std::endl
-              << std::endl
               << u8"load file: " << path << std::endl;
     auto ws = wb.active_sheet( );
 
@@ -391,7 +391,10 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
         for (auto cell : row) {
             // cell.to_string() 把数字、日期、公式等统一转为字符串
             aSingleRow.push_back(cell.to_string( ));
+            std::cout << cell << "   ";
         }
         _sheet.push_back(aSingleRow);
+        std::cout << std::endl;
     }
+    pause( );
 }
