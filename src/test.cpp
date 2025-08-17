@@ -12,6 +12,7 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <ppocr_API.h>
+#include <pugixml.hpp>
 #include <string>
 #include <stringapiset.h>
 #include <uchardet.h>
@@ -19,8 +20,138 @@
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
+#include<zlib.h>
+#include<unzip.h>
 
 
+
+// 从DOCX中读取指定文件内容（如word/document.xml）
+std::vector< char > read_docx_file(const std::string &docx_path, const std::string &inner_file_path) {
+    // 打开ZIP文件（DOCX本质是ZIP）
+    unzFile zip_file = unzOpen(docx_path.c_str( ));
+    if (!zip_file) {
+        std::cerr << u8"无法打开DOCX文件: " << docx_path << std::endl;
+        return { };
+    }
+
+    // 定位到压缩包内的目标文件
+    if (unzLocateFile(zip_file, inner_file_path.c_str( ), 0) != UNZ_OK) {
+        std::cerr << u8"DOCX中未找到文件: " << inner_file_path << std::endl;
+        unzClose(zip_file);
+        return { };
+    }
+
+    // 获取文件信息
+    unz_file_info file_info;
+    if (unzGetCurrentFileInfo(zip_file, &file_info, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK) {
+        std::cerr << u8"获取文件信息失败" << std::endl;
+        unzClose(zip_file);
+        return { };
+    }
+
+    // 打开当前文件并读取内容
+    if (unzOpenCurrentFile(zip_file) != UNZ_OK) {
+        std::cerr << u8"打开文件失败" << std::endl;
+        unzClose(zip_file);
+        return { };
+    }
+
+    // 读取文件内容到缓冲区
+    std::vector< char > buffer(file_info.uncompressed_size);
+    int                 bytes_read = unzReadCurrentFile(zip_file, buffer.data( ), buffer.size( ));
+    if (bytes_read != static_cast< int >(file_info.uncompressed_size)) {
+        std::cerr << u8"文件读取不完整" << std::endl;
+        unzCloseCurrentFile(zip_file);
+        unzClose(zip_file);
+        return { };
+    }
+
+    // 清理资源
+    unzCloseCurrentFile(zip_file);
+    unzClose(zip_file);
+
+    return buffer;
+}
+
+// 解析XML内容，提取所有表格数据
+std::vector< std::vector< std::vector< std::string > > > parse_tables(const std::vector< char > &xml_data) {
+    std::vector< std::vector< std::vector< std::string > > > all_tables;
+
+    // 加载XML数据
+    pugi::xml_document     doc;
+    pugi::xml_parse_result result = doc.load_buffer(xml_data.data( ), xml_data.size( ));
+    if (!result) {
+        std::cerr << u8"XML解析失败: " << result.description( ) << std::endl;
+        return all_tables;
+    }
+
+    // 遍历所有表格节点 <w:tbl>
+    for (auto tbl_node : doc.select_nodes("//w:tbl")) {
+        std::vector< std::vector< std::string > > table;
+
+        // 遍历表格中的行 <w:tr>
+        for (auto tr_node : tbl_node.node( ).select_nodes("w:tr")) {
+            std::vector< std::string > row;
+
+            // 遍历行中的单元格 <w:tc>
+            for (auto tc_node : tr_node.node( ).select_nodes("w:tc")) {
+                std::string cell_text;
+
+                // 提取单元格中的文本 <w:t>
+                for (auto t_node : tc_node.node( ).select_nodes(".//w:t")) {
+                    cell_text += t_node.node( ).text( ).as_string( );
+                }
+
+                row.push_back(cell_text);
+            }
+
+            table.push_back(row);
+        }
+
+        all_tables.push_back(table);
+    }
+
+    return all_tables;
+}
+
+// 打印表格数据
+void print_tables(const std::vector< std::vector< std::vector< std::string > > > &tables) {
+    std::cout << u8"共发现 " << tables.size( ) << u8" 个表格" << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
+
+    for (size_t i = 0; i < tables.size( ); ++i) {
+        std::cout << u8"表格 " << i + 1 << ":" << std::endl;
+        for (const auto &row : tables[i]) {
+            for (const auto &cell : row) {
+                std::cout << cell << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "----------------------------------------" << std::endl;
+    }
+}
+
+
+// 测试解析docx文件的minizip与pugixml
+int test_for_docx( ) {
+    // 1. 读取DOCX中的word/document.xml
+    std::vector< char > xml_data = read_docx_file("列.docx", "word/document.xml");
+    if (xml_data.empty( )) {
+        return 1;
+    }
+
+    // 2. 解析表格数据
+    auto tables = parse_tables(xml_data);
+    if (tables.empty( )) {
+        std::cout << u8"未找到任何表格" << std::endl;
+        return 0;
+    }
+
+    // 3. 打印结果
+    print_tables(tables);
+
+    return 0;
+}
 
 void test_main( ) {
 
@@ -164,8 +295,8 @@ void test_for_ppocr( ) {
             std::cout << "(" << cell.box[0][0] << "," << cell.box[0][1] << ")";
             std::cout << "(" << cell.box[1][0] << "," << cell.box[1][1] << ")" << std::endl;
             std::cout << "(" << cell.box[2][0] << "," << cell.box[2][1] << ")";
-            std::cout << "(" << cell.box[3][0] << "," << cell.box[3][1] << ")" ;
-            std::cout << cell.text<<std::endl;
+            std::cout << "(" << cell.box[3][0] << "," << cell.box[3][1] << ")";
+            std::cout << cell.text << std::endl;
         }
     }
 }

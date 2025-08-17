@@ -33,7 +33,7 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-    test_for_ppocr( );
+    test_for_docx( );
     pause( );
     // test_for__load_sheet_from_img( );
 #endif    // true
