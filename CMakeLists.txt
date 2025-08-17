@@ -29,10 +29,11 @@ set(CMAKE_CXX_STANDARD 17)
 # 找包，这是可行的
 # find_package(OpenCV REQUIRED)
 
-
 # 这里xlnt包不知道什么原因win没法安装，只能分步了
 #set(Xlnt_DIR "")
 #find_package(Xlnt REQUIRED)
+
+# 由于尽量满足简单地可移植性这一条件，我都将第三方库安装的这里
 
 set(THIRD_PARTY_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/dll/")
 set(THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/third_party/lib/")

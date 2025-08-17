@@ -10,6 +10,9 @@
 #include <vector>
 #include <xlnt/xlnt.hpp>
 
+
+namespace file {
+
 /*
  * @brief 解析文件名的后缀与文件名字（不含后缀）
  * @param _input 输入的文件名
@@ -133,13 +136,13 @@ bool get_imgpath_from_folder(
 
 /*
  * @brief 用于读取表格（utf8编码）
- * @param _aSheet 储存表格的二维数组（按照row，column的形式）
- * @param _pathAndName 文件的路径
+ * @param _sheet 储存表格的二维数组（按照row，column的形式）
+ * @param _path 文件的路径
  */
-void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_aSheet, std::string _pathAndName) {
+void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet, std::string _path) {
     xlnt::workbook wb;
-    std::cout << u8"load file: " << _pathAndName << std::endl;
-    wb.load(_pathAndName);
+    std::cout << u8"load file: " << _path << std::endl;
+    wb.load(_path);
     auto ws = wb.active_sheet( );    // 获取当前激活的工作表（唯一一张）
 
     // 按行遍历
@@ -151,19 +154,19 @@ void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_aSheet, st
             // cell.to_string() 把数字、日期、公式等统一转为字符串
             aSingleRow.push_back(cell.to_string( ));
         }
-        _aSheet.push_back(aSingleRow);
+        _sheet.push_back(aSingleRow);
     }
 }
 
 /*
  * @brief 签到表表格的储存
- * @param _aSheet 储存表格的二维数组
- * @param _pathAndName 文件的路径
+ * @param _sheet 储存表格的二维数组
+ * @param _path 文件的路径
  * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName,
+    std::vector< std::vector< std::string > > &_sheet,
+    std::string                                _path,
     std::string                                _titleName) {
 
     // 定义字体
@@ -194,16 +197,16 @@ void save_attSheet_to_xlsx(
 
     size_t maxCol = 1;    // sheet中列的数量
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
-        for (std::size_t c = 0; c < _aSheet[r].size( ); ++c) {
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_aSheet[r][c]);
+    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
+        for (std::size_t c = 0; c < _sheet[r].size( ); ++c) {
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(b);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(f);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
             // 注意 xlnt 行列从 1 开始
         }
-        if (maxCol < _aSheet[r].size( )) {
-            maxCol = _aSheet[r].size( );
+        if (maxCol < _sheet[r].size( )) {
+            maxCol = _sheet[r].size( );
         }
     }
 
@@ -215,7 +218,7 @@ void save_attSheet_to_xlsx(
         ws.column_properties(i).custom_width = true;
     }
 
-    for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
+    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
         ws.row_properties(r + 1).height        = 24;    // 24pt
         ws.row_properties(r + 1).custom_height = true;
     }
@@ -244,17 +247,17 @@ void save_attSheet_to_xlsx(
     ws.cell("A1").font(f_title);
     ws.cell("A1").alignment(align);
 
-    wb.save(_pathAndName);
+    wb.save(_path);
 }
 
 /*
  * @brief 考勤表表格的储存
- * @param _aSheet 储存表格的二维数组
+ * @param _sheet 储存表格的二维数组
  * @param _path 文件的路径
  * @param _titleName 表格标题的名称
  */
 void save_sttSheet_to_xlsx(
-    const std::vector< std::vector< std::string > > &_aSheet,
+    const std::vector< std::vector< std::string > > &_sheet,
     std::string                                     &_path,
     std::string                                     &_titleName) {
     // 定义字体
@@ -293,20 +296,20 @@ void save_sttSheet_to_xlsx(
 
     size_t maxCol = 1;    // sheet中列的数量
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _aSheet.size( ); ++r) {
-        for (std::size_t c = 0; c < _aSheet[r].size( ); ++c) {
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_aSheet[r][c]);
+    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
+        for (std::size_t c = 0; c < _sheet[r].size( ); ++c) {
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(b);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(fbody);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
             // 注意 xlnt 行列从 1 开始
         }
-        if (maxCol < _aSheet[r].size( )) {
-            maxCol = _aSheet[r].size( );
+        if (maxCol < _sheet[r].size( )) {
+            maxCol = _sheet[r].size( );
         }
     }
     // 修改第一行（表头）的字体
-    for (size_t c = 0; c < _aSheet[0].size( ); c++) {
+    for (size_t c = 0; c < _sheet[0].size( ); c++) {
         ws.cell(xlnt::cell_reference(c + 1, 1)).border(b);
     }
 
@@ -316,7 +319,7 @@ void save_sttSheet_to_xlsx(
         ws.column_properties(i).custom_width = true;
     }
     // 修改行高
-    for (size_t r = 1; r <= _aSheet.size( ); r++) {
+    for (size_t r = 1; r <= _sheet.size( ); r++) {
         ws.row_properties(r).height        = 25;    // 25pt
         ws.row_properties(r).custom_height = true;
     }
@@ -389,10 +392,10 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
         for (auto cell : row) {
             // cell.to_string() 把数字、日期、公式等统一转为字符串
             aSingleRow.push_back(cell.to_string( ));
-            std::cout << cell << "   ";
+            // std::cout << cell << "   ";
         }
         _sheet.push_back(aSingleRow);
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     pause( );
 }
@@ -411,3 +414,4 @@ void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > > &_sh
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
     wb.save("./output/unknown.xlsx");
 }
+}    // namespace file

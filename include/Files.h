@@ -14,6 +14,9 @@
 #include <utility>
 #include <vector>
 
+
+namespace file {
+
 /*
  * @brief 解析文件名字的后缀与文件名字（不含后缀）
  * @param _input 输入的文件名
@@ -53,30 +56,30 @@ bool get_imgpath_from_folder(
 
 /*
  * @brief 用于读取表格（utf8编码）
- * @param _aSheet 储存表格的二维数组（按照row，column的形式）
- * @param _pathAndName 文件的路径
+ * @param _sheet 储存表格的二维数组（按照row，column的形式）
+ * @param _path 文件的路径
  */
-void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_aSheet, std::string _pathAndName);
+void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet, std::string _path);
 
 /*
  * @brief 签到表表格的储存
- * @param _aSheet 储存表格的二维数组
- * @param _pathAndName 文件的路径
+ * @param _sheet 储存表格的二维数组
+ * @param _path 文件的路径
  * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName,
+    std::vector< std::vector< std::string > > &_sheet,
+    std::string                                _path,
     std::string                                _titleName);
 
 /*
  * @brief 考勤表表格的储存
- * @param _aSheet 储存表格的二维数组
+ * @param _sheet 储存表格的二维数组
  * @param _path 文件的路径
  * @param _titleName 表格标题的名称
  */
 void save_sttSheet_to_xlsx(
-    const std::vector< std::vector< std::string > > &_aSheet,
+    const std::vector< std::vector< std::string > > &_sheet,
     std::string                                     &_path,
     std::string                                     &_titleName);
 
@@ -97,6 +100,6 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
  * @param _sheet 表格
  */
 void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > > &_sheet);
-
+}    // namespace file
 
 #endif    // !FILES_H

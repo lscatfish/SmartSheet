@@ -252,7 +252,7 @@ void DoQingziClass::load_personnel_information_list( ) {
               << u8"读取全学院名单..." << std::endl
               << std::endl;
 
-    get_filepath_from_folder(
+    file::get_filepath_from_folder(
         className_,
         filePathAndName_,
         "./input/all/",
@@ -264,7 +264,7 @@ void DoQingziClass::load_personnel_information_list( ) {
          it_className++, it_filePathAndName++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_xlsx(sheet, *it_filePathAndName);
+        file::load_sheet_from_xlsx(sheet, *it_filePathAndName);
         save_information_std(sheet, *it_className);
     }
 }
@@ -321,7 +321,7 @@ void DoQingziClass::make_attendanceSheet( ) {
     //=======================================================================================/
     std::cout << std ::endl
               << u8"读取各班的报名表..." << std::endl;
-    get_filepath_from_folder(
+    file::get_filepath_from_folder(
         app_classname,
         app_filePathAndName,
         "./input/app/",
@@ -333,7 +333,7 @@ void DoQingziClass::make_attendanceSheet( ) {
          it_app_filepath++, it_app_classname++) {
         // 保存读取到的表格
         std::vector< std::vector< std::string > > sheet;
-        load_sheet_from_xlsx(sheet, *it_app_filepath);
+        file::load_sheet_from_xlsx(sheet, *it_app_filepath);
         extract_application_to_vector(sheet, *it_app_classname);
     }
 
@@ -409,7 +409,7 @@ void DoQingziClass::save_attendanceSheet( ) {
                 serialNum++;
             }
         }
-        save_attSheet_to_xlsx(sheet, sheetPath, sheetTitle);
+        file::save_attSheet_to_xlsx(sheet, sheetPath, sheetTitle);
     }
 }
 
@@ -533,7 +533,7 @@ void DoQingziClass::make_statisticsSheet( ) {
 
     // 1.拉取文件夹中的所有照片的地址
     std::vector< std::string > u8path;
-    get_imgpath_from_folder(
+    file::get_imgpath_from_folder(
         att_filePathAndName,
         att_fileName,
         u8path,
@@ -560,7 +560,7 @@ void DoQingziClass::make_statisticsSheet( ) {
         std::vector< std::vector< std::string > > sh;
         for (size_t i = 0; i < it_cfPAN->second.size( ); i++) {
             std::vector< std::vector< std::string > > partSh;
-            load_sheet_from_img(partSh, it_cfPAN->second[i]);
+            img::load_sheet_from_img(partSh, it_cfPAN->second[i]);
             sh = mergeMultipleSheets(sh, partSh);
             std::cout << u8"融合结束" << std::endl;
         }
@@ -642,7 +642,7 @@ void DoQingziClass::save_statisticsSheet( ) {
                 sheet.push_back(line);
             }
         }
-        save_sttSheet_to_xlsx(sheet, sheetSavePath, sheetTitle);
+        file::save_sttSheet_to_xlsx(sheet, sheetSavePath, sheetTitle);
     }
 }
 
@@ -862,7 +862,7 @@ void DoQingziClass::save_signSheet( ) {
         line.push_back(per.studentID);
         sh.push_back(line);
     }
-    save_signSheet_to_xlsx(sh);
+    file::save_signSheet_to_xlsx(sh);
 }
 
 /*
@@ -875,7 +875,7 @@ void DoQingziClass::load_signSheet( ) {
 
     // 按照 班级  学号  的方式读取
     std::vector< std::vector< std::string > > sh;
-    load_signSheet_from_xlsx(sh);
+    file::load_signSheet_from_xlsx(sh);
 
     for (const auto &line : sh) {
         DefPerson per;
@@ -924,5 +924,5 @@ void DoQingziClass::save_unknown_person(const std::vector< DefUnknownPerson > &_
             sh.push_back(line2);
         }
     }
-    save_unknownPerSheet_to_xlsx(sh);
+    file::save_unknownPerSheet_to_xlsx(sh);
 }
