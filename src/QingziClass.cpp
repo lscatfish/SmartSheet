@@ -896,11 +896,11 @@ void DoQingziClass::load_signSheet( ) {
  */
 void DoQingziClass::save_unknown_person(const std::vector< DefUnknownPerson > &_in_unLists) {
     std::vector< std::vector< std::string > > sh = {
-        { "", "班级", "姓名", "学号", "相似度" }
+        { "", u8"班级", u8"姓名", u8"学号", u8"相似度" }
     };
     for (auto &unPer : _in_unLists) {
         std::vector< std::string > line1;
-        line1.push_back("*UNKNOWN");
+        line1.push_back(u8"*UNKNOWN");
         line1.push_back(unPer.personStd.classname);
         line1.push_back(unPer.personStd.name);
         if (unPer.personStd.studentID.size( ) != 0) {
@@ -912,7 +912,7 @@ void DoQingziClass::save_unknown_person(const std::vector< DefUnknownPerson > &_
         sh.push_back(line1);
         for (size_t i = 0; i < unPer.likelyPerson.size( ); i++) {
             std::vector< std::string > line2;
-            line2.push_back("-LIKELY");
+            line2.push_back(u8"-LIKELY");
             line2.push_back(unPer.likelyPerson[i].classname);
             line2.push_back(unPer.likelyPerson[i].name);
             line2.push_back(unPer.likelyPerson[i].studentID);
