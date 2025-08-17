@@ -17,7 +17,7 @@ namespace file {
 // 递归遍历文件夹，收集所有文件路径到 vector 中
 void DefFolder::traverse_folder(const std::string &folderPath, list< std::string > &filePaths) {
     // 构建搜索路径（添加通配符*匹配所有项）
-    std::string searchPath = folderPath + "\\*";
+    std::string searchPath = folderPath + "/*";
 
     // 用于存储搜索结果的结构体
     WIN32_FIND_DATAA findData;
@@ -39,7 +39,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
         }
 
         // 构建完整路径
-        std::string fullPath = folderPath + "\\" + fileName;
+        std::string fullPath = folderPath + "/" + fileName;
 
         // 判断当前项是否为文件夹
         if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {

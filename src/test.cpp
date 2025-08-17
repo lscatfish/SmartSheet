@@ -33,28 +33,29 @@ struct TableCell {
 
 // 从DOCX中读取指定文件
 std::vector< char > read_docx_file(const std::string &docx_path, const std::string &inner_file_path) {
-    // 代码与之前相同，省略...
+
     unzFile zip_file = unzOpen(docx_path.c_str( ));
+
     if (!zip_file) {
-        std::cerr << "无法打开DOCX文件: " << docx_path << std::endl;
+        std::cerr << u8"无法打开DOCX文件: " << docx_path << std::endl;
         return { };
     }
 
     if (unzLocateFile(zip_file, inner_file_path.c_str( ), 0) != UNZ_OK) {
-        std::cerr << "DOCX中未找到文件: " << inner_file_path << std::endl;
+        std::cerr << u8"DOCX中未找到文件: " << inner_file_path << std::endl;
         unzClose(zip_file);
         return { };
     }
 
     unz_file_info file_info;
     if (unzGetCurrentFileInfo(zip_file, &file_info, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK) {
-        std::cerr << "获取文件信息失败" << std::endl;
+        std::cerr << u8"获取文件信息失败" << std::endl;
         unzClose(zip_file);
         return { };
     }
 
     if (unzOpenCurrentFile(zip_file) != UNZ_OK) {
-        std::cerr << "打开文件失败" << std::endl;
+        std::cerr << u8"打开文件失败" << std::endl;
         unzClose(zip_file);
         return { };
     }
@@ -62,7 +63,7 @@ std::vector< char > read_docx_file(const std::string &docx_path, const std::stri
     std::vector< char > buffer(file_info.uncompressed_size);
     int                 bytes_read = unzReadCurrentFile(zip_file, buffer.data( ), buffer.size( ));
     if (bytes_read != static_cast< int >(file_info.uncompressed_size)) {
-        std::cerr << "文件读取不完整" << std::endl;
+        std::cerr << u8"文件读取不完整" << std::endl;
         unzCloseCurrentFile(zip_file);
         unzClose(zip_file);
         return { };
@@ -80,7 +81,7 @@ std::vector< std::vector< std::vector< TableCell > > > parse_tables_with_positio
     pugi::xml_document     doc;
     pugi::xml_parse_result result = doc.load_buffer(xml_data.data( ), xml_data.size( ));
     if (!result) {
-        std::cerr << "XML解析失败: " << result.description( ) << std::endl;
+        std::cerr << u8"XML解析失败: " << result.description( ) << std::endl;
         return all_tables;
     }
 
