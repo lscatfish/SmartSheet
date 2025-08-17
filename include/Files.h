@@ -33,8 +33,6 @@ public:
             u8filePathList_.push_back(encoding::chcode_to_utf8(fP));
         }
     };
-
-
     ~DefFolder( ) = default;
 
     /*
@@ -55,7 +53,6 @@ public:
      * @return list<string>类型一个列表
      */
     list< std::string > get_u8filePath_list( );
-
 
 private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
