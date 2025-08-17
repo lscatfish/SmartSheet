@@ -1,5 +1,6 @@
 ﻿
 #include <algorithm>
+#include <basic.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <Encoding.h>
@@ -148,7 +149,7 @@ public:
     SHEET get_sheet( );
 
     // 返回只有string的表格
-    std::vector< std::vector< std::string > > get_stringSheet( );
+    table< std::string > get_stringSheet( );
 
 private:
     std::vector< int > horizontalYs_;    // 水平线的y坐标
@@ -320,10 +321,10 @@ SHEET GridResult::get_sheet( ) {
 }
 
 // 返回只有string的表格
-std::vector< std::vector< std::string > > GridResult::get_stringSheet( ) {
-    std::vector< std::vector< std::string > > sh;
+table< std::string > GridResult::get_stringSheet( ) {
+    table< std::string > sh;
     for (auto &line : this->sheet_) {
-        std::vector< std::string > l;
+        list< std::string > l;
         for (auto &cell : line) {
             l.push_back(cell.text);
         }
@@ -357,23 +358,23 @@ static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 /*
  * @brief 用于读取图片的表格（utf8编码）
- * @param 储存表格的二维数组（按照row，column的形式）
- * @param 文件的路径
+ * @param _sheet 储存表格的二维数组（按照row，column的形式）
+ * @param _path 文件的路径
  */
 void load_sheet_from_img(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName) {
+    table< std::string > &_sheet,
+    std::string           _path) {
 
     // 读取图片
     cv::Mat img;
-    if (!_read_img(_pathAndName, img)) return;    // 读取失败
+    if (!_read_img(_path, img)) return;    // 读取失败
 
     // ocr操作
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字块]
     std::cout << u8"ppocr工作" << std::endl;
     ppocr::ocr(ocrPR, img.clone( ), _ppocrDir_);    // 这里返回的text为utf8编码
     std::cout << std::endl
-              << u8"图片: " << encoding::chcode_to_utf8(_pathAndName) << u8" 加载结束..." << std::endl
+              << u8"图片: " << encoding::chcode_to_utf8(_path) << u8" 加载结束..." << std::endl
               << std::endl;
 
     // 解析照片中表格的网格线
@@ -390,7 +391,7 @@ void load_sheet_from_img(
 
     // 还原表格
     grid.fill_sheet(solveOCR);
-    _aSheet = grid.get_stringSheet( );
+    _sheet = grid.get_stringSheet( );
 }
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////

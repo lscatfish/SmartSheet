@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include <utility>
+#include<basic.hpp>
 #include <vector>
 
 /*
@@ -20,12 +21,12 @@ void pause( );
 std::pair< std::string, std::string > split_chinese_and_number(const std::string &input);
 
 // 递归终止函数
-void mergeHelper(std::vector< std::vector< std::string > > &result);
+void mergeHelper(table<std::string> &result);
 
 // 可变参数模板函数，用于合并任意数量的vector<vector<string>>
 template < typename... Args >
-void mergeHelper(std::vector< std::vector< std::string > >       &result,
-                 const std::vector< std::vector< std::string > > &first,
+void mergeHelper(table<std::string>       &result,
+                 const table<std::string> &first,
                  Args &&...rest) {
     // 添加当前vector的所有元素
     result.insert(result.end( ), first.begin( ), first.end( ));
@@ -35,8 +36,8 @@ void mergeHelper(std::vector< std::vector< std::string > >       &result,
 
 // 合并任意数量的vector<vector<string>>
 template < typename... Args >
-std::vector< std::vector< std::string > > mergeMultipleSheets(Args &&...args) {
-    std::vector< std::vector< std::string > > result;
+table<std::string> mergeMultipleSheets(Args &&...args) {
+    table<std::string> result;
     mergeHelper(result, std::forward< Args >(args)...);
     return result;
 }

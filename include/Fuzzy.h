@@ -15,6 +15,7 @@
 #ifndef FUZZY_H
 #define FUZZY_H
 
+#include <basic.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <PersonnelInformation.h>
@@ -41,10 +42,10 @@ enum class LEVEL {
  * @param _matchLevel 匹配度
  * @return 系列可能的答案
  */
-std::vector< std::string > search(
-    std::string                       _target,
-    const std::vector< std::string > &_searchingLib,
-    LEVEL                             _matchLevel);
+list< std::string > search(
+    std::string                _target,
+    const list< std::string > &_searchingLib,
+    LEVEL                      _matchLevel);
 
 /*
  * @brief 模糊搜索函数
@@ -56,10 +57,10 @@ std::vector< std::string > search(
  * @return 是否搜索成功
  */
 bool search(
-    std::vector< std::string >       &_outList,
-    std::string                       _target,
-    const std::vector< std::string > &_searchingLib,
-    LEVEL                             _matchLevel);
+    list< std::string >       &_outList,
+    std::string                _target,
+    const list< std::string > &_searchingLib,
+    LEVEL                      _matchLevel);
 
 /*
  * @brief 模糊搜索函数,没有返回可能匹配的答案
@@ -70,7 +71,7 @@ bool search(
  * @return 是否搜索成功
  */
 bool search(
-    const std::vector< std::string > &_searchingLib,
+    const list<std::string> &_searchingLib,
     std::string                       _target,
     LEVEL                             _matchLevel);
 
@@ -83,10 +84,10 @@ bool search(
  * @retrun 是否搜索成功
  */
 bool search_for_person(
-    std::vector< DefPerson >       &_outList,
-    std::vector< double >          &_likelyRate,
+    list< DefPerson >              &_outList,
+    list< double >                 &_likelyRate,
     DefPerson                       _target,
-    const std::vector< DefPerson > &_searchingLib);
+    const list< DefPerson > &_searchingLib);
 
 }    // namespace fuzzy
 

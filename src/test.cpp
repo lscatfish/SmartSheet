@@ -176,7 +176,7 @@ void test_main( ) {
 
     /* 3. 准备二维向量保存整张表 -------------------------------------------- */
     // theWholeSpreadSheet[row][col] 即第 row 行第 col 列的字符串
-    std::vector< std::vector< std::string > > theWholeSpreadSheet;
+    table< std::string > theWholeSpreadSheet;
 
     /* 4. 按行遍历工作表 ----------------------------------------------------- */
     // ws.rows(false) 返回行迭代器，false 表示不缓存，节省内存
@@ -184,7 +184,7 @@ void test_main( ) {
         std::cout << "为当前行创建一个新的向量..." << std::endl;
 
         // 保存当前行所有单元格文本的临时向量
-        std::vector< std::string > aSingleRow;
+        list< std::string > aSingleRow;
 
         /* 5. 遍历当前行的每个单元格 ---------------------------------------- */
         for (auto cell : row) {
@@ -215,11 +215,11 @@ void test_main( ) {
     wss.save(chcode_to_utf8("./1我/ou操.xlsx"));
 
 
-    std::vector< std::string > className_;          // 班级名字
-    std::vector< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    file::get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
+    list< std::string > className_;          // 班级名字
+    list< std::string > filePathAndName_;    // 每个xlsx文件的位置
+    file::get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), list< std::string >{ ".xlsx" });
 
-    std::vector< std::vector< std::string > > test1 = {
+    table< std::string > test1 = {
         { chcode_to_utf8("序号"), chcode_to_utf8("姓名"), chcode_to_utf8("学号"), chcode_to_utf8("签到") },
         { chcode_to_utf8("1"), chcode_to_utf8("王二"), chcode_to_utf8("20243546545T"), "" },
         { chcode_to_utf8("2"), chcode_to_utf8("张三"), chcode_to_utf8("324352532423"), "" },
@@ -232,11 +232,15 @@ void test_main( ) {
 // 测试ENCODING
 void test_for_ENCODING( ) {
     namespace ec = encoding;
-    std::vector< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
-                                    "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我",
-                                    "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh" };
+    list< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
+                             "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我",
+                             "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh",
+                             "./input/sign_k/青公班-报名表" };
     for (auto &a : str) {
         std::cout << ec::chcode_to_utf8(a) << std::endl;
+    }
+    for (auto &a : str) {
+        std::cout << ec::gbk_to_utf8(a) << std::endl;
     }
 }
 
@@ -244,7 +248,8 @@ void test_for_ENCODING( ) {
 void test_for_chstring( ) {
     namespace ec = encoding;
     std::vector< chstring > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
-                                 "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我", "顶峰那我", "图片" };
+                                 "****加拿大", "曾经多次uy蒂娜", u8"顶峰那我",
+                                 "顶峰那我", "图片" };
     for (auto &a : str) {
         std::cout << a << std::endl;
     }
@@ -274,8 +279,8 @@ void test_for_cv_imread( ) {
 
 // 测试融合sheet函数
 void test_for_mergeMultipleSheets( ) {
-    std::vector< std::vector< std::string > > sh1, sh2{ { "kndslnj", "dsn", "dic" }, { "dusbc", "cdb", "cdb" } }, sh3{ };
-    std::vector< std::vector< std::string > > sh = mergeMultipleSheets(sh1, sh2);
+    table< std::string > sh1, sh2{ { "kndslnj", "dsn", "dic" }, { "dusbc", "cdb", "cdb" } }, sh3{ };
+    table< std::string > sh = mergeMultipleSheets(sh1, sh2);
     for (size_t r = 0; r < sh.size( ); r++) {
         for (size_t c = 0; c < sh[r].size( ); c++) {
             std::cout << sh[r][c] << "   ";
@@ -303,5 +308,14 @@ void test_for_ppocr( ) {
             std::cout << "(" << cell.box[3][0] << "," << cell.box[3][1] << ")";
             std::cout << cell.text << std::endl;
         }
+    }
+}
+
+// 测试DefFolder
+void test_for_DefFolder( ) {
+    file::DefFolder     af("./input");
+    list< std::string > p = af.get_u8filePath_list( );
+    for (auto& l : p) {
+        std::cout << l << std::endl;
     }
 }
