@@ -36,9 +36,9 @@ enum class LEVEL {
 /*
  * @brief 模糊搜索函数
  * @note 用于支持部分文字编码、数字编码的模糊搜索
- * @param 搜索目标
- * @param 索引库
- * @param 匹配度
+ * @param _target 搜索目标
+ * @param _searchingLib 索引库
+ * @param _matchLevel 匹配度
  * @return 系列可能的答案
  */
 std::vector< std::string > search(
@@ -49,10 +49,10 @@ std::vector< std::string > search(
 /*
  * @brief 模糊搜索函数
  * @note 用于支持部分文字编码、数字编码的模糊搜索
- * @param 系列可能的答案
- * @param 搜索目标
- * @param 索引库
- * @param 匹配度
+ * @param _outList 系列可能的答案
+ * @param _target 搜索目标
+ * @param _searchingLib 索引库
+ * @param _matchLevel 匹配度
  * @return 是否搜索成功
  */
 bool search(

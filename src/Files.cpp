@@ -12,7 +12,7 @@
 
 /*
  * @brief 解析文件名的后缀与文件名字（不含后缀）
- * @param _input输入的文件名
+ * @param _input 输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
 std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input) {
@@ -133,12 +133,10 @@ bool get_imgpath_from_folder(
 
 /*
  * @brief 用于读取表格（utf8编码）
- * @param 储存表格的二维数组（按照row，column的形式）
- * @param 文件的路径
+ * @param _aSheet 储存表格的二维数组（按照row，column的形式）
+ * @param _pathAndName 文件的路径
  */
-void load_sheet_from_xlsx(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName) {
+void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_aSheet, std::string _pathAndName) {
     xlnt::workbook wb;
     std::cout << u8"load file: " << _pathAndName << std::endl;
     wb.load(_pathAndName);
@@ -159,9 +157,9 @@ void load_sheet_from_xlsx(
 
 /*
  * @brief 签到表表格的储存
- * @param 储存表格的二维数组
- * @param 文件的路径
- * @param 表格的名称
+ * @param _aSheet 储存表格的二维数组
+ * @param _pathAndName 文件的路径
+ * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
@@ -403,7 +401,7 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
  * @brief 保存尚未搜索到的成员到xlsx
  * @param _sheet 表格
  */
-void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > >& _sheet) {
+void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > > &_sheet) {
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
