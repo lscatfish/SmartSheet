@@ -29,5 +29,8 @@ void test_for_ppocr( );
 // 测试解析docx文件的minizip与pugixml
 int test_for_docx( );
 
+// 测试DefFolder
+void test_for_DefFolder( );
+
 
 #endif    // !TEST_H

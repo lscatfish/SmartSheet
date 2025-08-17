@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <basic.hpp>
 #include <Encoding.h>
 #include <Fuzzy.h>
 #include <PersonnelInformation.h>
@@ -71,16 +72,16 @@ static bool ifmatch_levenshtein(int dp, LEVEL _matchLevel) {
  * @param _matchLevel 匹配度
  * @return 系列可能的答案
  */
-std::vector< std::string > search(
-    std::string                       _target,
-    const std::vector< std::string > &_searchingLib,
-    LEVEL                             _matchLevel) {
+list< std::string > search(
+    std::string                _target,
+    const list< std::string > &_searchingLib,
+    LEVEL                      _matchLevel) {
 
-    std::vector< std::string > outList;
+    list< std::string > outList;
     if (search(outList, _target, _searchingLib, _matchLevel)) {
         return outList;
     } else {
-        return std::vector< std::string >( );
+        return list< std::string >( );
     }
 }
 
@@ -94,10 +95,10 @@ std::vector< std::string > search(
  * @return 是否搜索成功
  */
 bool search(
-    std::vector< std::string >       &_outList,
-    std::string                       _target,
-    const std::vector< std::string > &_searchingLib,
-    LEVEL                             _matchLevel) {
+    list< std::string >       &_outList,
+    std::string                _target,
+    const list< std::string > &_searchingLib,
+    LEVEL                      _matchLevel) {
     // 目标wstring
     std::wstring targrt = encoding::utf8_to_wstring_win(_target);
 
@@ -124,9 +125,9 @@ bool search(
  * @return 是否搜索成功
  */
 bool search(
-    const std::vector< std::string > &_searchingLib,
-    std::string                       _target,
-    LEVEL                             _matchLevel) {
+    const list< std::string > &_searchingLib,
+    std::string                _target,
+    LEVEL                      _matchLevel) {
 
     int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
     if (_matchLevel == LEVEL::High) {
@@ -167,10 +168,10 @@ bool search(
  * @retrun 是否搜索成功
  */
 bool search_for_person(
-    std::vector< DefPerson >       &_outList,
-    std::vector< double >          &_likelyRate,
-    DefPerson                       _target,
-    const std::vector< DefPerson > &_searchingLib) {
+    list< DefPerson >       &_outList,
+    list< double >          &_likelyRate,
+    DefPerson                _target,
+    const list< DefPerson > &_searchingLib) {
 
     /*
      * ****************************** 函数思路 ************************************

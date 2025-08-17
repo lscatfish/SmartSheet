@@ -39,6 +39,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <basic.hpp>
 
 // 操作照片的空间
 namespace img {
@@ -47,12 +48,12 @@ extern ppocr::DefDirs _ppocrDir_;
 
 /*
  * @brief 用于读取图片的表格（utf8编码）
- * @param 储存表格的二维数组（按照row，column的形式）
- * @param 文件的路径
+ * @param _sheet 储存表格的二维数组（按照row，column的形式）
+ * @param _path 文件的路径
  */
 void load_sheet_from_img(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName);
+    table< std::string > &_sheet,
+    std::string           _path);
 
 }    // namespace img
 

@@ -1,4 +1,5 @@
 ﻿
+#include <basic.hpp>
 #include <Encoding.h>
 #include <Files.h>
 #include <filesystem>
@@ -8,10 +9,74 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <Windows.h>
 #include <xlnt/xlnt.hpp>
 
-
 namespace file {
+
+// 递归遍历文件夹，收集所有文件路径到 vector 中
+void DefFolder::traverse_folder(const std::string &folderPath, list< std::string > &filePaths) {
+    // 构建搜索路径（添加通配符*匹配所有项）
+    std::string searchPath = folderPath + "\\*";
+
+    // 用于存储搜索结果的结构体
+    WIN32_FIND_DATAA findData;
+    HANDLE           hFind = FindFirstFileA(searchPath.c_str( ), &findData);
+
+    // 检查搜索是否成功
+    if (hFind == INVALID_HANDLE_VALUE) {
+        std::cerr << u8"无法打开文件夹: " << folderPath << std::endl;
+        return;
+    }
+
+    // 遍历所有找到的项
+    do {
+        std::string fileName = findData.cFileName;
+
+        // 跳过当前目录(.)、上级目录(..)以及__MACOSX文件夹
+        if (fileName == "." || fileName == ".." || fileName == "__MACOSX" || fileName == "_MACOSX") {
+            continue;
+        }
+
+        // 构建完整路径
+        std::string fullPath = folderPath + "\\" + fileName;
+
+        // 判断当前项是否为文件夹
+        if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            // 若是文件夹，递归遍历
+            traverse_folder(fullPath, filePaths);
+        } else {
+            // 若是文件，添加到路径列表
+            filePaths.push_back(fullPath);
+        }
+
+    } while (FindNextFileA(hFind, &findData) != 0);    // 继续搜索下一项
+
+    // 关闭搜索句柄
+    FindClose(hFind);
+}
+
+/*
+ * @brief 输出文件夹下的各个文件路径(utf8编码)
+ * @return list<string>类型一个列表
+ */
+list< std::string > DefFolder::get_filePath_list( ) {
+    return filePathList_;
+}
+
+/*
+ * @brief 输出文件夹下的各个文件路径
+ * @return list<string>类型一个列表
+ */
+list< std::string > file::DefFolder::get_u8filePath_list( ) {
+    return u8filePathList_;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 
 /*
  * @brief 解析文件名的后缀与文件名字（不含后缀）
@@ -41,18 +106,18 @@ std::pair< std::string, std::string > separate_filename_and_extension(const std:
  * @return 错误返回false，读取成功返回true
  */
 bool get_filepath_from_folder(
-    std::vector< std::string >       &_name,
-    std::vector< std::string >       &_path,
-    std::string                       _foldername,
-    const std::vector< std::string > &_extension) {
+    list< std::string >       &_name,
+    list< std::string >       &_path,
+    std::string                _foldername,
+    const list< std::string > &_extension) {
 
     namespace fs = std::filesystem;
 
-    fs::path                   folder = _foldername;    // 目标目录
-    std::vector< std::string > fileName;                // 文件名(包含后缀)
+    fs::path            foldern = _foldername;    // 目标目录
+    list< std::string > fileName;                 // 文件名(包含后缀)
 
     try {
-        for (const auto &entry : fs::recursive_directory_iterator(folder)) {
+        for (const auto &entry : fs::recursive_directory_iterator(foldern)) {
             if (fs::is_regular_file(entry.status( ))) {
                 fileName.emplace_back(entry.path( ).filename( ).u8string( ));    // 名字(包含后缀)
                 _path.emplace_back(entry.path( ).u8string( ));                   // 路径
@@ -91,19 +156,19 @@ bool get_filepath_from_folder(
  * @return 错误返回false，读取成功返回true
  */
 bool get_imgpath_from_folder(
-    std::vector< std::string >       &_path,
-    std::vector< std::string >       &_u8name,
-    std::vector< std::string >       &_u8path,
-    std::string                       _foldername,
-    const std::vector< std::string > &_extension) {
+    list< std::string >       &_path,
+    list< std::string >       &_u8name,
+    list< std::string >       &_u8path,
+    std::string                _foldername,
+    const list< std::string > &_extension) {
 
     namespace fs = std::filesystem;
 
-    fs::path                   folder = _foldername;    // 目标目录
-    std::vector< std::string > u8fileName;              // 文件名(包含后缀)
+    fs::path            foldern = _foldername;    // 目标目录
+    list< std::string > u8fileName;               // 文件名(包含后缀)
 
     try {
-        for (const auto &entry : fs::recursive_directory_iterator(folder)) {
+        for (const auto &entry : fs::recursive_directory_iterator(foldern)) {
             if (fs::is_regular_file(entry.status( ))) {
                 u8fileName.emplace_back(entry.path( ).filename( ).u8string( ));    // 名字(包含后缀)
                 _path.emplace_back(entry.path( ).string( ));                       // 路径
@@ -139,7 +204,7 @@ bool get_imgpath_from_folder(
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径
  */
-void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet, std::string _path) {
+void load_sheet_from_xlsx(table< std::string > &_sheet, std::string _path) {
     xlnt::workbook wb;
     std::cout << u8"load file: " << _path << std::endl;
     wb.load(_path);
@@ -148,7 +213,7 @@ void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet, std
     // 按行遍历
     for (auto row : ws.rows(false)) {
         // 保存当前行所有单元格文本的临时向量
-        std::vector< std::string > aSingleRow;
+        list< std::string > aSingleRow;
         // 遍历当前行的每个单元格
         for (auto cell : row) {
             // cell.to_string() 把数字、日期、公式等统一转为字符串
@@ -165,9 +230,9 @@ void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet, std
  * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
-    std::vector< std::vector< std::string > > &_sheet,
-    std::string                                _path,
-    std::string                                _titleName) {
+    table< std::string > &_sheet,
+    std::string           _path,
+    std::string           _titleName) {
 
     // 定义字体
     xlnt::font f;
@@ -257,9 +322,9 @@ void save_attSheet_to_xlsx(
  * @param _titleName 表格标题的名称
  */
 void save_sttSheet_to_xlsx(
-    const std::vector< std::vector< std::string > > &_sheet,
-    std::string                                     &_path,
-    std::string                                     &_titleName) {
+    const table< std::string > &_sheet,
+    std::string                &_path,
+    std::string                &_titleName) {
     // 定义字体
     xlnt::font fbody;      // 正文字体
     xlnt::font fheader;    // 表头字体
@@ -351,7 +416,7 @@ void save_sttSheet_to_xlsx(
  * @brief 保存缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void save_signSheet_to_xlsx(const std::vector< std::vector< std::string > > &_sheet) {
+void save_signSheet_to_xlsx(const table< std::string > &_sheet) {
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
@@ -366,7 +431,7 @@ void save_signSheet_to_xlsx(const std::vector< std::vector< std::string > > &_sh
  * @brief 加载缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet) {
+void load_signSheet_from_xlsx(table< std::string > &_sheet) {
     const std::string path = "./sign/sign.xlsx";
     namespace fs           = std::filesystem;
     // 判断此文件是否存在
@@ -387,7 +452,7 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
     // 按行遍历
     for (auto row : ws.rows(false)) {
         // 保存当前行所有单元格文本的临时向量
-        std::vector< std::string > aSingleRow;
+        list< std::string > aSingleRow;
         // 遍历当前行的每个单元格
         for (auto cell : row) {
             // cell.to_string() 把数字、日期、公式等统一转为字符串
@@ -404,7 +469,7 @@ void load_signSheet_from_xlsx(std::vector< std::vector< std::string > > &_sheet)
  * @brief 保存尚未搜索到的成员到xlsx
  * @param _sheet 表格
  */
-void save_unknownPerSheet_to_xlsx(std::vector< std::vector< std::string > > &_sheet) {
+void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");

@@ -1,5 +1,6 @@
 ﻿
 #include <algorithm>
+#include <basic.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <Encoding.h>
@@ -189,7 +190,7 @@ void DoQingziClass::load_personnel_information_list( ) {
      * @param 青字班的名字
      */
     auto save_information_std =
-        [&](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+        [&](const table< std::string > &sh, std::string cn) -> void {
 #ifdef DO_TEST
         for (size_t rowIndex = 0; rowIndex < sh.size( ); rowIndex++) {
             for (size_t colIndex = 0;
@@ -256,14 +257,14 @@ void DoQingziClass::load_personnel_information_list( ) {
         className_,
         filePathAndName_,
         "./input/all/",
-        std::vector< std::string >{ ".xlsx" });
+        list< std::string >{ ".xlsx" });
 
     // 按文件读取每个青字班的信息表
     for (auto it_className = className_.begin( ), it_filePathAndName = filePathAndName_.begin( );
          it_className != className_.end( ) && it_filePathAndName != filePathAndName_.end( );
          it_className++, it_filePathAndName++) {
         // 保存读取到的表格
-        std::vector< std::vector< std::string > > sheet;
+        table< std::string > sheet;
         file::load_sheet_from_xlsx(sheet, *it_filePathAndName);
         save_information_std(sheet, *it_className);
     }
@@ -273,9 +274,9 @@ void DoQingziClass::load_personnel_information_list( ) {
  * @brief 制作签到表
  */
 void DoQingziClass::make_attendanceSheet( ) {
-    std::vector< std::string > app_classname;          // 班级名称
-    std::vector< std::string > app_filePathAndName;    // applicationSheet的excel文件的路径
-    std::vector< DefLine >     app_person;             // 定义从报名表中获得的人员信息
+    list< std::string > app_classname;          // 班级名称
+    list< std::string > app_filePathAndName;    // applicationSheet的excel文件的路径
+    list< DefLine >     app_person;             // 定义从报名表中获得的人员信息
 
     int a = 0;
     while (a != 1 && a != 2) {
@@ -306,7 +307,7 @@ void DoQingziClass::make_attendanceSheet( ) {
      * @param 班级名称
      */
     auto extract_application_to_vector =
-        [&app_person](const std::vector< std::vector< std::string > > &sh, std::string cn) -> void {
+        [&app_person](const table< std::string > &sh, std::string cn) -> void {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefLine per;
             per.classname = cn;
@@ -325,21 +326,21 @@ void DoQingziClass::make_attendanceSheet( ) {
         app_classname,
         app_filePathAndName,
         "./input/app/",
-        std::vector< std::string >{ ".xlsx" });
+        list< std::string >{ ".xlsx" });
     std::cout << std::endl;
 
     for (auto it_app_filepath = app_filePathAndName.begin( ), it_app_classname = app_classname.begin( );
          it_app_filepath != app_filePathAndName.end( ) && it_app_classname != app_classname.end( );
          it_app_filepath++, it_app_classname++) {
         // 保存读取到的表格
-        std::vector< std::vector< std::string > > sheet;
+        table< std::string > sheet;
         file::load_sheet_from_xlsx(sheet, *it_app_filepath);
         extract_application_to_vector(sheet, *it_app_classname);
     }
 
     /* 报名，标定人员 */
     for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
-        std::vector< DefPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
+        list< DefPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
         search_person(it_search, *it_app_person);
         if (it_search != personStd_.end( )) {    // 说明搜索到了
             it_search->ifsign      = true;       // 已报名
@@ -392,15 +393,15 @@ void DoQingziClass::make_attendanceSheet( ) {
  */
 void DoQingziClass::save_attendanceSheet( ) {
     for (auto it_classname = className_.begin( ); it_classname != className_.end( ); it_classname++) {
-        std::string                               sheetTitle = *it_classname + u8"签到表";
-        std::string                               sheetPath  = "./output/app_out/" + (*it_classname) + ".xlsx";
-        std::vector< std::vector< std::string > > sheet      = {
+        std::string          sheetTitle = *it_classname + u8"签到表";
+        std::string          sheetPath  = "./output/app_out/" + (*it_classname) + ".xlsx";
+        table< std::string > sheet      = {
             { u8"序号", u8"姓名", u8"学号", u8"签到" }
         };
         int serialNum = 1;
         for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
             if (it_person->classname == *it_classname && it_person->ifsign == true) {
-                std::vector< std::string > aRow;
+                list< std::string > aRow;
                 aRow.push_back(trans_integer_to_string(serialNum));
                 aRow.push_back(it_person->name);
                 aRow.push_back(it_person->studentID);
@@ -427,10 +428,10 @@ void DoQingziClass::make_statisticsSheet( ) {
      *
      * ----------------------------------------------------------------- */
 
-    std::map< std::string, std::vector< std::string > > classname__filePathAndName;    // 班级名称与各班的签到表的匹配
-    std::vector< std::string >                          att_fileName;                  // 图片的文件名(无后缀)
-    std::vector< std::string >                          att_filePathAndName;           // 图片-签到表文件的路径
-    std::vector< DefPerson >                            att_person;                    // 定义从签到表中获得的人员信息
+    std::map< std::string, list< std::string > > classname__filePathAndName;    // 班级名称与各班的签到表的匹配
+    list< std::string >                          att_fileName;                  // 图片的文件名(无后缀)
+    list< std::string >                          att_filePathAndName;           // 图片-签到表文件的路径
+    std::vector< DefPerson >                     att_person;                    // 定义从签到表中获得的人员信息
 
     // lambda函数定义========================================================================================/
     /*
@@ -439,10 +440,10 @@ void DoQingziClass::make_statisticsSheet( ) {
      * @param cn 班级名称
      */
     auto extract_attendance_to_vector =
-        [&att_person](const std::vector< std::vector< std::string > > &sh, const std::string &cn) -> void {
-        std::vector< DefLine >     att_person_line;    // 人员行信息
-        size_t                     rowHeader = 1;      // 默认表头在第一行
-        std::vector< std::string > headerLine;         // 表头
+        [&att_person](const table< std::string > &sh, const std::string &cn) -> void {
+        std::vector< DefLine > att_person_line;    // 人员行信息
+        size_t                 rowHeader = 1;      // 默认表头在第一行
+        list< std::string >    headerLine;         // 表头
 
         // 首先找到 表头 所在的行
         for (size_t rowIndex = 0; rowIndex < sh.size( ); rowIndex++) {
@@ -516,7 +517,7 @@ void DoQingziClass::make_statisticsSheet( ) {
      * @brief 打赢sheet的结果
      * @param sh 表格
      */
-    auto sheet_printer = [](const std::vector< std::vector< std::string > > &sh) -> void {
+    auto sheet_printer = [](const table< std::string > &sh) -> void {
         std::cout << std::endl
                   << std::endl;
         for (size_t r = 0; r < sh.size( ); r++) {
@@ -532,14 +533,14 @@ void DoQingziClass::make_statisticsSheet( ) {
     // ===================================================================================================/
 
     // 1.拉取文件夹中的所有照片的地址
-    std::vector< std::string > u8path;
+    list< std::string > u8path;
     file::get_imgpath_from_folder(
         att_filePathAndName,
         att_fileName,
         u8path,
         "./input/att_imgs/",
-        std::vector< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
-                                    ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+        list< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
+                             ".jpe", ".bmp", ".dib", ".webp", ".raw" });
 
     // 排序，这样就可以按照班级来
     // std::sort(att_fileName.begin( ), att_fileName.end( ));
@@ -557,9 +558,9 @@ void DoQingziClass::make_statisticsSheet( ) {
     for (auto it_cfPAN = classname__filePathAndName.begin( );
          it_cfPAN != classname__filePathAndName.end( );
          it_cfPAN++) {
-        std::vector< std::vector< std::string > > sh;
+        table< std::string > sh;
         for (size_t i = 0; i < it_cfPAN->second.size( ); i++) {
-            std::vector< std::vector< std::string > > partSh;
+            table< std::string > partSh;
             img::load_sheet_from_img(partSh, it_cfPAN->second[i]);
             sh = mergeMultipleSheets(sh, partSh);
             std::cout << u8"融合结束" << std::endl;
@@ -611,15 +612,15 @@ void DoQingziClass::save_statisticsSheet( ) {
      * |姓名|学号|学员|联系|方式|签到|备注|
      * ================================================================================= */
     for (auto it_className = className_.begin( ); it_className != className_.end( ); it_className++) {
-        std::string                               sheetTitle    = *it_className + u8"学员线下签到汇总";
-        std::string                               sheetSavePath = u8"./output/att_out/" + *it_className + ".xlsx";
-        std::vector< std::vector< std::string > > sheet         = {
+        std::string          sheetTitle    = *it_className + u8"学员线下签到汇总";
+        std::string          sheetSavePath = u8"./output/att_out/" + *it_className + ".xlsx";
+        table< std::string > sheet         = {
             { u8"姓名", u8"学号", u8"学院", u8"联系方式", u8"签到", u8"备注" }
         };
 
         for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
             if (it_person->classname == *it_className) {
-                std::vector< std::string > line;
+                list< std::string > line;
                 line.push_back(it_person->name);
                 line.push_back(it_person->studentID);
                 line.push_back(it_person->academy);
@@ -653,7 +654,7 @@ void DoQingziClass::save_statisticsSheet( ) {
  * @note 可以考虑怎么优化这两个search函数
  * @shit if很多吧，慢慢看  (^-^)
  */
-void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output, DefPerson _targetPerson) {
+void DoQingziClass::search_person(list< DefPerson >::iterator &_it_output, DefPerson _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
         if (_targetPerson.classname.size( ) != 0) {
@@ -704,7 +705,7 @@ void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output
  * @note 可以考虑怎么优化这两个search函数
  * @shit if很多吧，慢慢看  (^-^)
  */
-void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output, DefLine _targetPerson) {
+void DoQingziClass::search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson) {
     for (auto it_all = personStd_.begin( ); it_all != personStd_.end( ); it_all++) {
         /* 1.优先匹配班级（如果有） */
         if (_targetPerson.classname.size( ) != 0) {
@@ -852,11 +853,11 @@ void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _ou
 void DoQingziClass::save_signSheet( ) {
     // 按照 班级  姓名  学号  的方式保存
     // 仅保存报名的人员s
-    std::vector< std::vector< std::string > > sh;
+    table< std::string > sh;
     // 制表
     for (const auto &per : personStd_) {
         if (!per.ifsign) continue;
-        std::vector< std::string > line;
+        list< std::string > line;
         line.push_back(per.classname);
         line.push_back(per.name);
         line.push_back(per.studentID);
@@ -874,7 +875,7 @@ void DoQingziClass::load_signSheet( ) {
               << std::endl;
 
     // 按照 班级  学号  的方式读取
-    std::vector< std::vector< std::string > > sh;
+    table< std::string > sh;
     file::load_signSheet_from_xlsx(sh);
 
     for (const auto &line : sh) {
@@ -898,12 +899,12 @@ void DoQingziClass::load_signSheet( ) {
  * @brief 保存尚未搜索到的成员
  * @param _in_unLists 未搜索到的成员列表
  */
-void DoQingziClass::save_unknown_person(const std::vector< DefUnknownPerson > &_in_unLists) {
-    std::vector< std::vector< std::string > > sh = {
+void DoQingziClass::save_unknown_person(const list< DefUnknownPerson > &_in_unLists) {
+    table< std::string > sh = {
         { "", u8"班级", u8"姓名", u8"学号", u8"相似度" }
     };
     for (auto &unPer : _in_unLists) {
-        std::vector< std::string > line1;
+        list< std::string > line1;
         line1.push_back(u8"*UNKNOWN");
         line1.push_back(unPer.personStd.classname);
         line1.push_back(unPer.personStd.name);
@@ -915,7 +916,7 @@ void DoQingziClass::save_unknown_person(const std::vector< DefUnknownPerson > &_
         line1.push_back("");
         sh.push_back(line1);
         for (size_t i = 0; i < unPer.likelyPerson.size( ); i++) {
-            std::vector< std::string > line2;
+            list< std::string > line2;
             line2.push_back(u8"-LIKELY");
             line2.push_back(unPer.likelyPerson[i].classname);
             line2.push_back(unPer.likelyPerson[i].name);

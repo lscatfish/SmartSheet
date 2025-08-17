@@ -3,6 +3,7 @@
 #ifndef QINGZICLASS_H
 #define QINGZICLASS_H
 
+#include <basic.hpp>
 #include <map>
 #include <PersonnelInformation.h>
 #include <string>
@@ -45,21 +46,21 @@ public:
 private:
     // PersonFormat perInFormat_;    // 人员信息的记录方式
 
-    std::vector< std::string > className_;          // 班级名字
-    std::vector< std::string > filePathAndName_;    // 每个标准xlsx文件的位置
-    std::vector< DefPerson >   personStd_;          // 定义的标准人员信息
+    list< std::string > className_;          // 班级名字
+    list< std::string > filePathAndName_;    // 每个标准xlsx文件的位置
+    list< DefPerson >   personStd_;          // 定义的标准人员信息
     // std::vector< DefLine > personUnstd_;        // 定义的非标准人员信息
 
     // 定义名单中不存在的人员
     struct DefUnknownPerson {
-        DefLine                  personLine;
-        DefPerson                personStd;
-        std::vector< DefPerson > likelyPerson;    // 相似的人
-        std::vector< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
+        DefLine           personLine;
+        DefPerson         personStd;
+        list< DefPerson > likelyPerson;    // 相似的人
+        list< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
     };
 
-    std::vector< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
-    std::vector< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
+    list< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
+    list< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
 
     // 不存在人员的模糊搜寻结果
     // std::map< std::vector< DefLine >::iterator, std::vector< DefLine > > fuzzyPerson_;
@@ -67,8 +68,7 @@ private:
     /*
      * @brief 加载全学员表的函数
      */
-    void
-    load_personnel_information_list( );
+    void load_personnel_information_list( );
 
     /*
      * @brief 制作签到表
@@ -97,7 +97,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    void search_person(std::vector< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
+    void search_person(list< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
@@ -106,7 +106,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    void search_person(std::vector< DefPerson >::iterator &_it_output, DefLine _targetPerson);
+    void search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
 
     /*
      * @brief 缓存全部报名的人员
@@ -122,7 +122,7 @@ private:
      * @brief 保存尚未搜索到的成员
      * @param _in_unLists 未搜索到的成员列表
      */
-    void save_unknown_person(const std::vector< DefUnknownPerson > &_in_unLists);
+    void save_unknown_person(const list< DefUnknownPerson > &_in_unLists);
 };
 
 
