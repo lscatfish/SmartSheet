@@ -42,7 +42,7 @@ include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/LangModels/")
-include_directories("${THIRD_PARTY_LIB_DIR}/minizip/include/")
+include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp" 
@@ -94,10 +94,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.lib>
 )
-# 链接到minizip
+# 链接到zlib
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_LIB_DIR}//minizip/Debug//minizipd.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_LIB_DIR}//minizip/Release//minizip.lib>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
@@ -119,6 +119,11 @@ set(UCHARDET_DLL_PATH
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.dll>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.dll>
 )
+# zlib的动态链接库地址
+set(ZLIB_DLL_PATH
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.dll>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.dll>
+)
 
 # 把 DLL 拷贝到目标可执行文件目录
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -137,7 +142,13 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${UCHARDET_DLL_PATH}
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
+    COMMENT "Copying uchardet dll to output directory"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${ZLIB_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying zlib dll to output directory"
 )
 
 # 遍历每个 OCR-DLL 文件并复制到目标目录 ： 只在找到文件时执行
