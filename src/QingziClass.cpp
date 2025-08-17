@@ -19,7 +19,7 @@
 
 /*
  * @brief 将整数类型转化为string类型
- * @param 输入的整型
+ * @param in 输入的整型
  */
 static std::string trans_integer_to_string(int in) {
     return std::to_string(in);
@@ -648,9 +648,9 @@ void DoQingziClass::save_statisticsSheet( ) {
 
 /*
  * @brief 搜索，从全人员名单中搜素目标人员信息
- * @param 总名单的一个迭代器
- * @param 目标的人员信息
- * @note 可以考虑怎么优化这四个search函数
+ * @param _it_output 总名单的一个迭代器
+ * @param _targetPerson 目标的人员信息
+ * @note 可以考虑怎么优化这两个search函数
  * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output, DefPerson _targetPerson) {
@@ -699,9 +699,9 @@ void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output
 
 /*
  * @brief 搜索，从全人员名单中搜素目标人员信息
- * @param 总名单的一个迭代器
- * @param 目标的人员信息
- * @note 可以考虑怎么优化这四个search函数
+ * @param _it_output 总名单的一个迭代器
+ * @param _targetPerson 目标的人员信息
+ * @note 可以考虑怎么优化这两个search函数
  * @shit if很多吧，慢慢看  (^-^)
  */
 void DoQingziClass::search_person(std::vector< DefPerson >::iterator &_it_output, DefLine _targetPerson) {
@@ -776,8 +776,8 @@ bool DoQingziClass::compare_studentID(const std::string &a, const std::string &b
 
 /*
  * @brief 一行信息转化为标准人员信息
- * @param 一行信息
- * @param 标准的人员信息
+ * @param _inperLine 一行信息
+ * @param _outperStd 标准的人员信息
  */
 void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_outperStd) {
     DefPerson per;
@@ -820,8 +820,8 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
 
 /*
  * @brief 标准人员信息转化为一行信息
- * @param 标准的人员信息
- * @param 一行信息
+ * @param _inperStd 标准的人员信息
+ * @param _outperLine 一行信息
  */
 void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _outperLine) {
     DefLine per;

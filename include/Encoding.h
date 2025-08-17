@@ -49,21 +49,21 @@ ENCODING detect_encoding(const std::string &str);
 
 /*
  * @brief 将gbk格式转化为utf8
- * @param gbk格式的string
+ * @param gbk_str gbk格式的string
  * @return 转化为utf8格式的string
  */
 std::string gbk_to_utf8(const std::string &gbk_str);
 
 /*
  * @brief 将utf8格式转化为gbk
- * @param utf8格式的string
+ * @param utf8_str utf8格式的string
  * @return 转化为gbk格式的string
  */
 std::string utf8_to_gbk(const std::string &utf8_str);
 
 /*
  * @brief utf8转wstring
- * @param utf8编码的string
+ * @param u8 utf8编码的string
  * @return 宽字符wstring（win里面实际是utf-16）
  * @note 只能在windows编译
  **/

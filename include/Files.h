@@ -16,7 +16,7 @@
 
 /*
  * @brief 解析文件名字的后缀与文件名字（不含后缀）
- * @param _input输入的文件名
+ * @param _input 输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
 std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input);
@@ -52,19 +52,17 @@ bool get_imgpath_from_folder(
     const std::vector< std::string > &_extension);
 
 /*
- * @brief 用于读取表格
- * @param 储存表格的二维数组
- * @param 文件的路径
+ * @brief 用于读取表格（utf8编码）
+ * @param _aSheet 储存表格的二维数组（按照row，column的形式）
+ * @param _pathAndName 文件的路径
  */
-void load_sheet_from_xlsx(
-    std::vector< std::vector< std::string > > &_aSheet,
-    std::string                                _pathAndName);
+void load_sheet_from_xlsx(std::vector< std::vector< std::string > > &_aSheet, std::string _pathAndName);
 
 /*
  * @brief 签到表表格的储存
- * @param 储存表格的二维数组
- * @param 文件的路径
- * @param 表格标题的名称
+ * @param _aSheet 储存表格的二维数组
+ * @param _pathAndName 文件的路径
+ * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
     std::vector< std::vector< std::string > > &_aSheet,
