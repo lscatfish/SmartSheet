@@ -40,8 +40,10 @@
 #include <utility>
 #include <vector>
 
-extern ppocr::DefDirs _ppocrDir_;
+// 操作照片的空间
+namespace img {
 
+extern ppocr::DefDirs _ppocrDir_;
 
 /*
  * @brief 用于读取图片的表格（utf8编码）
@@ -52,6 +54,6 @@ void load_sheet_from_img(
     std::vector< std::vector< std::string > > &_aSheet,
     std::string                                _pathAndName);
 
-
+}    // namespace img
 
 #endif    // !IMGS_H

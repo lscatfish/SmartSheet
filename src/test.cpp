@@ -16,96 +16,104 @@
 #include <string>
 #include <stringapiset.h>
 #include <uchardet.h>
+#include <unzip.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
-#include<zlib.h>
-#include<unzip.h>
+#include <zlib.h>
 
 
+// 定义单元格结构体，包含内容和位置信息
+struct TableCell {
+    std::string content;    // 单元格内容
+    int         row;        // 行号（从0开始）
+    int         col;        // 列号（从0开始）
+};
 
-// 从DOCX中读取指定文件内容（如word/document.xml）
+// 从DOCX中读取指定文件
 std::vector< char > read_docx_file(const std::string &docx_path, const std::string &inner_file_path) {
-    // 打开ZIP文件（DOCX本质是ZIP）
+    // 代码与之前相同，省略...
     unzFile zip_file = unzOpen(docx_path.c_str( ));
     if (!zip_file) {
-        std::cerr << u8"无法打开DOCX文件: " << docx_path << std::endl;
+        std::cerr << "无法打开DOCX文件: " << docx_path << std::endl;
         return { };
     }
 
-    // 定位到压缩包内的目标文件
     if (unzLocateFile(zip_file, inner_file_path.c_str( ), 0) != UNZ_OK) {
-        std::cerr << u8"DOCX中未找到文件: " << inner_file_path << std::endl;
+        std::cerr << "DOCX中未找到文件: " << inner_file_path << std::endl;
         unzClose(zip_file);
         return { };
     }
 
-    // 获取文件信息
     unz_file_info file_info;
     if (unzGetCurrentFileInfo(zip_file, &file_info, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK) {
-        std::cerr << u8"获取文件信息失败" << std::endl;
+        std::cerr << "获取文件信息失败" << std::endl;
         unzClose(zip_file);
         return { };
     }
 
-    // 打开当前文件并读取内容
     if (unzOpenCurrentFile(zip_file) != UNZ_OK) {
-        std::cerr << u8"打开文件失败" << std::endl;
+        std::cerr << "打开文件失败" << std::endl;
         unzClose(zip_file);
         return { };
     }
 
-    // 读取文件内容到缓冲区
     std::vector< char > buffer(file_info.uncompressed_size);
     int                 bytes_read = unzReadCurrentFile(zip_file, buffer.data( ), buffer.size( ));
     if (bytes_read != static_cast< int >(file_info.uncompressed_size)) {
-        std::cerr << u8"文件读取不完整" << std::endl;
+        std::cerr << "文件读取不完整" << std::endl;
         unzCloseCurrentFile(zip_file);
         unzClose(zip_file);
         return { };
     }
 
-    // 清理资源
     unzCloseCurrentFile(zip_file);
     unzClose(zip_file);
-
     return buffer;
 }
 
-// 解析XML内容，提取所有表格数据
-std::vector< std::vector< std::vector< std::string > > > parse_tables(const std::vector< char > &xml_data) {
-    std::vector< std::vector< std::vector< std::string > > > all_tables;
+// 解析表格并记录单元格位置
+std::vector< std::vector< std::vector< TableCell > > > parse_tables_with_position(const std::vector< char > &xml_data) {
+    std::vector< std::vector< std::vector< TableCell > > > all_tables;
 
-    // 加载XML数据
     pugi::xml_document     doc;
     pugi::xml_parse_result result = doc.load_buffer(xml_data.data( ), xml_data.size( ));
     if (!result) {
-        std::cerr << u8"XML解析失败: " << result.description( ) << std::endl;
+        std::cerr << "XML解析失败: " << result.description( ) << std::endl;
         return all_tables;
     }
 
-    // 遍历所有表格节点 <w:tbl>
+    // 遍历所有表格（<w:tbl>）
     for (auto tbl_node : doc.select_nodes("//w:tbl")) {
-        std::vector< std::vector< std::string > > table;
+        std::vector< std::vector< TableCell > > table;
+        int                                     row_index = 0;    // 行索引（从0开始）
 
-        // 遍历表格中的行 <w:tr>
+        // 遍历表格行（<w:tr>）
         for (auto tr_node : tbl_node.node( ).select_nodes("w:tr")) {
-            std::vector< std::string > row;
+            std::vector< TableCell > row_cells;
+            int                      col_index = 0;    // 列索引（从0开始）
 
-            // 遍历行中的单元格 <w:tc>
+            // 遍历单元格（<w:tc>）
             for (auto tc_node : tr_node.node( ).select_nodes("w:tc")) {
+                // 提取单元格文本
                 std::string cell_text;
-
-                // 提取单元格中的文本 <w:t>
                 for (auto t_node : tc_node.node( ).select_nodes(".//w:t")) {
                     cell_text += t_node.node( ).text( ).as_string( );
                 }
 
-                row.push_back(cell_text);
+                // 记录位置信息
+                TableCell cell;
+                cell.content = cell_text;
+                cell.row     = row_index;
+                cell.col     = col_index;
+
+                row_cells.push_back(cell);
+                col_index++;    // 列索引自增
             }
 
-            table.push_back(row);
+            table.push_back(row_cells);
+            row_index++;    // 行索引自增
         }
 
         all_tables.push_back(table);
@@ -114,16 +122,17 @@ std::vector< std::vector< std::vector< std::string > > > parse_tables(const std:
     return all_tables;
 }
 
-// 打印表格数据
-void print_tables(const std::vector< std::vector< std::vector< std::string > > > &tables) {
-    std::cout << u8"共发现 " << tables.size( ) << u8" 个表格" << std::endl;
+// 打印带位置信息的表格
+void print_tables_with_position(const std::vector< std::vector< std::vector< TableCell > > > &tables) {
+    std::cout << "共发现 " << tables.size( ) << " 个表格" << std::endl;
     std::cout << "----------------------------------------" << std::endl;
 
-    for (size_t i = 0; i < tables.size( ); ++i) {
-        std::cout << u8"表格 " << i + 1 << ":" << std::endl;
-        for (const auto &row : tables[i]) {
+    for (size_t table_idx = 0; table_idx < tables.size( ); ++table_idx) {
+        std::cout << "表格 " << table_idx + 1 << ":" << std::endl;
+        for (const auto &row : tables[table_idx]) {
             for (const auto &cell : row) {
-                std::cout << cell << "\t";
+                // 输出格式：[行,列]内容
+                std::cout << "[" << cell.row << "," << cell.col << "]" << cell.content << "\t";
             }
             std::cout << std::endl;
         }
@@ -134,22 +143,18 @@ void print_tables(const std::vector< std::vector< std::vector< std::string > > >
 
 // 测试解析docx文件的minizip与pugixml
 int test_for_docx( ) {
-    // 1. 读取DOCX中的word/document.xml
     std::vector< char > xml_data = read_docx_file("列.docx", "word/document.xml");
     if (xml_data.empty( )) {
         return 1;
     }
 
-    // 2. 解析表格数据
-    auto tables = parse_tables(xml_data);
+    auto tables = parse_tables_with_position(xml_data);
     if (tables.empty( )) {
-        std::cout << u8"未找到任何表格" << std::endl;
+        std::cout << "未找到任何表格" << std::endl;
         return 0;
     }
 
-    // 3. 打印结果
-    print_tables(tables);
-
+    print_tables_with_position(tables);
     return 0;
 }
 
@@ -212,7 +217,7 @@ void test_main( ) {
 
     std::vector< std::string > className_;          // 班级名字
     std::vector< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
+    file::get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), std::vector< std::string >{ ".xlsx" });
 
     std::vector< std::vector< std::string > > test1 = {
         { chcode_to_utf8("序号"), chcode_to_utf8("姓名"), chcode_to_utf8("学号"), chcode_to_utf8("签到") },
@@ -221,7 +226,7 @@ void test_main( ) {
         { chcode_to_utf8("3"), chcode_to_utf8("李四"), chcode_to_utf8("324234"), "" },
 
     };
-    save_attSheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
+    file::save_attSheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
 }
 
 // 测试ENCODING
@@ -285,7 +290,7 @@ void test_for_ppocr( ) {
 
     cv::Mat img = cv::imread("1.jpeg");
 
-    ppocr::ocr(out, img, _ppocrDir_);
+    ppocr::ocr(out, img, img::_ppocrDir_);
 
     std::cout << std::endl;
     std::cout << std::endl;

@@ -17,6 +17,9 @@
 #include <vector>
 
 
+// 解析照片的空间
+namespace img {
+
 // 模型地址
 ppocr::DefDirs _ppocrDir_ = {
     "./models/ppocr_keys.txt",    // 字典库
@@ -300,10 +303,9 @@ void GridResult::fill_sheet(const std::vector< CELL > &inCellLists) {
         for (auto &line : this->sheet_) {
             for (auto &cell : line) {
                 if (inCell.is_contained(cell)) {
-                    if (cell.text.size( )==0) {
+                    if (cell.text.size( ) == 0) {
                         cell.text = inCell.text;
-                    }
-                    else {
+                    } else {
                         cell.text = cell.text + inCell.text;
                     }
                 }
@@ -393,3 +395,4 @@ void load_sheet_from_img(
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+}    // namespace img
