@@ -117,6 +117,8 @@ void DoQingziClass::start( ) {
         std::cout << u8"已完成相关数据的缓存..." << std::endl
                   << std::endl;
         save_unknown_person(unknownAppPerson_);
+        std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
+                  << std::endl;
 
         std::this_thread::sleep_for(std::chrono::seconds(1));
         return;
@@ -169,6 +171,8 @@ void DoQingziClass::start( ) {
         std::cout << u8"已完成线下签到汇总表的输出，请在 output/att_out 中查看！" << std::endl
                   << std::endl;
         save_unknown_person(unknownAttPerson_);
+        std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
+                  << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(1));
         return;
     }
