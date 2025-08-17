@@ -34,18 +34,16 @@ set(CMAKE_CXX_STANDARD 17)
 #set(Xlnt_DIR "")
 #find_package(Xlnt REQUIRED)
 
+set(THIRD_PARTY_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/dll/")
+
 include_directories("${CMAKE_SOURCE_DIR}/include/")
-include_directories("${CMAKE_SOURCE_DIR}/third_party/xlnt/include/")
-include_directories("${CMAKE_SOURCE_DIR}/third_party/opencv/include/")
-include_directories("${CMAKE_SOURCE_DIR}/third_party/uchardet/src/")
-include_directories("${CMAKE_SOURCE_DIR}/third_party/uchardet/src/LangModels/")
+include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
+include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
+include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/")
+include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/LangModels/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp" 
-#"${CMAKE_SOURCE_DIR}/third_party/uchardet/src/*.h"
-#"${CMAKE_SOURCE_DIR}/third_party/uchardet/src/*.cpp"
-#"${CMAKE_SOURCE_DIR}/third_party/uchardet/src/*.hpp"
-#"${CMAKE_SOURCE_DIR}/third_party/uchardet/src/LangModels/*.cpp"
 )
 
 ###########################################################################################
@@ -53,7 +51,7 @@ file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp"
 
 # ppOCR的相关动态链接库
 # 首先检查OCR DLL目录是否存在，然后查找文件
-set(OCR_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/OCRdlls-Release")
+set(OCR_DLL_DIR "${THIRD_PARTY_DLL_DIR}/OCRdlls-Release")
 if(NOT EXISTS ${OCR_DLL_DIR})
     message(WARNING "OCR DLL directory not found: ${OCR_DLL_DIR}")
 else()
@@ -81,18 +79,18 @@ add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
 # 链接lib
 # 链接到xlnt
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.lib>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.lib>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
 )
 # 链接到opencv
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100d.lib>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/lib/opencv_world4100.lib>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
 )
 # 链接到uchardet
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.lib>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.lib>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.lib>
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
@@ -101,18 +99,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # 根据当前配置选择 DLL
 # xlnt的动态链接库地址
 set(XLNT_DLL_PATH
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Debug/xlntd.dll>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/xlnt/Release/xlnt.dll>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.dll>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.dll>
 )
 # opencv的动态链接库地址
 set(OPENCV_DLL_PATH
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100d.dll>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/opencv/bin/opencv_world4100.dll>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100d.dll>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100.dll>
 )
 # uchardet的动态链接库地址
 set(UCHARDET_DLL_PATH
-    $<$<CONFIG:Debug>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Debug/uchardet.dll>
-    $<$<CONFIG:Release>:${CMAKE_SOURCE_DIR}/third_party/uchardet/Release/uchardet.dll>
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.dll>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.dll>
 )
 
 # 把 DLL 拷贝到目标可执行文件目录
