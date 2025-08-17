@@ -35,12 +35,14 @@ set(CMAKE_CXX_STANDARD 17)
 #find_package(Xlnt REQUIRED)
 
 set(THIRD_PARTY_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/dll/")
+set(THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/third_party/lib/")
 
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/LangModels/")
+include_directories("${THIRD_PARTY_LIB_DIR}/minizip/include/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp" 
@@ -91,6 +93,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.lib>
+)
+# 链接到minizip
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    $<$<CONFIG:Debug>:${THIRD_PARTY_LIB_DIR}//minizip/Debug//minizipd.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_LIB_DIR}//minizip/Release//minizip.lib>
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
