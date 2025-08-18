@@ -1,9 +1,12 @@
 ﻿
 #include <basic.hpp>
+#include <Encoding.h>
+#include <Fuzzy.h>
+#include <pugiconfig.hpp>
+#include <pugixml.hpp>
 #include <unzip.h>
 #include <word.h>
 #include <zip.h>
-#include<pugixml.hpp>
 
 namespace docx {
 
@@ -58,12 +61,12 @@ std::vector< char > DefDocx::read_docx_file(const std::string &_docx_path, const
  * @brief 解析表格并记录单元格位置
  * @param 输入的docx的xml信息
  */
-list< table< TableCell > > docx::DefDocx::parse_tables_with_position(const std::vector< char > &xml_data) {
+list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector< char > &_xml_data) {
 
     list< table< TableCell > > all_tables;
 
     pugi::xml_document     doc;
-    pugi::xml_parse_result result = doc.load_buffer(xml_data.data( ), xml_data.size( ));
+    pugi::xml_parse_result result = doc.load_buffer(_xml_data.data( ), _xml_data.size( ));
     if (!result) {
         std::cerr << u8"XML解析失败: " << result.description( ) << std::endl;
         return all_tables;
@@ -107,6 +110,56 @@ list< table< TableCell > > docx::DefDocx::parse_tables_with_position(const std::
     return all_tables;
 }
 
+// 打印带位置信息的表格
+void DefDocx::print_tables_with_position( ) {
+    std::cout << u8"docx文件 " << u8path_ << u8" 共发现 " << tableList_.size( ) << u8" 个表格" << std::endl;
+    std::cout << "----------------------------------------" << std::endl;
 
+    for (size_t table_idx = 0; table_idx < tableList_.size( ); ++table_idx) {
+        std::cout << u8"表格 " << table_idx + 1 << ":" << std::endl;
+        for (const auto &row : tableList_[table_idx]) {
+            for (const auto &cell : row) {
+                // 输出格式：[行,列]内容
+                std::cout << "[" << cell.row << "," << cell.col << "]" << cell.content << "\t";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "----------------------------------------" << std::endl;
+    }
+}
+
+/*
+ * @brief 返回一个具有列表中关键值的表
+ * @param _u8imp u8编码的搜索表
+ * @return table<TableCell>类型的表
+ */
+table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
+    for (const auto &t : this->tableList_) {
+        // 构造搜索库
+        list< std::string > searchingLib;
+        for (const auto &r : t) {
+            for (const auto &c : r) {
+                if (c.content.size( ) != 0) {
+                    searchingLib.push_back(c.content);
+                }
+            }
+        }
+        if (searchingLib.size( ) == 0) {
+            continue;
+        }
+        bool next_table = false;    // 是否检测下一张表
+        // 检测关键值
+        for (size_t i = 0; i < _u8imp.size( ); i++) {
+            if (!fuzzy::search(searchingLib, _u8imp[i], fuzzy::LEVEL::High)) {
+                next_table = true;
+                break;
+            }
+        }
+        if (!next_table) {
+            return t;
+        }
+    }
+    return table< TableCell >( );    // 返回空表
+}
 
 }    // namespace docx

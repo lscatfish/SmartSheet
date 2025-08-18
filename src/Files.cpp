@@ -33,8 +33,10 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
     do {
         std::string fileName = findData.cFileName;
 
-        // 跳过当前目录(.)、上级目录(..)以及__MACOSX文件夹
-        if (fileName == "." || fileName == ".." || fileName == "__MACOSX" || fileName == "_MACOSX") {
+        // 跳过当前目录(.)、上级目录(..)以及__MACOSX文件夹，还有~$预加载文件
+        if (fileName == "." || fileName == ".."
+            || fileName == "__MACOSX" || fileName == "_MACOSX"
+            || (fileName.size( ) >= 2 && fileName.substr(0, 2) == "~$")) {
             continue;
         }
 
@@ -72,9 +74,90 @@ list< std::string > file::DefFolder::get_u8filePath_list( ) {
     return u8filePathList_;
 }
 
+/*
+ * @brief 输出指定后缀的文件路径
+ * @param _extension 指定的后缀
+ * @return 输出指定后缀的文件路径
+ */
+list< std::string > DefFolder::get_filePath_list(const list< std::string > &_extension) {
+    list< std::string > out;
+    for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( ); it_path++) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High))
+            out.push_back(*it_path);
+    }
+    return out;
+}
+
+/*
+ * @brief 输出指定后缀的文件路径(u8编码)
+ * @param _extension 指定的后缀
+ * @return 输出指定后缀的文件路径（u8编码）
+ */
+list< std::string > DefFolder::get_u8filePath_list(const list< std::string > &_extension) {
+    list< std::string > out;
+    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( ); it_path++) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High))
+            out.push_back(*it_path);
+    }
+    return out;
+}
+
+/*
+ * @brief 保留指定后缀的文件
+ * @param _extension 指定的后缀
+ * @return 剩余文件的数量
+ */
+size_t DefFolder::keep_with(const list< std::string > &_extension) {
+    for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( );) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
+            it_path++;
+        } else {
+            it_path = this->filePathList_.erase(it_path);
+        }
+    }
+    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( );) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
+            it_path++;
+        } else {
+            it_path = this->u8filePathList_.erase(it_path);
+        }
+    }
+    return this->filePathList_.size( );
+}
+
+/*
+ * @brief 擦除指定的后缀
+ * @param _extension 指定的后缀
+ * @return 剩余文件的数量
+ */
+size_t file::DefFolder::erase_with(const list< std::string > &_extension) {
+    for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( );) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
+            it_path = this->filePathList_.erase(it_path);
+        } else {
+            it_path++;
+        }
+    }
+    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( );) {
+        auto [n, ex] = split_filename_and_extension(*it_path);
+        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
+            it_path = this->u8filePathList_.erase(it_path);
+        } else {
+            it_path++;
+        }
+    }
+    return this->filePathList_.size( );
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -83,7 +166,7 @@ list< std::string > file::DefFolder::get_u8filePath_list( ) {
  * @param _input 输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
-std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input) {
+std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input) {
     // 找到最后一个 '.' 的位置
     size_t pos = _input.find_last_of('.');
     // 如果没有找到 '.'，返回原字符和空字符串
@@ -130,7 +213,7 @@ bool get_filepath_from_folder(
 
     for (auto &aFileName : fileName) {
         // 文件名/后缀
-        auto [a, b] = separate_filename_and_extension(aFileName);
+        auto [a, b] = split_filename_and_extension(aFileName);
         if (fuzzy::search(_extension, b, fuzzy::LEVEL::High)) {
             // 匹配才加入
             _name.push_back(a);
@@ -182,7 +265,7 @@ bool get_imgpath_from_folder(
 
     for (auto &aFileName : u8fileName) {
         // 文件名/后缀
-        auto [a, b] = separate_filename_and_extension(aFileName);
+        auto [a, b] = split_filename_and_extension(aFileName);
         if (fuzzy::search(_extension, b, fuzzy::LEVEL::High)) {
             // 匹配才加入
             _u8name.push_back(a);

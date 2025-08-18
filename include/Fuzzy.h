@@ -71,9 +71,9 @@ bool search(
  * @return 是否搜索成功
  */
 bool search(
-    const list<std::string> &_searchingLib,
-    std::string                       _target,
-    LEVEL                             _matchLevel);
+    const list< std::string > &_searchingLib,
+    std::string                _target,
+    LEVEL                      _matchLevel);
 
 /*
  * @brief 模糊搜索人员信息
@@ -84,10 +84,17 @@ bool search(
  * @retrun 是否搜索成功
  */
 bool search_for_person(
-    list< DefPerson >              &_outList,
-    list< double >                 &_likelyRate,
-    DefPerson                       _target,
+    list< DefPerson >       &_outList,
+    list< double >          &_likelyRate,
+    DefPerson                _target,
     const list< DefPerson > &_searchingLib);
+
+/*
+ * @brief 检查主字符串中是否包含子串
+ * @param _mainStr 主字符串
+ * @param _subStr 子字符串
+ */
+bool contains_substring(const std::string &_mainStr, const std::string &_subStr);
 
 }    // namespace fuzzy
 

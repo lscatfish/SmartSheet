@@ -4,7 +4,8 @@
  *
  * @brief 用于操作中文编码的文件
  * @note 没有从string派生是因为string没有虚析构函数，因此通过基类指针删除派生类对象可能导致未定义行为
- * 
+ * @note 希望此类可以集成到icu，以达到对中文编码的精确识别
+ *
  * 作者：刘思成
  * 邮箱：2561925435@qq.com
  * ================================================================================= */
@@ -14,13 +15,12 @@
 #ifndef CHSTRING_HPP
 #define CHSTRING_HPP
 
+#include <Encoding.h>
 #include <iostream>
 #include <string>
-#include <Encoding.h>
 
 class chstring {
 public:
-
     chstring(std::string _in_) {
         this->str = encoding::chcode_to_utf8(_in_);    // 使用Encoding库转换编码
     }
