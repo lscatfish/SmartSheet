@@ -18,6 +18,7 @@
 #include <thread>
 #include <vector>
 #include <Windows.h>
+#include <word.h>
 
 /*
  * @brief 将整数类型转化为string类型
@@ -48,26 +49,29 @@ void DoQingziClass::start( ) {
 
     /* 4.加载签到表或是出勤记录表 ============================================================= */
     if (outWhichSheet == 1) {
-        attendanceSheet( );
+        attendance( );
     } else if (outWhichSheet == 2) {
-        statisticsSheet( );
+        statistics( );
+    } else if (outWhichSheet == 3) {
+        registration( );
     }
 }
 
 // 选择
 int DoQingziClass::choose_function( ) {
     int a = 0;
-    while (a != 1 && a != 2) {
+    while (a != 1 && a != 2 && a != 3) {
         system("cls");
         std::cout << u8"请选择要生成excel表的类型：" << std::endl
                   << u8"1. 活动签到表" << std::endl;
         std::cout << u8"2. 出勤记录表" << std::endl;
-        std::cout << u8"请选择（ 输入 1 或者 2 后按下 Enter键 ）：";
+        std::cout << u8"3. 青字班报名" << std::endl;
+        std::cout << u8"请选择（ 输入 1 或者 2 或者 3 后按下 Enter键 ）：";
         std::cin >> a;
-        if (a == 1 || a == 2) {
+        if (a == 1 || a == 2 || a == 3) {
             return a;
         } else {
-            std::cout << u8"你的输入错误，请输入 1 或者 2 后按下 Enter键 " << std::endl;
+            std::cout << u8"你的输入错误，请输入 1 或者 2 或者 3 后按下 Enter键 " << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
@@ -162,7 +166,7 @@ void DoQingziClass::load_personnel_information_list( ) {
 }
 
 // @brief 控制生成签到表的函数
-void DoQingziClass::attendanceSheet( ) {
+void DoQingziClass::attendance( ) {
     // 制作签到表
     stats_applicants( );
     save_attendanceSheet( );
@@ -211,7 +215,7 @@ void DoQingziClass::attendanceSheet( ) {
     std::cout << u8"已完成签到表输出，请在 output/app_out 中查看！" << std::endl
               << std::endl;
 
-    save_signSheet( );
+    save_storageSheet( );
     std::cout << u8"已完成相关数据的缓存..." << std::endl
               << std::endl;
     save_unknown_person(unknownAppPerson_);
@@ -362,10 +366,13 @@ void DoQingziClass::save_attendanceSheet( ) {
     }
 }
 
+
+
+
 // @brief 控制生成签到考勤表的函数
-void DoQingziClass::statisticsSheet( ) {
+void DoQingziClass::statistics( ) {
     ppocr::Init( );
-    load_signSheet( );
+    load_storageSheet( );
     // 制作考勤统计表
     /* std::cout << std::endl
                << u8"此功能还在开发中..." << std::endl;*/
@@ -645,6 +652,30 @@ void DoQingziClass::save_statisticsSheet( ) {
     }
 }
 
+
+
+
+// @brief 青字班报名
+void DoQingziClass::registration( ) {
+    file::DefFolder     aFolder("./input/sign_for_QingziClass");
+    list< std::string > paths = aFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
+
+    // list< std::string > u8paths = aFolder.get_u8filePath_list(list< std::string >{ ".docx" });    // u8文件路径
+
+    // 解析文件
+    for (const auto &p : paths) {
+        docx::DefDocx aDocx(p);
+        personStd_.push_back(aDocx.get_person( ));
+    }
+
+    //尝试输出
+    for (const auto& p : personStd_) {
+        std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
+    }
+
+}
+
+
 /*
  * @brief 搜索，从全人员名单中搜素目标人员信息
  * @param _it_output 总名单的一个迭代器
@@ -810,6 +841,21 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
                    || (it_inperLine->first == u8"qq")
                    || (it_inperLine->first == u8"QQ")) {
             per.qqnumber = it_inperLine->second;
+        } else if ((it_inperLine->first == u8"所任职务")
+                   || (it_inperLine->first == u8"职务")
+                   || (fuzzy::contains_substring(it_inperLine->first, u8"职务"))
+                   || (fuzzy::contains_substring(it_inperLine->first, u8"所任职务"))) {
+            per.position = it_inperLine->second;
+        } else if (it_inperLine->first == u8"邮箱") {
+            per.email = it_inperLine->second;
+        } else if (it_inperLine->first == u8"民族") {
+            per.ethnicity = it_inperLine->second;
+        } else if (it_inperLine->first == u8"社团") {
+            per.club = it_inperLine->second;
+        } else if ((it_inperLine->first == u8"报名青字班")
+                   || (it_inperLine->first == u8"青字班")
+                   || (fuzzy::contains_substring(it_inperLine->first, u8"青字班"))) {
+            per.classname = it_inperLine->second;
         } else {
             per.otherInformation[it_inperLine->first] = it_inperLine->second;
         }
@@ -848,7 +894,7 @@ void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine &_o
 
 
 // @brief 缓存全部报名的人员
-void DoQingziClass::save_signSheet( ) {
+void DoQingziClass::save_storageSheet( ) {
     // 按照 班级  姓名  学号  的方式保存
     // 仅保存报名的人员s
     table< std::string > sh;
@@ -861,18 +907,18 @@ void DoQingziClass::save_signSheet( ) {
         line.push_back(per.studentID);
         sh.push_back(line);
     }
-    file::save_signSheet_to_xlsx(sh);
+    file::save_storageSheet_to_xlsx(sh);
 }
 
 // @brief 加载缓存的全部报名的人员
-void DoQingziClass::load_signSheet( ) {
+void DoQingziClass::load_storageSheet( ) {
     std::cout << std::endl
               << u8"加载缓存文件..." << std::endl
               << std::endl;
 
     // 按照 班级  学号  的方式读取
     table< std::string > sh;
-    file::load_signSheet_from_xlsx(sh);
+    file::load_storageSheet_from_xlsx(sh);
 
     for (const auto &line : sh) {
         DefPerson per;

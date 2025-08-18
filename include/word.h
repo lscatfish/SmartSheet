@@ -11,6 +11,7 @@
 #include <basic.hpp>
 #include <Encoding.h>
 #include <iostream>
+#include <PersonnelInformation.h>
 #include <string>
 #include <vector>
 
@@ -22,12 +23,17 @@ struct TableCell {
     std::string content;    // 单元格内容
     int         row;        // 行号（从0开始）
     int         col;        // 列号（从0开始）
+
+    TableCell( ) {
+        row     = 0;
+        col     = 0;
+        content = "";
+    };
 };
 
 // 此类用于解析docx文件
 class DefDocx {
 public:
-
     /*
      * @brief 从DOCX中读取指定文件
      * @param _docx_path 要读取的文件的路径
@@ -48,12 +54,15 @@ public:
      */
     table< TableCell > get_table_with(const list< std::string > &_u8imp);
 
+    // @brief 返回一个标准人员信息
+    DefPerson get_person( );
+
     // 打印带位置信息的表格
     void print_tables_with_position( );
 
-    /* ================================================================================================================ */
+    /* ======================================================================================================================= */
 
-        /*
+    /*
      * @brief 标准构造函数，输入一个docx文件的路径（按照系统编码）
      * @param _path docx文件的路径
      */
@@ -75,6 +84,8 @@ public:
             std::cout << u8"docx文件 " << u8path_ << u8" 无表格" << std::endl;
         }
 
+        keyTable_ = get_table_with(list< std::string >{ u8"姓名", u8"学号" });
+
         std::cout << u8"docx文件 " << u8path_ << u8" 解析完毕" << std::endl;
     };
 
@@ -84,6 +95,7 @@ private:
     std::string                path_;         // 此文件储存的路径
     std::string                u8path_;       // 此文件储存的路径(u8编码)
     list< table< TableCell > > tableList_;    // 解析出的表格
+    table< TableCell >         keyTable_;     // 关键表格
 };
 
 }    // namespace docx

@@ -7,9 +7,9 @@
  * 此文件用于定义人员信息
  */
 
+#include <Encoding.h>
 #include <map>
 #include <string>
-#include<Encoding.h>
 
 /*
  * 此结构体用于定义标准人员信息
@@ -26,6 +26,12 @@ public:
     std::string majors;              // 专业
     std::string phonenumber;         // 电话
     std::string qqnumber;            // QQ号
+
+    std::string position;            // 所任职务
+    std::string email;               // 邮箱
+    std::string ethnicity;           // 民族
+    std::string club;                // 社团
+
     bool        ifcheck;             // 是否签到
     bool        ifsign;              // 是否报名
 
@@ -44,6 +50,10 @@ public:
         majors.erase( );
         phonenumber.erase( );
         qqnumber.erase( );
+        position.erase( );
+        email.erase( );
+        ethnicity.erase( );
+        club.erase( );
         ifcheck = false;
         ifsign  = false;
     };
@@ -77,6 +87,10 @@ public:
         studentID   = _studentID;
         academy     = _academy;
         phonenumber = _phonenumber;
+        position.erase( );
+        email.erase( );
+        ethnicity.erase( );
+        club.erase( );
         ifcheck     = false;
         ifsign      = false;
     };
@@ -118,10 +132,10 @@ public:
         std::string _studentID,
         std::string _academy,
         std::string _phonenumber) {
-        ifcheck                                  = false;
-        ifsign                                   = false;
-        classname                                = _classname;
-        information[u8"姓名"]     =encoding:: chcode_to_utf8(_name);
+        ifcheck                   = false;
+        ifsign                    = false;
+        classname                 = _classname;
+        information[u8"姓名"]     = encoding::chcode_to_utf8(_name);
         information[u8"学号"]     = encoding::chcode_to_utf8(_studentID);
         information[u8"学院"]     = encoding::chcode_to_utf8(_academy);
         information[u8"联系电话"] = encoding::chcode_to_utf8(_phonenumber);

@@ -45,3 +45,14 @@ std::pair< std::string, std::string > split_chinese_and_number(const std::string
 
 // 递归终止函数
 void mergeHelper(table< std::string > &result) {}
+
+
+// 清除字符串前面的所有空格
+std::string trim_leading_spaces(const std::string &str) {
+    // 找到第一个非空格字符的位置
+    auto firstNonSpace = std::find_if(str.begin( ), str.end( ),
+                                      [](unsigned char c) { return !std::isspace(c); });
+
+    // 从第一个非空格字符开始截取字符串
+    return std::string(firstNonSpace, str.end( ));
+}
