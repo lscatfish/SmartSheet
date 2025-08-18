@@ -219,4 +219,22 @@ bool search_for_person(
         return true;
 }
 
+/*
+ * @brief 检查主字符串中是否包含子串
+ * @param _mainStr 主字符串
+ * @param _subStr 子字符串
+ */
+bool contains_substring(const std::string &_mainStr, const std::string &_subStr) {
+    // 子串为空时，默认认为包含
+    if (_subStr.empty( )) {
+        return true;
+    }
+
+    // 使用string的find方法查找子串
+    size_t found = _mainStr.find(_subStr);
+
+    // 如果找到子串（返回值不是string::npos），则返回true
+    return (found != std::string::npos);
+}
+
 }    // namespace fuzzy

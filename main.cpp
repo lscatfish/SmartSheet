@@ -33,12 +33,10 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-    test_for_DefFolder( );
+    test_for_docx( );
     pause( );
     // test_for__load_sheet_from_img( );
 #endif    // true
-
-
 
     std::cout << std::endl
               << u8"程序结束...";

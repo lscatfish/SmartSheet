@@ -20,142 +20,25 @@
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
+#include <word.h>
 #include <xlnt/xlnt.hpp>
 #include <zlib.h>
-
-
-// 定义单元格结构体，包含内容和位置信息
-struct TableCell {
-    std::string content;    // 单元格内容
-    int         row;        // 行号（从0开始）
-    int         col;        // 列号（从0开始）
-};
-
-// 从DOCX中读取指定文件
-std::vector< char > read_docx_file(const std::string &docx_path, const std::string &inner_file_path) {
-
-    unzFile zip_file = unzOpen(docx_path.c_str( ));
-
-    if (!zip_file) {
-        std::cerr << u8"无法打开DOCX文件: " << docx_path << std::endl;
-        return { };
-    }
-
-    if (unzLocateFile(zip_file, inner_file_path.c_str( ), 0) != UNZ_OK) {
-        std::cerr << u8"DOCX中未找到文件: " << inner_file_path << std::endl;
-        unzClose(zip_file);
-        return { };
-    }
-
-    unz_file_info file_info;
-    if (unzGetCurrentFileInfo(zip_file, &file_info, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK) {
-        std::cerr << u8"获取文件信息失败" << std::endl;
-        unzClose(zip_file);
-        return { };
-    }
-
-    if (unzOpenCurrentFile(zip_file) != UNZ_OK) {
-        std::cerr << u8"打开文件失败" << std::endl;
-        unzClose(zip_file);
-        return { };
-    }
-
-    std::vector< char > buffer(file_info.uncompressed_size);
-    int                 bytes_read = unzReadCurrentFile(zip_file, buffer.data( ), buffer.size( ));
-    if (bytes_read != static_cast< int >(file_info.uncompressed_size)) {
-        std::cerr << u8"文件读取不完整" << std::endl;
-        unzCloseCurrentFile(zip_file);
-        unzClose(zip_file);
-        return { };
-    }
-
-    unzCloseCurrentFile(zip_file);
-    unzClose(zip_file);
-    return buffer;
-}
-
-// 解析表格并记录单元格位置
-std::vector< std::vector< std::vector< TableCell > > > parse_tables_with_position(const std::vector< char > &xml_data) {
-    std::vector< std::vector< std::vector< TableCell > > > all_tables;
-
-    pugi::xml_document     doc;
-    pugi::xml_parse_result result = doc.load_buffer(xml_data.data( ), xml_data.size( ));
-    if (!result) {
-        std::cerr << u8"XML解析失败: " << result.description( ) << std::endl;
-        return all_tables;
-    }
-
-    // 遍历所有表格（<w:tbl>）
-    for (auto tbl_node : doc.select_nodes("//w:tbl")) {
-        std::vector< std::vector< TableCell > > table;
-        int                                     row_index = 0;    // 行索引（从0开始）
-
-        // 遍历表格行（<w:tr>）
-        for (auto tr_node : tbl_node.node( ).select_nodes("w:tr")) {
-            std::vector< TableCell > row_cells;
-            int                      col_index = 0;    // 列索引（从0开始）
-
-            // 遍历单元格（<w:tc>）
-            for (auto tc_node : tr_node.node( ).select_nodes("w:tc")) {
-                // 提取单元格文本
-                std::string cell_text;
-                for (auto t_node : tc_node.node( ).select_nodes(".//w:t")) {
-                    cell_text += t_node.node( ).text( ).as_string( );
-                }
-
-                // 记录位置信息
-                TableCell cell;
-                cell.content = cell_text;
-                cell.row     = row_index;
-                cell.col     = col_index;
-
-                row_cells.push_back(cell);
-                col_index++;    // 列索引自增
-            }
-
-            table.push_back(row_cells);
-            row_index++;    // 行索引自增
-        }
-
-        all_tables.push_back(table);
-    }
-
-    return all_tables;
-}
-
-// 打印带位置信息的表格
-void print_tables_with_position(const std::vector< std::vector< std::vector< TableCell > > > &tables) {
-    std::cout << "共发现 " << tables.size( ) << " 个表格" << std::endl;
-    std::cout << "----------------------------------------" << std::endl;
-
-    for (size_t table_idx = 0; table_idx < tables.size( ); ++table_idx) {
-        std::cout << "表格 " << table_idx + 1 << ":" << std::endl;
-        for (const auto &row : tables[table_idx]) {
-            for (const auto &cell : row) {
-                // 输出格式：[行,列]内容
-                std::cout << "[" << cell.row << "," << cell.col << "]" << cell.content << "\t";
-            }
-            std::cout << std::endl;
-        }
-        std::cout << "----------------------------------------" << std::endl;
-    }
-}
+#include <basic.hpp>
 
 
 // 测试解析docx文件的minizip与pugixml
 int test_for_docx( ) {
-    std::vector< char > xml_data = read_docx_file("列.docx", "word/document.xml");
-    if (xml_data.empty( )) {
-        return 1;
-    }
 
-    auto tables = parse_tables_with_position(xml_data);
+    docx::DefDocx d("./列.docx");
+    d.print_tables_with_position( );
+
+
+    auto tables = d.get_table_with(list< std::string >{ u8"姓名", u8"性别" });
     if (tables.empty( )) {
-        std::cout << "未找到任何表格" << std::endl;
+        std::cout << u8"未找到任何表格" << std::endl;
         return 0;
     }
 
-    print_tables_with_position(tables);
     return 0;
 }
 
@@ -316,7 +199,7 @@ void test_for_ppocr( ) {
 void test_for_DefFolder( ) {
     file::DefFolder     af("./input");
     list< std::string > p = af.get_u8filePath_list( );
-    for (auto& l : p) {
+    for (auto &l : p) {
         std::cout << l << std::endl;
     }
 }

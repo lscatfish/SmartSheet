@@ -54,6 +54,34 @@ public:
      */
     list< std::string > get_u8filePath_list( );
 
+    /*
+     * @brief 输出指定后缀的文件路径
+     * @param _extension 指定的后缀
+     * @return 输出指定后缀的文件路径
+     */
+    list< std::string > get_filePath_list(const list< std::string > &_extension);
+
+    /*
+     * @brief 输出指定后缀的文件路径(u8编码)
+     * @param _extension 指定的后缀
+     * @return 输出指定后缀的文件路径（u8编码）
+     */
+    list< std::string > get_u8filePath_list(const list< std::string > &_extension);
+
+    /*
+     * @brief 保留指定后缀的文件
+     * @param _extension 指定的后缀
+     * @return 剩余文件的数量
+     */
+    size_t keep_with(const list< std::string > &_extension);
+
+    /*
+     * @brief 擦除指定的后缀
+     * @param _extension 指定的后缀
+     * @return 剩余文件的数量
+     */
+    size_t erase_with(const list< std::string > &_extension);
+
 private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
     list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
@@ -66,7 +94,7 @@ private:
  * @param _input 输入的文件名
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
-std::pair< std::string, std::string > separate_filename_and_extension(const std::string &_input);
+std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input);
 
 /*
  * @brief 从一个文件下获取所有符合后缀条件的文件
