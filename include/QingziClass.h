@@ -15,6 +15,8 @@ class DoQingziClass {
 public:
     DoQingziClass( );
     ~DoQingziClass( );
+
+
     void start( );    // 主控函数
 
     /*
@@ -28,8 +30,9 @@ public:
      * @brief 标准人员信息转化为一行信息
      * @param _inperStd 标准的人员信息
      * @param _outperLine 一行信息
+     * @note 这个函数好像没怎么用到
      */
-    static void trans_person_to_line(const DefPerson &_inperStd, DefLine _outperLine);
+    static void trans_person_to_line(const DefPerson &_inperStd, DefLine &_outperLine);
 
     /*
      * @brief 比较学号
@@ -44,12 +47,9 @@ public:
     };
 
 private:
-    // PersonFormat perInFormat_;    // 人员信息的记录方式
-
     list< std::string > className_;          // 班级名字
     list< std::string > filePathAndName_;    // 每个标准xlsx文件的位置
     list< DefPerson >   personStd_;          // 定义的标准人员信息
-    // std::vector< DefLine > personUnstd_;        // 定义的非标准人员信息
 
     // 定义名单中不存在的人员
     struct DefUnknownPerson {
@@ -62,32 +62,29 @@ private:
     list< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
     list< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
 
-    // 不存在人员的模糊搜寻结果
-    // std::map< std::vector< DefLine >::iterator, std::vector< DefLine > > fuzzyPerson_;
 
-    /*
-     * @brief 加载全学员表的函数
-     */
+    // 选择
+    int choose_function( );
+
+    // @brief 加载全学员表的函数
     void load_personnel_information_list( );
 
-    /*
-     * @brief 制作签到表
-     */
-    void make_attendanceSheet( );
+    // @brief 控制生成签到表的函数
+    void attendanceSheet( );
 
-    /*
-     * @brief 保存签到表
-     */
+    // @brief 统计报名人员
+    void stats_applicants( );
+
+    // @brief 保存签到表
     void save_attendanceSheet( );
 
-    /*
-     * @brief 制作考勤统计表
-     */
-    void make_statisticsSheet( );
+    // @brief 控制生成签到考勤表的函数
+    void statisticsSheet( );
 
-    /*
-     * @brief 保存考勤表
-     */
+    //  @brief 统计签到人员
+    void stats_checkinners( );
+
+    // @brief 保存签到考勤表
     void save_statisticsSheet( );
 
     /*
@@ -108,14 +105,10 @@ private:
      */
     void search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
 
-    /*
-     * @brief 缓存全部报名的人员
-     */
+    // @brief 缓存全部报名的人员
     void save_signSheet( );
 
-    /*
-     * @brief 加载缓存的全部报名的人员
-     */
+    // @brief 加载缓存的全部报名的人员
     void load_signSheet( );
 
     /*
