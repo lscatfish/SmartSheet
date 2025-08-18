@@ -21,14 +21,6 @@
 // 解析照片的空间
 namespace img {
 
-// 模型地址
-ppocr::DefDirs _ppocrDir_ = {
-    "./models/ppocr_keys.txt",    // 字典库
-    "./models/ch_PP-OCRv4_det_infer",
-    "./models/ch_PP-OCRv4_rec_infer",
-    "./models/ch_ppocr_mobile_v2.0_cls_infer"
-};
-
 // 定义二维点类型
 struct GridPoint {
     double x;    // x坐标
@@ -372,7 +364,7 @@ void load_sheet_from_img(
     // ocr操作
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字块]
     std::cout << u8"ppocr工作" << std::endl;
-    ppocr::ocr(ocrPR, img.clone( ), _ppocrDir_);    // 这里返回的text为utf8编码
+    ppocr::ocr(ocrPR, img.clone( ));    // 这里返回的text为utf8编码
     std::cout << std::endl
               << u8"图片: " << encoding::chcode_to_utf8(_path) << u8" 加载结束..." << std::endl
               << std::endl;

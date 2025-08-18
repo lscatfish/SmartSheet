@@ -179,7 +179,7 @@ void test_for_ppocr( ) {
 
     cv::Mat img = cv::imread("1.jpeg");
 
-    ppocr::ocr(out, img, img::_ppocrDir_);
+    ppocr::ocr(out, img);
 
     std::cout << std::endl;
     std::cout << std::endl;

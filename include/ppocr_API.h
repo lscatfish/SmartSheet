@@ -12,6 +12,7 @@
 #include <Windows.h>             // Windows API
 
 namespace ppocr {
+
 /*========================================================
  * 1. OCR 结果结构体
  *    与 DLL 中返回的结构体字段保持一致
@@ -23,6 +24,18 @@ struct OCRPredictResult {
     float                             cls_score = 0.0f;     // 方向分类置信度
     int                               cls_label = -1;       // 方向分类标签
 };
+
+
+// 要传入的模型与字典库的地址
+struct DefDirs {
+    const char *rec_char_dict_path;    // 字典库地址
+    const char *det_model_dir;
+    const char *rec_model_dir;
+    const char *cls_model_dir;
+};
+
+extern DefDirs _ppocrDir_;
+
 
 /*========================================================
  * 2. 函数指针类型定义
@@ -44,41 +57,29 @@ using GetOcrFunc = bool (*)(cv::Mat, std::vector< std::vector< OCRPredictResult 
  */
 using SetModelDirFunc = void (*)(const char *, const char *, const char *, bool);
 
-/*========================================================
- * 3. 工具函数：加载 DLL
- *    参数：DLL 的完整路径（宽字符）
- *    返回：模块句柄；失败返回 nullptr
- *--------------------------------------------------------*/
-HMODULE LoadDll(const std::wstring &dllPath);
+/*
+ * @brief 设置字典路径
+ */
+using SetRecDictFunc = void (*)(const char *);
 
-/*========================================================
- * 4. 工具函数：获取 DLL 导出函数地址
- *    模板函数，支持任意返回类型
- *--------------------------------------------------------*/
-template < typename FuncPtr >
-bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn);
-
-// 要传入的模型与字典库的地址
-struct DefDirs {
-    const char *rec_char_dict_path;    // 字典库地址
-    const char *det_model_dir;
-    const char *rec_model_dir;
-    const char *cls_model_dir;
-};
 
 /*
  * @brief 调用ocr进行检测
  * @param _out 输出的结果
  * @param _img 输入的图片
- * @param _dirs 输入的模型与字典库的path或dir
  */
-bool ocr(std::vector< std::vector< OCRPredictResult > > &_out,
-         cv::Mat                                         _img,
-         DefDirs                                        &_dirs);
+bool ocr(std::vector< std::vector< OCRPredictResult > > &_out, cv::Mat _img);
 
+/*
+ * @brief 初始化ppocr的dll
+ * @return 是否成功
+ */
+bool Init( );
 
-
-
+/*
+ * @brief 卸载ppocr的dll
+ */
+void Uninit( );
 
 }    // namespace ppocr
 
