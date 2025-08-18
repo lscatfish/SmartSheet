@@ -17,6 +17,7 @@
 #include <thread>
 #include <vector>
 #include <Windows.h>
+#include <ppocr_API.h>
 
 /*
  * @brief 将整数类型转化为string类型
@@ -124,6 +125,7 @@ void DoQingziClass::start( ) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
         return;
     } else if (outWhichSheet == 2) {
+        ppocr::Init( );
         load_signSheet( );
         // 制作考勤统计表
         /* std::cout << std::endl
@@ -174,6 +176,7 @@ void DoQingziClass::start( ) {
         save_unknown_person(unknownAttPerson_);
         std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
                   << std::endl;
+        ppocr::Uninit( );
         std::this_thread::sleep_for(std::chrono::seconds(1));
         return;
     }
