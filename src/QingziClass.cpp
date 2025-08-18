@@ -11,13 +11,13 @@
 #include <iostream>
 #include <map>
 #include <PersonnelInformation.h>
+#include <ppocr_API.h>
 #include <QingziClass.h>
 #include <string>
 #include <test.h>
 #include <thread>
 #include <vector>
 #include <Windows.h>
-#include <ppocr_API.h>
 
 /*
  * @brief 将整数类型转化为string类型
@@ -39,15 +39,24 @@ DoQingziClass::~DoQingziClass( ) {
  * @attention 重构到构造函数吧
  */
 void DoQingziClass::start( ) {
-    int a = 0;
-    /* 1.加载全学员表 ===================================================================== */
     system("cls");
-    std::cout << u8"加载全学员信息表..." << std::endl;
+    /* 1.加载全学员表 ===================================================================== */
     load_personnel_information_list( );
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
-    a                 = 0;
-    int outWhichSheet = 1;    // 生成那一张表：1签到表  2出勤记录表
+    int outWhichSheet = choose_function( );    // 生成那一张表：1签到表  2出勤记录表
+
+    /* 4.加载签到表或是出勤记录表 ============================================================= */
+    if (outWhichSheet == 1) {
+        attendanceSheet( );
+    } else if (outWhichSheet == 2) {
+        statisticsSheet( );
+    }
+}
+
+// 选择
+int DoQingziClass::choose_function( ) {
+    int a = 0;
     while (a != 1 && a != 2) {
         system("cls");
         std::cout << u8"请选择要生成excel表的类型：" << std::endl
@@ -55,137 +64,18 @@ void DoQingziClass::start( ) {
         std::cout << u8"2. 出勤记录表" << std::endl;
         std::cout << u8"请选择（ 输入 1 或者 2 后按下 Enter键 ）：";
         std::cin >> a;
-        if (a == 1) {
-            outWhichSheet = 1;
-        } else if (a == 2) {
-            outWhichSheet = 2;
+        if (a == 1 || a == 2) {
+            return a;
         } else {
             std::cout << u8"你的输入错误，请输入 1 或者 2 后按下 Enter键 " << std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
-
-    /* 4.加载签到表或是出勤记录表 ============================================================= */
-    if (outWhichSheet == 1) {
-        // 制作签到表
-        make_attendanceSheet( );
-        save_attendanceSheet( );
-        if (unknownAppPerson_.size( ) >= 1) {
-            std::cout << std::endl
-                      << std::endl
-                      << "\033[43;30mWARNING!!!\033[0m" << std::endl;
-            std::cout << "\033[43;30m";
-            std::cout << "###ATTENTION### ";
-            std::cout << u8"以下的人员不在全学员名单中";
-            std::cout << " ###ATTENTION###";
-            std::cout << std::endl;
-            for (auto it_unknownPerson = unknownAppPerson_.begin( );
-                 it_unknownPerson != unknownAppPerson_.end( );
-                 it_unknownPerson++) {
-                if (it_unknownPerson->personStd.ifcheck == false) {
-                    std::cout << "Unknown:  ";
-                    std::cout << it_unknownPerson->personStd.classname << "    ";
-                    std::cout << it_unknownPerson->personStd.name << "    ";
-                    if (it_unknownPerson->personStd.studentID.size( ) != 0) {
-                        std::cout << it_unknownPerson->personStd.studentID << "    ";
-                    } else {
-                        std::cout << u8"？学号不存在？ ";
-                    }
-                    std::cout << std::endl;
-
-                    for (size_t i = 0; i < it_unknownPerson->likelyPerson.size( ); i++) {
-                        std::cout << u8"-likely:  ";
-                        std::cout << it_unknownPerson->likelyPerson[i].classname << "    ";
-                        std::cout << it_unknownPerson->likelyPerson[i].name << "    ";
-                        std::cout << it_unknownPerson->likelyPerson[i].studentID << "    ";
-                        std::cout << it_unknownPerson->likelyRate[i] << std::endl;
-                    }
-                    std::cout << std::endl;
-                }
-            }
-            std::cout << "###ATTENTION### ";
-            std::cout << u8"以上的人员不在全学员名单中";
-            std::cout << " ###ATTENTION###";
-            std::cout << "\033[0m";
-            std::cout << std::endl
-                      << std::endl
-                      << std::endl;
-        }
-
-        std::cout << u8"已完成签到表输出，请在 output/app_out 中查看！" << std::endl
-                  << std::endl;
-
-        save_signSheet( );
-        std::cout << u8"已完成相关数据的缓存..." << std::endl
-                  << std::endl;
-        save_unknown_person(unknownAppPerson_);
-        std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
-                  << std::endl;
-
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        return;
-    } else if (outWhichSheet == 2) {
-        ppocr::Init( );
-        load_signSheet( );
-        // 制作考勤统计表
-        /* std::cout << std::endl
-                   << u8"此功能还在开发中..." << std::endl;*/
-        make_statisticsSheet( );
-        save_statisticsSheet( );
-        if (unknownAttPerson_.size( ) > 0) {
-            std::cout << std::endl
-                      << std::endl
-                      << "\033[43;30mWARNING!!!\033[0m" << std::endl;
-            std::cout << "\033[43;30m";
-            std::cout << "###ATTENTION### ";
-            std::cout << u8"图片中的以下人员不在全学员名单中";
-            std::cout << " ###ATTENTION###";
-            std::cout << std::endl;
-
-            for (auto it_unknownPerson = unknownAttPerson_.begin( );
-                 it_unknownPerson != unknownAttPerson_.end( );
-                 it_unknownPerson++) {
-                std::cout << "Unknown:  ";
-                std::cout << it_unknownPerson->personStd.classname << "    ";
-                std::cout << it_unknownPerson->personStd.name << "    ";
-                if (it_unknownPerson->personStd.studentID.size( ) != 0) {
-                    std::cout << it_unknownPerson->personStd.studentID << "    ";
-                } else {
-                    std::cout << u8"？学号不存在？ ";
-                }
-                std::cout << std::endl;
-                for (size_t i = 0; i < it_unknownPerson->likelyPerson.size( ); i++) {
-                    std::cout << u8"-likely:  ";
-                    std::cout << it_unknownPerson->likelyPerson[i].classname << "    ";
-                    std::cout << it_unknownPerson->likelyPerson[i].name << "    ";
-                    std::cout << it_unknownPerson->likelyPerson[i].studentID << "    ";
-                    std::cout << it_unknownPerson->likelyRate[i] << std::endl;
-                }
-                std::cout << std::endl;
-            }
-            std::cout << "###ATTENTION### ";
-            std::cout << u8"以上的人员不在全学员名单中";
-            std::cout << " ###ATTENTION###";
-            std::cout << "\033[0m";
-            std::cout << std::endl
-                      << std::endl
-                      << std::endl;
-        }
-        std::cout << u8"已完成线下签到汇总表的输出，请在 output/att_out 中查看！" << std::endl
-                  << std::endl;
-        save_unknown_person(unknownAttPerson_);
-        std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
-                  << std::endl;
-        ppocr::Uninit( );
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        return;
-    }
 }
 
-/*
- * @brief 加载全学员表的函数
- */
+// @brief 加载全学员表的函数
 void DoQingziClass::load_personnel_information_list( ) {
+    std::cout << u8"加载全学员信息表..." << std::endl;
     // lambda函数定义========================================================================/
     /*
      * @brief 保存标准的人员信息
@@ -209,9 +99,7 @@ void DoQingziClass::load_personnel_information_list( ) {
             DefPerson per;
             per.classname = cn;
             //  std::cout << chcode_to_utf8("加载std") << std::endl;
-            for (size_t colIndex = 0;
-                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
-                 colIndex++) {
+            for (size_t colIndex = 0; colIndex < sh[rowIndex].size( ); colIndex++) {
                 if (sh[0][colIndex] == u8"姓名") {
                     per.name = sh[rowIndex][colIndex];
                 } else if (sh[0][colIndex] == u8"性别") {
@@ -273,10 +161,69 @@ void DoQingziClass::load_personnel_information_list( ) {
     }
 }
 
-/*
- * @brief 制作签到表
- */
-void DoQingziClass::make_attendanceSheet( ) {
+// @brief 控制生成签到表的函数
+void DoQingziClass::attendanceSheet( ) {
+    // 制作签到表
+    stats_applicants( );
+    save_attendanceSheet( );
+    if (unknownAppPerson_.size( ) >= 1) {
+        std::cout << std::endl
+                  << std::endl
+                  << "\033[43;30mWARNING!!!\033[0m" << std::endl;
+        std::cout << "\033[43;30m";
+        std::cout << "###ATTENTION### ";
+        std::cout << u8"以下的人员不在全学员名单中";
+        std::cout << " ###ATTENTION###";
+        std::cout << std::endl;
+        for (auto it_unknownPerson = unknownAppPerson_.begin( );
+             it_unknownPerson != unknownAppPerson_.end( );
+             it_unknownPerson++) {
+            if (it_unknownPerson->personStd.ifcheck == false) {
+                std::cout << "Unknown:  ";
+                std::cout << it_unknownPerson->personStd.classname << "    ";
+                std::cout << it_unknownPerson->personStd.name << "    ";
+                if (it_unknownPerson->personStd.studentID.size( ) != 0) {
+                    std::cout << it_unknownPerson->personStd.studentID << "    ";
+                } else {
+                    std::cout << u8"？学号不存在？ ";
+                }
+                std::cout << std::endl;
+
+                for (size_t i = 0; i < it_unknownPerson->likelyPerson.size( ); i++) {
+                    std::cout << u8"-likely:  ";
+                    std::cout << it_unknownPerson->likelyPerson[i].classname << "    ";
+                    std::cout << it_unknownPerson->likelyPerson[i].name << "    ";
+                    std::cout << it_unknownPerson->likelyPerson[i].studentID << "    ";
+                    std::cout << it_unknownPerson->likelyRate[i] << std::endl;
+                }
+                std::cout << std::endl;
+            }
+        }
+        std::cout << "###ATTENTION### ";
+        std::cout << u8"以上的人员不在全学员名单中";
+        std::cout << " ###ATTENTION###";
+        std::cout << "\033[0m";
+        std::cout << std::endl
+                  << std::endl
+                  << std::endl;
+    }
+
+    std::cout << u8"已完成签到表输出，请在 output/app_out 中查看！" << std::endl
+              << std::endl;
+
+    save_signSheet( );
+    std::cout << u8"已完成相关数据的缓存..." << std::endl
+              << std::endl;
+    save_unknown_person(unknownAppPerson_);
+    std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
+              << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    return;
+}
+
+// @brief 统计报名人员
+void DoQingziClass::stats_applicants( ) {
     list< std::string > app_classname;          // 班级名称
     list< std::string > app_filePathAndName;    // applicationSheet的excel文件的路径
     list< DefLine >     app_person;             // 定义从报名表中获得的人员信息
@@ -391,9 +338,7 @@ void DoQingziClass::make_attendanceSheet( ) {
     }
 }
 
-/*
- * @brief 保存签到表
- */
+// @brief 保存签到表
 void DoQingziClass::save_attendanceSheet( ) {
     for (auto it_classname = className_.begin( ); it_classname != className_.end( ); it_classname++) {
         std::string          sheetTitle = *it_classname + u8"签到表";
@@ -417,10 +362,66 @@ void DoQingziClass::save_attendanceSheet( ) {
     }
 }
 
-/*
- * @brief 制作考勤统计表
- */
-void DoQingziClass::make_statisticsSheet( ) {
+// @brief 控制生成签到考勤表的函数
+void DoQingziClass::statisticsSheet( ) {
+    ppocr::Init( );
+    load_signSheet( );
+    // 制作考勤统计表
+    /* std::cout << std::endl
+               << u8"此功能还在开发中..." << std::endl;*/
+    stats_checkinners( );
+    save_statisticsSheet( );
+    if (unknownAttPerson_.size( ) > 0) {
+        std::cout << std::endl
+                  << std::endl
+                  << "\033[43;30mWARNING!!!\033[0m" << std::endl;
+        std::cout << "\033[43;30m";
+        std::cout << "###ATTENTION### ";
+        std::cout << u8"图片中的以下人员不在全学员名单中";
+        std::cout << " ###ATTENTION###";
+        std::cout << std::endl;
+
+        for (auto it_unknownPerson = unknownAttPerson_.begin( );
+             it_unknownPerson != unknownAttPerson_.end( );
+             it_unknownPerson++) {
+            std::cout << "Unknown:  ";
+            std::cout << it_unknownPerson->personStd.classname << "    ";
+            std::cout << it_unknownPerson->personStd.name << "    ";
+            if (it_unknownPerson->personStd.studentID.size( ) != 0) {
+                std::cout << it_unknownPerson->personStd.studentID << "    ";
+            } else {
+                std::cout << u8"？学号不存在？ ";
+            }
+            std::cout << std::endl;
+            for (size_t i = 0; i < it_unknownPerson->likelyPerson.size( ); i++) {
+                std::cout << u8"-likely:  ";
+                std::cout << it_unknownPerson->likelyPerson[i].classname << "    ";
+                std::cout << it_unknownPerson->likelyPerson[i].name << "    ";
+                std::cout << it_unknownPerson->likelyPerson[i].studentID << "    ";
+                std::cout << it_unknownPerson->likelyRate[i] << std::endl;
+            }
+            std::cout << std::endl;
+        }
+        std::cout << "###ATTENTION### ";
+        std::cout << u8"以上的人员不在全学员名单中";
+        std::cout << " ###ATTENTION###";
+        std::cout << "\033[0m";
+        std::cout << std::endl
+                  << std::endl
+                  << std::endl;
+    }
+    std::cout << u8"已完成线下签到汇总表的输出，请在 output/att_out 中查看！" << std::endl
+              << std::endl;
+    save_unknown_person(unknownAttPerson_);
+    std::cout << u8"未知的人员信息已输出到 output/unknown.xlsx 中" << std::endl
+              << std::endl;
+    ppocr::Uninit( );
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    return;
+}
+
+// @brief 制作考勤统计表
+void DoQingziClass::stats_checkinners( ) {
 
     /*  ===================================================================
      *				================
@@ -545,10 +546,6 @@ void DoQingziClass::make_statisticsSheet( ) {
         list< std::string >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
                              ".jpe", ".bmp", ".dib", ".webp", ".raw" });
 
-    // 排序，这样就可以按照班级来
-    // std::sort(att_fileName.begin( ), att_fileName.end( ));
-    // std::sort(att_filePathAndName.begin( ), att_filePathAndName.end( ));
-
     // 2.解析班级的名字与名单的数量，储存到classname__filePathAndName中
     for (auto it_att_fileName = att_fileName.begin( ), it_att_filePathAndName = att_filePathAndName.begin( );
          it_att_fileName != att_fileName.end( ) && it_att_filePathAndName != att_filePathAndName.end( );
@@ -605,9 +602,7 @@ void DoQingziClass::make_statisticsSheet( ) {
     }
 }
 
-/*
- * @brief 保存考勤表
- */
+// @brief 保存签到考勤表
 void DoQingziClass::save_statisticsSheet( ) {
     /* ==================================================================================
      * 制表方式
@@ -826,8 +821,9 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
  * @brief 标准人员信息转化为一行信息
  * @param _inperStd 标准的人员信息
  * @param _outperLine 一行信息
+ * @note 这个函数好像没怎么用到
  */
-void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _outperLine) {
+void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine &_outperLine) {
     DefLine per;
     per.classname                 = _inperStd.classname;
     per.information[u8"姓名"]     = _inperStd.name;
@@ -850,9 +846,8 @@ void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine _ou
     _outperLine = per;
 }
 
-/*
- * @brief 缓存全部报名的人员
- */
+
+// @brief 缓存全部报名的人员
 void DoQingziClass::save_signSheet( ) {
     // 按照 班级  姓名  学号  的方式保存
     // 仅保存报名的人员s
@@ -869,9 +864,7 @@ void DoQingziClass::save_signSheet( ) {
     file::save_signSheet_to_xlsx(sh);
 }
 
-/*
- * @brief 加载缓存的全部报名的人员
- */
+// @brief 加载缓存的全部报名的人员
 void DoQingziClass::load_signSheet( ) {
     std::cout << std::endl
               << u8"加载缓存文件..." << std::endl
