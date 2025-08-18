@@ -159,13 +159,13 @@ void save_sttSheet_to_xlsx(
  * @brief 保存报名信息到xlsx
  * @param _sheet 表格
  */
-void save_signSheet_to_xlsx(const table< std::string > &_sheet);
+void save_storageSheet_to_xlsx(const table< std::string > &_sheet);
 
 /*
  * @brief 加载缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void load_signSheet_from_xlsx(table< std::string > &_sheet);
+void load_storageSheet_from_xlsx(table< std::string > &_sheet);
 
 /*
  * @brief 保存尚未搜索到的成员到xlsx

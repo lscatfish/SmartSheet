@@ -499,7 +499,7 @@ void save_sttSheet_to_xlsx(
  * @brief 保存缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void save_signSheet_to_xlsx(const table< std::string > &_sheet) {
+void save_storageSheet_to_xlsx(const table< std::string > &_sheet) {
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
@@ -507,15 +507,15 @@ void save_signSheet_to_xlsx(const table< std::string > &_sheet) {
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save("./sign/sign.xlsx");
+    wb.save("./storage/storage.xlsx");
 }
 
 /*
  * @brief 加载缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void load_signSheet_from_xlsx(table< std::string > &_sheet) {
-    const std::string path = "./sign/sign.xlsx";
+void load_storageSheet_from_xlsx(table< std::string > &_sheet) {
+    const std::string path = "./storage/storage.xlsx";
     namespace fs           = std::filesystem;
     // 判断此文件是否存在
     if (!fs::exists(path)) {
@@ -545,7 +545,6 @@ void load_signSheet_from_xlsx(table< std::string > &_sheet) {
         _sheet.push_back(aSingleRow);
         // std::cout << std::endl;
     }
-    pause( );
 }
 
 /*

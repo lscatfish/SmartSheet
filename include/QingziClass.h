@@ -69,8 +69,10 @@ private:
     // @brief 加载全学员表的函数
     void load_personnel_information_list( );
 
+
+
     // @brief 控制生成签到表的函数
-    void attendanceSheet( );
+    void attendance( );
 
     // @brief 统计报名人员
     void stats_applicants( );
@@ -78,14 +80,23 @@ private:
     // @brief 保存签到表
     void save_attendanceSheet( );
 
+
+
+
+
     // @brief 控制生成签到考勤表的函数
-    void statisticsSheet( );
+    void statistics( );
 
     //  @brief 统计签到人员
     void stats_checkinners( );
 
     // @brief 保存签到考勤表
     void save_statisticsSheet( );
+
+
+
+    // @brief 青字班报名
+    void registration( );
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
@@ -106,10 +117,10 @@ private:
     void search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
 
     // @brief 缓存全部报名的人员
-    void save_signSheet( );
+    void save_storageSheet( );
 
     // @brief 加载缓存的全部报名的人员
-    void load_signSheet( );
+    void load_storageSheet( );
 
     /*
      * @brief 保存尚未搜索到的成员

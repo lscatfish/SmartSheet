@@ -42,5 +42,8 @@ table<std::string> mergeMultipleSheets(Args &&...args) {
     return result;
 }
 
+// 清除字符串前面的所有空格
+std::string trim_leading_spaces(const std::string &str);
+
 
 #endif    // !HELPER_H
