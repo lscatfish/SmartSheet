@@ -14,7 +14,6 @@
 #include <ppocr_API.h>
 #include <QingziClass.h>
 #include <string>
-#include <test.h>
 #include <thread>
 #include <vector>
 #include <Windows.h>
@@ -63,17 +62,19 @@ void DoQingziClass::self_check( ) {
     const list< std::string > pathList{ "./input/all",
                                         "./input/app",
                                         "./input/att_imgs",
-                                        "./input/sign_for_QingziClass",
+                                        "./input/sign_for_QingziClass/self",
+                                        "./input/sign_for_QingziClass/org",
                                         "./output/app_out",
                                         "./output/att_out",
                                         "./output/sign_for_QingziClass_out",
                                         "./storage",
                                         "./models" };
     for (const auto &p : pathList) {
-        file::create_folder_recursive(p);
+        if (!file::create_folder_recursive(p)) {
+            pause( );
+        };
     }
     std::cout << u8"自检完毕..." << std::endl;
-    pause( );
 }
 
 // 选择
@@ -186,7 +187,7 @@ void DoQingziClass::load_personnel_information_list( ) {
 
 
 
-
+/* ======================================================================================================================= */
 
 
 // @brief 控制生成签到表的函数
@@ -393,6 +394,7 @@ void DoQingziClass::save_attendanceSheet( ) {
 }
 
 
+/* ======================================================================================================================= */
 
 
 // @brief 控制生成签到考勤表的函数
@@ -681,25 +683,72 @@ void DoQingziClass::save_statisticsSheet( ) {
 }
 
 
+/* ======================================================================================================================= */
 
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {
-    file::DefFolder     aFolder("./input/sign_for_QingziClass");
-    list< std::string > paths = aFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
+    file::DefFolder selfFolder("./input/sign_for_QingziClass/self");
+    file::DefFolder orgFolder("./input/sign_for_QingziClass/org");
 
-    // list< std::string > u8paths = aFolder.get_u8filePath_list(list< std::string >{ ".docx" });    // u8文件路径
-
+    list< std::string > paths = selfFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
     // 解析文件
-    for (const auto &p : paths) {
-        docx::DefDocx aDocx(p);
-        personStd_.push_back(aDocx.get_person( ));
-    }
+    if (paths.size( ) != 0)
+        for (const auto &p : paths) {
+            docx::DefDocx aDocx(p);
+            personStd_.push_back(aDocx.get_person(u8"自主报名"));
+        }
+
+    paths = orgFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
+    // 解析文件
+    if (paths.size( ) != 0)
+        for (const auto &p : paths) {
+            docx::DefDocx aDocx(p);
+            personStd_.push_back(aDocx.get_person(u8"组织推荐"));
+        }
 
     // 尝试输出
-    for (const auto &p : personStd_) {
-        std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
+    /* for (const auto &p : personStd_) {
+         std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
+     }*/
+
+    save_registrationSheet( );
+}
+
+// @brief 保存青字班的报名表
+void DoQingziClass::save_registrationSheet( ) {
+    table< std::string > sh{
+        { u8"序号", u8"姓名", u8"性别", u8"民族", u8"年级", u8"学号", u8"政治面貌", u8"学院", u8"专业", u8"学生职务",
+          u8"社团", u8"联系电话", u8"QQ号", u8"邮箱", u8"报名青字班", u8"是否报名班委", u8"报名方式", u8"备注",
+          u8"文件地址" }
+    };    // 表格
+    int serial = 1;//序号
+    for (auto& p : personStd_) {
+        list< std::string > line;
+        line.push_back(trans_integer_to_string(serial));
+        line.push_back(p.name);
+        line.push_back(p.gender);
+        line.push_back(p.ethnicity);
+        line.push_back(p.grade);
+        line.push_back(p.studentID);
+        line.push_back(p.politicaloutlook);
+        line.push_back(p.academy);
+        line.push_back(p.majors);
+        line.push_back(p.position);
+        line.push_back(p.club);
+        line.push_back(p.phonenumber);
+        line.push_back(p.qqnumber);
+        line.push_back(p.email);
+        line.push_back(p.classname);
+        line.push_back(u8"否");
+        line.push_back(p.otherInformation[u8"报名方式"]);
+        line.push_back(p.otherInformation[u8"备注"]);
+        line.push_back(p.otherInformation[u8"文件地址"]);
+        sh.push_back(line);
+        serial++;
     }
+    file::save_registrationSheet_to_xlsx(sh);
+
 }
 
 
@@ -870,8 +919,8 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
             per.qqnumber = it_inperLine->second;
         } else if ((it_inperLine->first == u8"所任职务")
                    || (it_inperLine->first == u8"职务")
-                   || (fuzzy::contains_substring(it_inperLine->first, u8"职务"))
-                   || (fuzzy::contains_substring(it_inperLine->first, u8"所任职务"))) {
+                   || (fuzzy::search_substring(it_inperLine->first, u8"职务"))
+                   || (fuzzy::search_substring(it_inperLine->first, u8"所任职务"))) {
             per.position = it_inperLine->second;
         } else if (it_inperLine->first == u8"邮箱") {
             per.email = it_inperLine->second;
@@ -881,7 +930,7 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
             per.club = it_inperLine->second;
         } else if ((it_inperLine->first == u8"报名青字班")
                    || (it_inperLine->first == u8"青字班")
-                   || (fuzzy::contains_substring(it_inperLine->first, u8"青字班"))) {
+                   || (fuzzy::search_substring(it_inperLine->first, u8"青字班"))) {
             per.classname = it_inperLine->second;
         } else {
             per.otherInformation[it_inperLine->first] = it_inperLine->second;

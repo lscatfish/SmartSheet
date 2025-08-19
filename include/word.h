@@ -54,8 +54,11 @@ public:
      */
     table< TableCell > get_table_with(const list< std::string > &_u8imp);
 
-    // @brief 返回一个标准人员信息
-    DefPerson get_person( );
+    /*
+     * @brief 返回一个标准人员信息
+     * @param _reMeth 报名方式
+     */
+    DefPerson get_person(const std::string _reMeth);
 
     // 打印带位置信息的表格
     void print_tables_with_position( );

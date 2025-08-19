@@ -100,6 +100,9 @@ private:
     // @brief 青字班报名
     void registration( );
 
+    // @brief 保存青字班的报名表
+    void save_registrationSheet( );
+
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
      * @param _it_output 总名单的一个迭代器
