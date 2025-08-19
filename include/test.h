@@ -35,5 +35,8 @@ void test_for_DefFolder( );
 // 测试文件夹的检测
 void test_for_check_and_create_folder( );
 
+// 测试icu_encoding_handler
+void test_for_icu_encoding_handler( );
+
 
 #endif    // !TEST_H

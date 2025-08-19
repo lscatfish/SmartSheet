@@ -9,6 +9,7 @@
 #include <Encoding.h>
 #include <exception>
 #include <helper.h>
+#include <icu_encoding_handler.h>
 #include <imgs.h>
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -123,9 +124,6 @@ void test_for_ENCODING( ) {
     for (auto &a : str) {
         std::cout << ec::chcode_to_utf8(a) << std::endl;
     }
-    for (auto &a : str) {
-        std::cout << ec::gbk_to_utf8(a) << std::endl;
-    }
 }
 
 // 测试chstring
@@ -151,8 +149,8 @@ void test_for_cv_imread( ) {
     }
 
     std::string u8path = u8"./input/att_imgs/青书班1.jpeg";
-    u8path             = encoding::utf8_to_gbk(u8path);
-    cv::Mat u8img      = cv::imread(u8path);
+    // u8path             = encoding::utf8_to_gbk(u8path);
+    cv::Mat u8img = cv::imread(u8path);
     if (u8img.empty( )) {
         std::cout << u8"u8图片 " << u8path << u8" 打开失败" << std::endl;
         return;
@@ -211,6 +209,24 @@ void test_for_check_and_create_folder( ) {
     std::string nestedRelativePath = "./parent/child";    // 嵌套的相对路径（注意：parent文件夹也会被创建）
 
     // 检测并创建文件夹
-    file::create_folder_recursive( relativePath);
-    file::create_folder_recursive( nestedRelativePath);
+    file::create_folder_recursive(relativePath);
+    file::create_folder_recursive(nestedRelativePath);
+}
+
+// 测试icu_encoding_handler
+void test_for_icu_encoding_handler( ) {
+    std::string p = ICUEncodingHandler::get_system_default_encoding( );
+    std::cout << p << std::endl;
+
+    std::string                            anycode = "青公班1.jpeg";
+    std::vector< EncodingDetectionResult > results;    // 结果函数
+    std::string                            out;        // 输出
+    std::string                            e;          // 错误
+    ICUEncodingHandler::detect_encoding(anycode.c_str( ), anycode.size( ), results, 5);
+
+    for (auto &r : results) {
+        std::cout << r.encodingName << "    " << r.confidence << std::endl;
+    }
+   std::cout<< encoding::chcode_to_utf8(anycode);
+
 }
