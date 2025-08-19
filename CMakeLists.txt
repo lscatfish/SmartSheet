@@ -44,6 +44,7 @@ include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/")
 include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/LangModels/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
+include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp" 
@@ -75,6 +76,32 @@ set(SOURCE_OCR_MODELS "${CMAKE_SOURCE_DIR}/models")
 ##################################OCR的相关文件############################################
 ###########################################################################################
 
+###########################################################################################
+##################################icu的相关文件############################################
+
+# icu的相关动态链接库
+# 首先检查icu DLL目录是否存在，然后查找文件
+set(ICU_DLL_DIR "${THIRD_PARTY_DLL_DIR}/icu/Release/bin64")
+if(NOT EXISTS ${ICU_DLL_DIR})
+    message(WARNING "ICU DLL directory not found: ${ICU_DLL_DIR}")
+else()
+    # 使用LIST_DIRECTORIES false确保只获取文件
+    file(GLOB ICU_DLL_RELEASE_FILES LIST_DIRECTORIES false "${ICU_DLL_DIR}/*.dll")
+    
+    # 验证是否找到了DLL文件
+    if(NOT ICU_DLL_RELEASE_FILES)
+        message(WARNING "No ICU DLL files found in ${ICU_DLL_DIR}")
+    else()
+        message(STATUS "Found ${CMAKE_ARGC} ICU DLL files to copy")
+    endif()
+endif()
+
+##################################icu的相关文件############################################
+###########################################################################################
+
+
+
+
 # 添加执行文件
 add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
 
@@ -99,6 +126,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
+)
+# 链接到icu
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
@@ -179,3 +215,19 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
     COMMENT "Copying ${SOURCE_OCR_MODELS} to executable directory"  # 显示提示信息
 )
+
+# 遍历每个 icu-DLL 文件并复制到目标目录 ： 只在找到文件时执行
+if(ICU_DLL_RELEASE_FILES)
+    foreach(DLL_FILE ${ICU_DLL_RELEASE_FILES})
+        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${DLL_FILE}"  # 添加引号处理路径中的空格
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
+            COMMENT "Copying ${DLL_NAME} to output directory"
+            VERBATIM  # 确保正确处理特殊字符
+        )
+    endforeach()
+else()
+    message(WARNING "No ICU DLL files will be copied - none found")
+endif()
