@@ -577,7 +577,21 @@ void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
     wb.save("./output/unknown.xlsx");
 }
 
+/*
+ * @brief 保存青字班报名表
+ * @param _sheet 表格
+ */
+void save_registrationSheet_to_xlsx(const table< std::string >& _sheet) {
 
+        xlnt::workbook wb;
+    auto           ws = wb.active_sheet( );
+    ws.title("Sheet1");
+    // 逐行逐列写入
+    for (std::size_t r = 0; r < _sheet.size( ); ++r)
+        for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    wb.save("./output/sign_for_QingziClass_out/s.xlsx");
+}
 
 
 

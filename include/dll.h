@@ -37,9 +37,6 @@ bool GetExport(HMODULE h, const char *procName, FuncPtr &outFn) {
  *--------------------------------------------------------*/
 HMODULE LoadDll(const std::wstring &dllPath);
 
-
-
-
 }    // namespace dll
 
 

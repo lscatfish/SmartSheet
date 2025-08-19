@@ -165,29 +165,65 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
     return table< TableCell >( );    // 返回空表
 }
 
-// @brief 返回一个标准人员信息
-DefPerson DefDocx::get_person( ) {
+/*
+ * @brief 返回一个标准人员信息
+ * @param _reMeth 报名方式
+ */
+DefPerson DefDocx::get_person(const std::string _reMeth) {
     DefLine   perLine;
+    perLine.information[u8"备注"] = "";
+
     DefPerson per;
     // 定义关键的词
     const list< std::string > headerLib{ u8"姓名", u8"性别", u8"年级", u8"学号", u8"政治面貌", u8"学院",
                                          u8"专业", u8"电话", u8"联系方式", u8"联系电话", u8"电话号码",
-                                         u8"QQ号", u8"qq号", u8"qq", u8"QQ", u8"所任职务", u8"职务",
+                                         u8"QQ号", u8"qq号", u8"qq", u8"QQ", u8"所任职务", u8"职务", u8"学生职务",
                                          u8"邮箱", u8"民族", u8"社团", u8"报名青字班", u8"青字班" };
-
     for (size_t row = 0; row < keyTable_.size( ); row++) {
         for (size_t col = 0; col < keyTable_[row].size( ); col++) {
             if (keyTable_[row][col].content.size( ) != 0) {
-                if (fuzzy::search(headerLib, keyTable_[row][col].content, fuzzy::LEVEL::High)) {
+                if (fuzzy::search(headerLib, trim_leading_spaces(keyTable_[row][col].content), fuzzy::LEVEL::High)) {
                     if (col + 1 < keyTable_[row].size( )) {
-                        perLine.information[keyTable_[row][col].content] = trim_leading_spaces(keyTable_[row][col + 1].content);
+                        perLine.information[trim_leading_spaces(keyTable_[row][col].content)] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         col++;
+                    }
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"个人简介") {
+                    if (col + 1 < keyTable_[row].size( )) {
+                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人简介极少；";
+                            col++;
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 210) {    // 70字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人简介较少；";
+                            col++;
+                        }
+                    }
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"个人特长") {
+                    if (col + 1 < keyTable_[row].size( )) {
+                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人特长极少；";
+                            col++;
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人特长较少；";
+                            col++;
+                        }
+                    }
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"工作经历") {
+                    if (col + 1 < keyTable_[row].size( )) {
+                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历极少；";
+                            col++;
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                            perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历较少；";
+                            col++;
+                        }
                     }
                 }
             }
         }
     }
     DoQingziClass::trans_line_to_person(perLine, per);
+    per.otherInformation[u8"报名方式"] = _reMeth;
+    per.otherInformation[u8"文件地址"] = u8path_;
     return per;
 }
 

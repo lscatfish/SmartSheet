@@ -94,7 +94,7 @@ bool search_for_person(
  * @param _mainStr 主字符串
  * @param _subStr 子字符串
  */
-bool contains_substring(const std::string &_mainStr, const std::string &_subStr);
+bool search_substring(const std::string &_mainStr, const std::string &_subStr);
 
 }    // namespace fuzzy
 

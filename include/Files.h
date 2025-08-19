@@ -175,6 +175,12 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet);
  */
 void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet);
 
+/*
+* @brief 保存青字班报名表
+* @param _sheet 表格
+*/
+void save_registrationSheet_to_xlsx(const table< std::string > &_sheet);
+
 /**
  * 替换字符串中的所有指定字符
  *
