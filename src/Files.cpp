@@ -1,6 +1,7 @@
 ﻿
 #include <basic.hpp>
 #include <Encoding.h>
+#include <errhandlingapi.h>
 #include <Files.h>
 #include <filesystem>
 #include <Fuzzy.h>
@@ -11,6 +12,22 @@
 #include <vector>
 #include <Windows.h>
 #include <xlnt/xlnt.hpp>
+
+#include <algorithm>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <vector>
+
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir(path) _mkdir(path)
+#else
+#include <unistd.h>
+#define mkdir(path) mkdir(path, 0755)
+#endif
 
 namespace file {
 
@@ -154,10 +171,8 @@ size_t file::DefFolder::erase_with(const list< std::string > &_extension) {
     return this->filePathList_.size( );
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/* ========================================================================================================================= */
+
 
 
 
@@ -561,4 +576,100 @@ void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
     wb.save("./output/unknown.xlsx");
 }
+
+
+
+
+
+
+// 替换字符串中的所有指定字符
+std::string replace_all(const std::string &_str, char _oldChar, char _newChar) {
+    std::string result = _str;
+    std::replace(result.begin( ), result.end( ), _oldChar, _newChar);
+    return result;
+}
+
+// 分割路径为各个组件，同时支持正反斜杠
+std::vector< std::string > split_path(const std::string &_path) {
+    std::vector< std::string > components;
+    std::string                processedPath = _path;
+
+#ifdef _WIN32
+    // 在Windows系统下，将所有正斜杠转换为反斜杠统一处理
+    processedPath = replace_all(processedPath, '/', '\\');
+#endif
+
+    std::stringstream ss(processedPath);
+    std::string       component;
+    char              delimiter = '/';
+
+#ifdef _WIN32
+    delimiter = '\\';    // Windows使用反斜杠作为分隔符
+#endif
+
+    while (std::getline(ss, component, delimiter)) {
+        if (!component.empty( )) {
+            components.push_back(component);
+        }
+    }
+    return components;
+}
+
+// 检查文件夹是否存在
+bool is_folder_exists(const std::string &_path) {
+    struct stat info;
+    if (stat(_path.c_str( ), &info) != 0) {
+        return false;
+    }
+    return (info.st_mode & S_IFDIR) != 0;
+}
+
+// 递归创建文件夹，支持Windows正反斜杠
+bool create_folder_recursive(const std::string &_path) {
+    // 如果路径已存在，直接返回成功
+    if (is_folder_exists(_path)) {
+        std::cout << u8"文件夹已存在: " << _path << std::endl;
+        return true;
+    }
+
+    // 分割路径为各个组件
+    std::vector< std::string > components = split_path(_path);
+    if (components.empty( )) {
+        std::cerr << u8"无效的路径: " << _path << std::endl;
+        return false;
+    }
+
+    // 逐级构建路径并创建
+    std::string currentPath;
+#ifdef _WIN32
+    // 处理Windows下的盘符（如C:）
+    if (_path.find(':') != std::string::npos) {
+        currentPath = components[0] + ":";
+        components.erase(components.begin( ));
+    }
+#endif
+
+    for (const std::string &component : components) {
+        if (!currentPath.empty( )) {
+#ifdef _WIN32
+            currentPath += "\\";    // Windows使用反斜杠
+#else
+            currentPath += "/";    // Linux使用正斜杠
+#endif
+        }
+        currentPath += component;
+
+        // 如果当前路径不存在，则创建
+        if (!is_folder_exists(currentPath)) {
+            if (mkdir(currentPath.c_str( )) != 0) {
+                std::cerr << u8"创建目录失败: " << currentPath << std::endl;
+                return false;
+            }
+            std::cout << u8"创建目录成功: " << currentPath << std::endl;
+        }
+    }
+
+    return true;
+}
+
 }    // namespace file

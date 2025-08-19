@@ -40,9 +40,7 @@ DoQingziClass::~DoQingziClass( ) {
  * @attention 重构到构造函数吧
  */
 void DoQingziClass::start( ) {
-    system("cls");
-    /* 1.加载全学员表 ===================================================================== */
-    load_personnel_information_list( );
+    self_check( );
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
     int outWhichSheet = choose_function( );    // 生成那一张表：1签到表  2出勤记录表
@@ -55,6 +53,27 @@ void DoQingziClass::start( ) {
     } else if (outWhichSheet == 3) {
         registration( );
     }
+}
+
+// 自检程序
+void DoQingziClass::self_check( ) {
+    system("cls");
+    std::cout << u8"启动自检程序......" << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    const list< std::string > pathList{ "./input/all",
+                                        "./input/app",
+                                        "./input/att_imgs",
+                                        "./input/sign_for_QingziClass",
+                                        "./output/app_out",
+                                        "./output/att_out",
+                                        "./output/sign_for_QingziClass_out",
+                                        "./storage",
+                                        "./models" };
+    for (const auto &p : pathList) {
+        file::create_folder_recursive(p);
+    }
+    std::cout << u8"自检完毕..." << std::endl;
+    pause( );
 }
 
 // 选择
@@ -165,9 +184,16 @@ void DoQingziClass::load_personnel_information_list( ) {
     }
 }
 
+
+
+
+
+
 // @brief 控制生成签到表的函数
 void DoQingziClass::attendance( ) {
-    // 制作签到表
+    /* 1.加载全学员表 ===================================================================== */
+    load_personnel_information_list( );
+
     stats_applicants( );
     save_attendanceSheet( );
     if (unknownAppPerson_.size( ) >= 1) {
@@ -371,6 +397,8 @@ void DoQingziClass::save_attendanceSheet( ) {
 
 // @brief 控制生成签到考勤表的函数
 void DoQingziClass::statistics( ) {
+    /* 1.加载全学员表 ===================================================================== */
+    load_personnel_information_list( );
     ppocr::Init( );
     load_storageSheet( );
     // 制作考勤统计表
@@ -668,11 +696,10 @@ void DoQingziClass::registration( ) {
         personStd_.push_back(aDocx.get_person( ));
     }
 
-    //尝试输出
-    for (const auto& p : personStd_) {
+    // 尝试输出
+    for (const auto &p : personStd_) {
         std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
     }
-
 }
 
 
