@@ -25,7 +25,7 @@ std::wstring utf8_to_wstring_win(const std::string u8);
  * @param _anycode 任意中文（简体）格式的string
  * @return 转化为utf8格式的string
  */
-std::string chcode_to_utf8(const std::string &_anycode);
+std::string sysdcode_to_utf8(const std::string &_anycode);
 
 
 }    // namespace encoding

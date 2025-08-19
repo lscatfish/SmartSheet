@@ -122,7 +122,7 @@ void DoQingziClass::load_personnel_information_list( ) {
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefPerson per;
             per.classname = cn;
-            //  std::cout << chcode_to_utf8("加载std") << std::endl;
+            //  std::cout << sysdcode_to_utf8("加载std") << std::endl;
             for (size_t colIndex = 0; colIndex < sh[rowIndex].size( ); colIndex++) {
                 if (sh[0][colIndex] == u8"姓名") {
                     per.name = sh[rowIndex][colIndex];

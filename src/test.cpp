@@ -52,7 +52,7 @@ void test_main( ) {
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
     xlnt::workbook wb;                        // 创建一个工作簿对象
-    wb.load(chcode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
+    wb.load(sysdcode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
     auto ws = wb.active_sheet( );             // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
@@ -75,7 +75,7 @@ void test_main( ) {
         for (auto cell : row) {
             std::cout << "将该单元格添加到当前行向量..." << std::endl;
             // cell.to_string() 把数字、日期、公式等统一转为字符串
-            aSingleRow.push_back(chcode_to_utf8(cell.to_string( )));
+            aSingleRow.push_back(sysdcode_to_utf8(cell.to_string( )));
         }
 
         std::cout << "将该整行添加到总向量..." << std::endl;
@@ -96,22 +96,22 @@ void test_main( ) {
 
     xlnt::workbook wss;
 
-    wss.active_sheet( ).cell("B6").value(chcode_to_utf8("1中国234"));
-    wss.save(chcode_to_utf8("./1我/ou操.xlsx"));
+    wss.active_sheet( ).cell("B6").value(sysdcode_to_utf8("1中国234"));
+    wss.save(sysdcode_to_utf8("./1我/ou操.xlsx"));
 
 
     list< std::string > className_;          // 班级名字
     list< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    file::get_filepath_from_folder(className_, filePathAndName_, chcode_to_utf8("./input/all/"), list< std::string >{ ".xlsx" });
+    file::get_filepath_from_folder(className_, filePathAndName_, sysdcode_to_utf8("./input/all/"), list< std::string >{ ".xlsx" });
 
     table< std::string > test1 = {
-        { chcode_to_utf8("序号"), chcode_to_utf8("姓名"), chcode_to_utf8("学号"), chcode_to_utf8("签到") },
-        { chcode_to_utf8("1"), chcode_to_utf8("王二"), chcode_to_utf8("20243546545T"), "" },
-        { chcode_to_utf8("2"), chcode_to_utf8("张三"), chcode_to_utf8("324352532423"), "" },
-        { chcode_to_utf8("3"), chcode_to_utf8("李四"), chcode_to_utf8("324234"), "" },
+        { sysdcode_to_utf8("序号"), sysdcode_to_utf8("姓名"), sysdcode_to_utf8("学号"), sysdcode_to_utf8("签到") },
+        { sysdcode_to_utf8("1"), sysdcode_to_utf8("王二"), sysdcode_to_utf8("20243546545T"), "" },
+        { sysdcode_to_utf8("2"), sysdcode_to_utf8("张三"), sysdcode_to_utf8("324352532423"), "" },
+        { sysdcode_to_utf8("3"), sysdcode_to_utf8("李四"), sysdcode_to_utf8("324234"), "" },
 
     };
-    file::save_attSheet_to_xlsx(test1, "test1.xlsx", chcode_to_utf8("测试签到表"));
+    file::save_attSheet_to_xlsx(test1, "test1.xlsx", sysdcode_to_utf8("测试签到表"));
 }
 
 // 测试ENCODING
@@ -122,7 +122,7 @@ void test_for_ENCODING( ) {
                              "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh",
                              "./input/sign_k/青公班-报名表" };
     for (auto &a : str) {
-        std::cout << ec::chcode_to_utf8(a) << std::endl;
+        std::cout << ec::sysdcode_to_utf8(a) << std::endl;
     }
 }
 
@@ -218,7 +218,7 @@ void test_for_icu_encoding_handler( ) {
     std::string p = ICUEncodingHandler::get_system_default_encoding( );
     std::cout << p << std::endl;
 
-    std::string                            anycode = "青公班1.jpeg";
+    std::string                            anycode = "./input/att_ims/青宣班1.jpeg";
     std::vector< EncodingDetectionResult > results;    // 结果函数
     std::string                            out;        // 输出
     std::string                            e;          // 错误
@@ -227,6 +227,6 @@ void test_for_icu_encoding_handler( ) {
     for (auto &r : results) {
         std::cout << r.encodingName << "    " << r.confidence << std::endl;
     }
-   std::cout<< encoding::chcode_to_utf8(anycode);
+   std::cout<< encoding::sysdcode_to_utf8(anycode);
 
 }

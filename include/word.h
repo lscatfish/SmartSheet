@@ -71,7 +71,7 @@ public:
      */
     DefDocx(const std::string &_path) {
         path_   = _path;
-        u8path_ = encoding::chcode_to_utf8(_path);
+        u8path_ = encoding::sysdcode_to_utf8(_path);
 
         std::vector< char > xml_data = read_docx_file(path_, "word/document.xml");
         if (xml_data.empty( )) {

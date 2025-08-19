@@ -31,7 +31,7 @@ public:
         traverse_folder(_folderDir, this->filePathList_);
         // 输出u8的文件夹地址，用于在控制台输出
         for (const auto &fP : this->filePathList_) {
-            u8filePathList_.push_back(encoding::chcode_to_utf8(fP));
+            u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
         }
     };
     ~DefFolder( ) = default;
