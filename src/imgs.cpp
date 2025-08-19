@@ -333,12 +333,12 @@ table< std::string > GridResult::get_stringSheet( ) {
  * @return 失败返回false
  */
 static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
-    std::cout << u8"加载图片: " << encoding::chcode_to_utf8(_pathAndName) << u8" 中" << std::endl;
+    std::cout << u8"加载图片: " << encoding::sysdcode_to_utf8(_pathAndName) << u8" 中" << std::endl;
 
     // 打开图片
     _img = cv::imread(_pathAndName);
     if (_img.empty( )) {
-        std::cout << u8"图片 " << encoding::chcode_to_utf8(_pathAndName) << u8" 打开失败" << std::endl;
+        std::cout << u8"图片 " << encoding::sysdcode_to_utf8(_pathAndName) << u8" 打开失败" << std::endl;
         return false;
     }
     return true;
@@ -366,7 +366,7 @@ void load_sheet_from_img(
     std::cout << u8"ppocr工作" << std::endl;
     ppocr::ocr(ocrPR, img.clone( ));    // 这里返回的text为utf8编码
     std::cout << std::endl
-              << u8"图片: " << encoding::chcode_to_utf8(_path) << u8" 加载结束..." << std::endl
+              << u8"图片: " << encoding::sysdcode_to_utf8(_path) << u8" 加载结束..." << std::endl
               << std::endl;
 
     // 解析照片中表格的网格线

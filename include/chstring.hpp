@@ -22,10 +22,10 @@
 class chstring {
 public:
     chstring(std::string _in_) {
-        this->str = encoding::chcode_to_utf8(_in_);    // 使用Encoding库转换编码
+        this->str = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
     }
     chstring(const char *cstr) {
-        this->str = encoding::chcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
+        this->str = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
     }
     chstring(const chstring &_in_) {
         this->str = _in_.str;    // 直接复制底层字符串
