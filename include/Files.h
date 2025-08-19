@@ -17,6 +17,7 @@
 #include <vector>
 #include <Windows.h>
 
+// 此空间用于操作系统的文件以及文件夹
 namespace file {
 
 // 此类用于获取文件夹中的所有文件
@@ -87,6 +88,7 @@ private:
     list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
     list< std::string > u8filePathList_;    // 文件夹下的文件路径（按照utf8编码）
 };
+/* ========================================================================================================================= */
 
 
 /*
@@ -172,6 +174,44 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet);
  * @param _sheet 表格
  */
 void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet);
+
+/**
+ * 替换字符串中的所有指定字符
+ *
+ * 遍历输入字符串，将所有与oldChar匹配的字符替换为newChar
+ * 不修改原字符串，返回替换后的新字符串副本
+ *
+ * @param str 要处理的原始字符串
+ * @param oldChar 需要被替换的字符
+ * @param newChar 用于替换的新字符
+ * @return 替换完成后的字符串副本
+ */
+std::string replace_all(const std::string &str, char oldChar, char newChar);
+
+/**
+ * 检查文件夹是否存在
+ *
+ * 使用系统相关函数检查指定路径是否存在且为一个目录
+ * 支持绝对路径和相对路径，跨平台兼容Windows和类Unix系统
+ *
+ * @param path 要检查的文件夹路径
+ * @return 如果路径存在且是文件夹则返回true，否则返回false
+ */
+bool is_folder_exists(const std::string &path);
+
+/**
+ * 递归创建文件夹，支持Windows正反斜杠
+ *
+ * 解析输入路径，逐级检查并创建所有不存在的目录层级
+ * 自动处理Windows系统下的正反斜杠混合使用情况，以及带盘符的路径
+ * 类Unix系统下保持使用正斜杠作为路径分隔符
+ *
+ * @param path 要创建的文件夹路径（支持绝对路径、相对路径、嵌套路径）
+ * @return 如果全部目录创建成功或路径已存在则返回true，创建失败则返回false
+ */
+bool create_folder_recursive(const std::string &path);
+
+
 }    // namespace file
 
 #endif    // !FILES_H

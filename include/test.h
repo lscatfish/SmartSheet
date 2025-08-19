@@ -32,5 +32,8 @@ int test_for_docx( );
 // 测试DefFolder
 void test_for_DefFolder( );
 
+// 测试文件夹的检测
+void test_for_check_and_create_folder( );
+
 
 #endif    // !TEST_H

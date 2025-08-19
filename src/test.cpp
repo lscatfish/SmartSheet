@@ -3,6 +3,7 @@
 #include "PersonnelInformation.h"
 #include "test.h"
 #include <algorithm>
+#include <basic.hpp>
 #include <chstring.hpp>
 #include <consoleapi2.h>
 #include <Encoding.h>
@@ -23,7 +24,6 @@
 #include <word.h>
 #include <xlnt/xlnt.hpp>
 #include <zlib.h>
-#include <basic.hpp>
 
 
 // 测试解析docx文件的minizip与pugixml
@@ -202,4 +202,15 @@ void test_for_DefFolder( ) {
     for (auto &l : p) {
         std::cout << l << std::endl;
     }
+}
+
+// 测试文件夹的检测
+void test_for_check_and_create_folder( ) {
+    // 测试相对路径和绝对路径
+    std::string relativePath       = "./test_folder";     // 相对路径示例
+    std::string nestedRelativePath = "./parent/child";    // 嵌套的相对路径（注意：parent文件夹也会被创建）
+
+    // 检测并创建文件夹
+    file::create_folder_recursive( relativePath);
+    file::create_folder_recursive( nestedRelativePath);
 }
