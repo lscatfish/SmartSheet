@@ -74,6 +74,17 @@ std::string sysdcode_to_utf8(const std::string &_anycode) {
     std::string out;    // 输出
     std::string e;      // 错误
 
+    std::vector< EncodingDetectionResult > icuResult;
+    std::string                            ys = _anycode;
+    while (ys.size( ) < 100) {
+        ys = ys + ys;
+    }
+
+    if (ICUEncodingHandler::detect_encoding(ys.c_str( ), ys.size( ), icuResult, 1)) {
+        if (icuResult[0].encodingName == u8"UTF-8")
+            return _anycode;
+    }
+
     if (ICUEncodingHandler::convert_to_utf8(_anycode.c_str( ), _anycode.size( ), systemDefaultEncoding, out, e)) {
         return out;
     } else {

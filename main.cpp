@@ -19,7 +19,6 @@
 #include <string>
 #include <stringapiset.h>
 #include <test.h>
-#include <test_for_cv.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
@@ -31,12 +30,12 @@ int main( ) {
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
 
-#if true
+#if false
     DoQingziClass qClass;
     qClass.start( );
 #else
 
-    test_for_icu_encoding_handler( );
+    test_for_DefFolder( );
     pause( );
     // test_for__load_sheet_from_img( );
 #endif    // true

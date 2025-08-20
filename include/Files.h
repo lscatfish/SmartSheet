@@ -12,15 +12,18 @@
  */
 #include <basic.hpp>
 #include <Encoding.h>
+#include <filesystem>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 #include <Windows.h>
+#include <iostream>
 
 // 此空间用于操作系统的文件以及文件夹
 namespace file {
 
-// 此类用于获取文件夹中的所有文件
+// 此类用于获取文件夹中的 所有 文件
 class DefFolder {
 public:
     /*
@@ -33,6 +36,9 @@ public:
         for (const auto &fP : this->filePathList_) {
             u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
         }
+        for (const auto &f : u8filePathList_) {
+            std::cout << f << std::endl;
+        }
     };
     ~DefFolder( ) = default;
 
@@ -44,30 +50,30 @@ public:
     static void traverse_folder(const std::string &folderPath, list< std::string > &filePaths);
 
     /*
-     * @brief 输出文件夹下的各个文件路径
+     * @brief 输出文件夹下的各个文件的相对路径
      * @return list<string>类型一个列表
      */
-    list< std::string > get_filePath_list( );
+    list< std::string > get_filepath_list( );
 
     /*
-     * @brief 输出文件夹下的各个文件路径(utf8编码)
+     * @brief 输出文件夹下的各个文件的相对路径(utf8编码)
      * @return list<string>类型一个列表
      */
-    list< std::string > get_u8filePath_list( );
+    list< std::string > get_u8filepath_list( );
 
     /*
      * @brief 输出指定后缀的文件路径
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径
      */
-    list< std::string > get_filePath_list(const list< std::string > &_extension);
+    list< std::string > get_filepath_list(const list< std::string > &_extension);
 
     /*
      * @brief 输出指定后缀的文件路径(u8编码)
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径（u8编码）
      */
-    list< std::string > get_u8filePath_list(const list< std::string > &_extension);
+    list< std::string > get_u8filepath_list(const list< std::string > &_extension);
 
     /*
      * @brief 保留指定后缀的文件
@@ -83,11 +89,75 @@ public:
      */
     size_t erase_with(const list< std::string > &_extension);
 
+    /*
+     * @brief 复制指定后缀的文件到指定的路径
+     * @param _targetDir 指定路径
+     * @param _extension 指定的后缀
+     * @return 复制到的文件的数量
+     */
+    size_t copy_files_to(const std::string &_targetDir, const list< std::string > &_extension);
+
+    /*
+     * @brief 返回所有的文件名（包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件（包含后缀）
+     */
+    list< std::string > get_file_list( );
+
+    /*
+     * @brief 返回特定后缀的文件名（包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件（包含后缀）
+     */
+    list< std::string > get_file_list(const list< std::string > &_extension);
+
+    /*
+     * @brief 返回所有的文件名（包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件（包含后缀）
+     */
+    list< std::string > get_u8file_list( );
+
+    /*
+     * @brief 返回特定后缀的文件名（包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件（包含后缀）
+     */
+    list< std::string > get_u8file_list(const list< std::string > &_extension);
+
+    /*
+     * @brief 返回所有的文件名（不包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< std::string > get_filename_list( );
+
+    /*
+     * @brief 返回特定后缀的文件名（不包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< std::string > get_filename_list(const list< std::string > &_extension);
+
+    /*
+     * @brief 返回所有的文件名（不包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< std::string > get_u8filename_list( );
+
+    /*
+     * @brief 返回特定后缀的文件名（不包含后缀）
+     * @param _extension 指定的后缀
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< std::string > get_u8filename_list(const list< std::string > &_extension);
+
+
 private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
     list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
     list< std::string > u8filePathList_;    // 文件夹下的文件路径（按照utf8编码）
-    
 };
 /* ========================================================================================================================= */
 
@@ -98,6 +168,26 @@ private:
  * @return 文件名字（不含后缀）与 后缀 的pair
  */
 std::pair< std::string, std::string > split_filename_and_extension(const std::string &_input);
+
+/*
+ * @brief 从路径中提取文件名（包含后缀）
+ * @param _path 输入的文件路径
+ */
+std::string split_file_from_path(const std::string &_path);
+
+/*
+ * @brief 组合文件夹路径和文件名，处理路径分隔符
+ * @param _folder 文件夹路径
+ * @param _filename 文件名字（带后缀）
+ */
+std::string combine_folderdir_and_filename(const std::string &_folder, const std::string &_filename);
+
+/*
+ * @brief 复制文件函数，目标为文件夹路径
+ * @param _sourcePath 要复制的文件路径
+ * @param _destFolder 要复制到的文件夹路径
+ */
+bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_destFolder);
 
 /*
  * @brief 从一个文件下获取所有符合后缀条件的文件
