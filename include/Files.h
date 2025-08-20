@@ -11,6 +11,7 @@
  * 此文件用于操作文件
  */
 #include <basic.hpp>
+#include <cstdlib>
 #include <Encoding.h>
 #include <filesystem>
 #include <iostream>
@@ -18,7 +19,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <Windows.h>
 
 // 此空间用于操作系统的文件以及文件夹
 namespace file {
@@ -300,6 +300,9 @@ void save_registrationSheet_to_xlsx(const table< std::string > &_sheet);
  * @return 替换完成后的字符串副本
  */
 std::string replace_all(const std::string &str, char oldChar, char newChar);
+
+// 分割路径为各个组件，同时支持正反斜杠
+std::vector< std::string > split_path(const std::string &_path);
 
 /**
  * 检查文件夹是否存在

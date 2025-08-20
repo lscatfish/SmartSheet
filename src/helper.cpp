@@ -10,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include<cstdlib>
 
 /*
  * @brief 按回车键继续
@@ -55,4 +56,15 @@ std::string trim_leading_spaces(const std::string &str) {
 
     // 从第一个非空格字符开始截取字符串
     return std::string(firstNonSpace, str.end( ));
+}
+
+// 清空控制台
+void clearConsole( ) {
+#ifdef _WIN32
+    // Windows 系统使用 "cls" 命令
+    system("cls");
+#else
+    // Linux/macOS 系统使用 "clear" 命令
+    system("clear");
+#endif
 }

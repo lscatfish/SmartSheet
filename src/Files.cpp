@@ -1,6 +1,7 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
+#include <cstdlib>
 #include <Encoding.h>
 #include <errhandlingapi.h>
 #include <Files.h>
@@ -14,11 +15,11 @@
 #include <sys/types.h>
 #include <utility>
 #include <vector>
-#include <Windows.h>
 #include <xlnt/xlnt.hpp>
 
 #ifdef _WIN32
 #include <direct.h>
+#include <Windows.h>
 #define mkdir(path) _mkdir(path)
 #else
 #include <unistd.h>
@@ -35,9 +36,9 @@ std::string _INPUT_ATT_IMGS_DIR_     = "./input/att_imgs/";
 std::string _INPUT_SIGN_QC_SELF_DIR_ = "./input/sign_for_QingziClass/self/";
 std::string _INPUT_SIGN_QC_ORG_DIR_  = "./input/sign_for_QingziClass/org/";
 
-std::string _OUTPUT_APP_DIR_ = "./output/app_out/";
-std::string _OUTPUT_ATT_DIR_ = "./output/att_out/";
-std::string _OUTPUT_SIGN_QC_DIR_ = "./output/sign_for_QingziClass_out/";
+std::string _OUTPUT_APP_DIR_         = "./output/app_out/";
+std::string _OUTPUT_ATT_DIR_         = "./output/att_out/";
+std::string _OUTPUT_SIGN_QC_DIR_     = "./output/sign_for_QingziClass_out/";
 std::string _OUTPUT_SIGN_QC_PDF_DIR_ = "./output/sign_for_QingziClass_out/pdf/";
 
 std::string _STORAGE_DIR_ = "./storage/";
