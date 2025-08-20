@@ -50,7 +50,7 @@ void DoQingziClass::start( ) {
 // 自检程序
 void DoQingziClass::self_check( ) {
     system("cls");
-    std::cout << u8"启动自检程序......" << std::endl;
+    std::cout << u8"启动自检程序......" << std::endl<<std::endl;
     std::cout << u8"检测工作区的文件夹：" << std::endl;
     const list< std::string > ws_pathList{
         "./models/",
@@ -79,14 +79,14 @@ void DoQingziClass::self_check( ) {
         ppocr::_ppocrDir_.rec_model_dir
     };
     for (const auto &p : md_pathList) {
-        if (!file::is_folder_empty(p)) {
+        if (file::is_folder_empty(p)) {
             std::cout << u8"模型文件夹错误：" << p << std::endl;
         }
     }
     if (!file::is_file_exists(ppocr::_ppocrDir_.rec_char_dict_path)) {
         std::cout << u8"模型字典库错误：" << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
     }
-
+    std::cout << u8"模型文件检测通过！！！" << std::endl;
     std::cout << std::endl
               << u8"自检完毕..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
