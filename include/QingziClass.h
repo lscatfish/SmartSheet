@@ -18,7 +18,7 @@ public:
 
     void start( );    // 主控函数
 
-    void self_check( );    // 自检程序
+    bool self_check( );    // 自检程序
 
     /*
      * @brief 一行信息转化为标准人员信息

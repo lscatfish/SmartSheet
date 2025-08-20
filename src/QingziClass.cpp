@@ -16,12 +16,12 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <Windows.h>
 #include <word.h>
 
 
 DoQingziClass::DoQingziClass( ) {
-    self_check( );
+    if (!self_check( ))
+        return;
 }
 
 DoQingziClass::~DoQingziClass( ) {
@@ -48,9 +48,10 @@ void DoQingziClass::start( ) {
 }
 
 // 自检程序
-void DoQingziClass::self_check( ) {
-    system("cls");
-    std::cout << u8"启动自检程序......" << std::endl<<std::endl;
+bool DoQingziClass::self_check( ) {
+    clearConsole( );
+    std::cout << u8"启动自检程序......" << std::endl
+              << std::endl;
     std::cout << u8"检测工作区的文件夹：" << std::endl;
     const list< std::string > ws_pathList{
         "./models/",
@@ -68,6 +69,7 @@ void DoQingziClass::self_check( ) {
     for (const auto &p : ws_pathList) {
         if (!file::create_folder_recursive(p)) {
             pause( );
+            return false;
         };
     }
 
@@ -81,23 +83,28 @@ void DoQingziClass::self_check( ) {
     for (const auto &p : md_pathList) {
         if (file::is_folder_empty(p)) {
             std::cout << u8"模型文件夹错误：" << p << std::endl;
+            pause( );
+            return false;
         }
     }
     if (!file::is_file_exists(ppocr::_ppocrDir_.rec_char_dict_path)) {
         std::cout << u8"模型字典库错误：" << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
+        pause( );
+        return false;
     }
     std::cout << u8"模型文件检测通过！！！" << std::endl;
     std::cout << std::endl
               << u8"自检完毕..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
     pause( );
+    return true;
 }
 
 // 选择
 int DoQingziClass::choose_function( ) {
     int a = 0;
     while (a != 1 && a != 2 && a != 3) {
-        system("cls");
+        clearConsole( );
         std::cout << u8"请选择要生成excel表的类型：" << std::endl
                   << u8"1. 活动签到表" << std::endl;
         std::cout << u8"2. 出勤记录表" << std::endl;
@@ -279,7 +286,7 @@ void DoQingziClass::stats_applicants( ) {
 
     int a = 0;
     while (a != 1 && a != 2) {
-        system("cls");
+        clearConsole( );
         std::cout << std::endl
                   << u8"请选择生成方式：" << std::endl
                   << u8"1.生成部分人员的签到表" << std::endl
