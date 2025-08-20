@@ -17,7 +17,6 @@
 #include <pugixml.hpp>
 #include <string>
 #include <stringapiset.h>
-#include <uchardet.h>
 #include <unzip.h>
 #include <vector>
 #include <Windows.h>

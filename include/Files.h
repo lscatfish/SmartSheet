@@ -44,13 +44,13 @@ public:
     static void traverse_folder(const std::string &folderPath, list< std::string > &filePaths);
 
     /*
-     * @brief 输出文件夹下的各个文件路径(utf8编码)
+     * @brief 输出文件夹下的各个文件路径
      * @return list<string>类型一个列表
      */
     list< std::string > get_filePath_list( );
 
     /*
-     * @brief 输出文件夹下的各个文件路径
+     * @brief 输出文件夹下的各个文件路径(utf8编码)
      * @return list<string>类型一个列表
      */
     list< std::string > get_u8filePath_list( );
@@ -87,6 +87,7 @@ private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
     list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
     list< std::string > u8filePathList_;    // 文件夹下的文件路径（按照utf8编码）
+    
 };
 /* ========================================================================================================================= */
 
@@ -176,9 +177,9 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet);
 void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet);
 
 /*
-* @brief 保存青字班报名表
-* @param _sheet 表格
-*/
+ * @brief 保存青字班报名表
+ * @param _sheet 表格
+ */
 void save_registrationSheet_to_xlsx(const table< std::string > &_sheet);
 
 /**

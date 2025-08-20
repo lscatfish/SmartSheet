@@ -12,6 +12,9 @@ namespace encoding    // 使用时请用namespace encoding=ec;
 // 系统默认的编码方式
 extern std::string systemDefaultEncoding;
 
+// 启动函数，配置编码
+void Init( );
+
 /*
  * @brief utf8转wstring
  * @param u8 utf8编码的string

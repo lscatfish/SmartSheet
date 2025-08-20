@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstring>
 #include <Encoding.h>
+#include <helper.h>
 #include <icu_encoding_handler.h>
 #include <interlockedapi.h>    // PSLIST_HEADER
 #include <iostream>
@@ -62,7 +63,6 @@ static std::string remove_ascii_characters(const std::string &input) {
 
     return result;
 }
-    
 
 /*
  * @brief 将系统默认的中文（简体）格式转化为utf8
@@ -71,11 +71,17 @@ static std::string remove_ascii_characters(const std::string &input) {
  */
 std::string sysdcode_to_utf8(const std::string &_anycode) {
 
-    std::string                            out;//输出
-    std::string                            e;//错误
+    std::string out;    // 输出
+    std::string e;      // 错误
 
-    ICUEncodingHandler::convert_to_utf8(_anycode.c_str( ), _anycode.size( ), systemDefaultEncoding, out, e);
-    return out;
-
+    if (ICUEncodingHandler::convert_to_utf8(_anycode.c_str( ), _anycode.size( ), systemDefaultEncoding, out, e)) {
+        return out;
+    } else {
+        std::cout << std::endl
+                  << e << std::endl;
+        pause( );
+        return "error";
+    }
 }
+
 }    // namespace encoding

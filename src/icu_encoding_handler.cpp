@@ -7,11 +7,12 @@
 #include <icu_encoding_handler.h>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <unicode/ucnv.h>
+#include <unicode/ucnv_err.h>
 #include <unicode/ucsdet.h>
 #include <unicode/uloc.h>
 #include <unicode/unistr.h>
+#include <vector>
 #include <windows.h>
 
 
