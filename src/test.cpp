@@ -223,6 +223,7 @@ void test_for_DefFolder( ) {
     for (const auto &l : p6) {
         std::cout << l << std::endl;
     }
+    af.copy_files_to("./output/sign_for_QingziClass_out/pdf", list< std::string >{ ".xlsx" });
 }
 
 // 测试文件夹的检测

@@ -13,15 +13,28 @@
 #include <basic.hpp>
 #include <Encoding.h>
 #include <filesystem>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 #include <Windows.h>
-#include <iostream>
 
 // 此空间用于操作系统的文件以及文件夹
 namespace file {
+
+extern std::string _INPUT_ALL_DIR_;
+extern std::string _INPUT_APP_DIR_;
+extern std::string _INPUT_ATT_IMGS_DIR_;
+extern std::string _INPUT_SIGN_QC_SELF_DIR_;
+extern std::string _INPUT_SIGN_QC_ORG_DIR_;
+
+extern std::string _OUTPUT_APP_DIR_;
+extern std::string _OUTPUT_ATT_DIR_;
+extern std::string _OUTPUT_SIGN_QC_DIR_;
+extern std::string _OUTPUT_SIGN_QC_PDF_DIR_;
+
+extern std::string _STORAGE_DIR_;
 
 // 此类用于获取文件夹中的 所有 文件
 class DefFolder {
@@ -31,6 +44,9 @@ public:
      * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
      */
     DefFolder(std::string _folderDir) {
+        if (*_folderDir.rbegin( ) == '\\' || *_folderDir.rbegin( ) == '/' && _folderDir.size( ) != 0)
+            _folderDir.pop_back( );
+
         traverse_folder(_folderDir, this->filePathList_);
         // 输出u8的文件夹地址，用于在控制台输出
         for (const auto &fP : this->filePathList_) {
@@ -291,10 +307,16 @@ std::string replace_all(const std::string &str, char oldChar, char newChar);
  * 使用系统相关函数检查指定路径是否存在且为一个目录
  * 支持绝对路径和相对路径，跨平台兼容Windows和类Unix系统
  *
- * @param path 要检查的文件夹路径
+ * @param _path 要检查的文件夹路径
  * @return 如果路径存在且是文件夹则返回true，否则返回false
  */
-bool is_folder_exists(const std::string &path);
+bool is_folder_exists(const std::string &_path);
+
+// 检查文件夹是否为空
+bool is_folder_empty(const std::string &folder_path);
+
+// 检查文件是否存在（仅检测普通文件）
+bool is_file_exists(const std::string &_path);
 
 /**
  * 递归创建文件夹，支持Windows正反斜杠

@@ -25,8 +25,27 @@
 #define mkdir(path) mkdir(path, 0755)
 #endif
 #include <fstream>
+#include <stdexcept>
 
 namespace file {
+
+std::string _INPUT_ALL_DIR_          = "./input/all/";
+std::string _INPUT_APP_DIR_          = "./input/app/";
+std::string _INPUT_ATT_IMGS_DIR_     = "./input/att_imgs/";
+std::string _INPUT_SIGN_QC_SELF_DIR_ = "./input/sign_for_QingziClass/self/";
+std::string _INPUT_SIGN_QC_ORG_DIR_  = "./input/sign_for_QingziClass/org/";
+
+std::string _OUTPUT_APP_DIR_ = "./output/app_out/";
+std::string _OUTPUT_ATT_DIR_ = "./output/att_out/";
+std::string _OUTPUT_SIGN_QC_DIR_ = "./output/sign_for_QingziClass_out/";
+std::string _OUTPUT_SIGN_QC_PDF_DIR_ = "./output/sign_for_QingziClass_out/pdf/";
+
+std::string _STORAGE_DIR_ = "./storage/";
+
+/* ========================================================================================================================= */
+/* ========================================================================================================================= */
+/* ========================================================================================================================= */
+/* ========================================================================================================================= */
 
 // 递归遍历文件夹，收集所有文件路径到 vector 中
 void DefFolder::traverse_folder(const std::string &folderPath, list< std::string > &filePaths) {
@@ -320,6 +339,10 @@ list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_e
 }
 
 /* ========================================================================================================================= */
+/* ========================================================================================================================= */
+/* ========================================================================================================================= */
+/* ========================================================================================================================= */
+
 
 /*
  * @brief 解析文件名的后缀与文件名字（不含后缀）
@@ -423,13 +446,11 @@ bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_des
 
     // 检查是否发生错误
     if (!sourceFile.eof( ) || !destFile) {
-        throw std::runtime_error(encoding::sysdcode_to_utf8("复制文件过程中发生错误"));
+        throw std::runtime_error(u8"复制文件过程中发生错误");
     }
 
     return true;
 }
-
-
 
 /*
  * @brief 从一个文件下获取所有符合后缀条件的文件
@@ -869,6 +890,29 @@ bool is_folder_exists(const std::string &_path) {
         return false;
     }
     return (info.st_mode & S_IFDIR) != 0;
+}
+
+// 检查文件夹是否为空
+bool is_folder_empty(const std::string &folder_path) {
+    namespace fs = std::filesystem;
+    // 检查路径是否存在且是文件夹
+    if (!fs::exists(folder_path) || !fs::is_directory(folder_path)) {
+        std::cerr << u8"路径不存在或不是文件夹: " << folder_path << std::endl;
+        return false;    // 或根据需求抛出异常
+    }
+
+    // 遍历文件夹，只要有一个条目（文件或子文件夹）就不为空
+    auto it = fs::directory_iterator(folder_path);
+    return it == fs::directory_iterator( );    // 如果迭代器为空，则文件夹为空
+}
+
+// 检查文件是否存在（仅检测普通文件）
+bool is_file_exists(const std::string &_path) {
+    struct stat info;
+    if (stat(_path.c_str( ), &info) != 0) {
+        return false;    // 路径不存在
+    }
+    return (info.st_mode & S_IFREG) != 0;    // 检查是否为普通文件
 }
 
 // 递归创建文件夹，支持Windows正反斜杠

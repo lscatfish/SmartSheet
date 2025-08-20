@@ -44,8 +44,6 @@
 // 操作照片的空间
 namespace img {
 
-extern ppocr::DefDirs _ppocrDir_;
-
 /*
  * @brief 用于读取图片的表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）

@@ -51,24 +51,46 @@ void DoQingziClass::start( ) {
 void DoQingziClass::self_check( ) {
     system("cls");
     std::cout << u8"启动自检程序......" << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    const list< std::string > pathList{ "./input/all",
-                                        "./input/app",
-                                        "./input/att_imgs",
-                                        "./input/sign_for_QingziClass/self",
-                                        "./input/sign_for_QingziClass/org",
-                                        "./output/app_out",
-                                        "./output/att_out",
-                                        "./output/sign_for_QingziClass_out/pdf",
-                                        "./storage",
-                                        "./models" };
-    for (const auto &p : pathList) {
+    std::cout << u8"检测工作区的文件夹：" << std::endl;
+    const list< std::string > ws_pathList{
+        "./models/",
+        file::_INPUT_ALL_DIR_,
+        file::_INPUT_APP_DIR_,
+        file::_INPUT_ATT_IMGS_DIR_,
+        file::_INPUT_SIGN_QC_ORG_DIR_,
+        file::_INPUT_SIGN_QC_SELF_DIR_,
+        file::_OUTPUT_APP_DIR_,
+        file::_OUTPUT_ATT_DIR_,
+        file::_OUTPUT_SIGN_QC_DIR_,
+        file::_OUTPUT_SIGN_QC_PDF_DIR_,
+        file::_STORAGE_DIR_
+    };
+    for (const auto &p : ws_pathList) {
         if (!file::create_folder_recursive(p)) {
             pause( );
         };
     }
-    std::cout << u8"自检完毕..." << std::endl;
+
+    std::cout << std::endl
+              << u8"检测模型文件：" << std::endl;
+    const list< std::string > md_pathList{
+        ppocr::_ppocrDir_.cls_model_dir,
+        ppocr::_ppocrDir_.det_model_dir,
+        ppocr::_ppocrDir_.rec_model_dir
+    };
+    for (const auto &p : md_pathList) {
+        if (!file::is_folder_empty(p)) {
+            std::cout << u8"模型文件夹错误：" << p << std::endl;
+        }
+    }
+    if (!file::is_file_exists(ppocr::_ppocrDir_.rec_char_dict_path)) {
+        std::cout << u8"模型字典库错误：" << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
+    }
+
+    std::cout << std::endl
+              << u8"自检完毕..." << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
+    pause( );
 }
 
 // 选择
@@ -161,6 +183,8 @@ void DoQingziClass::load_personnel_information_list( ) {
     std::cout << std::endl
               << u8"读取全学院名单..." << std::endl
               << std::endl;
+
+
 
     file::get_filepath_from_folder(
         className_,
@@ -297,10 +321,10 @@ void DoQingziClass::stats_applicants( ) {
     //=======================================================================================/
     std::cout << std ::endl
               << u8"读取各班的报名表..." << std::endl;
-    /* 
-    * 为什么不用DefFolder类： [@lscatfish]我不想改了，还有两个向量信息对齐的原因
-    * DefFolder
-    */
+    /*
+     * 为什么不用DefFolder类： [@lscatfish]我不想改了，还有两个向量信息对齐的原因
+     * DefFolder
+     */
     file::get_filepath_from_folder(
         app_classname,
         app_filePathAndName,
@@ -721,9 +745,9 @@ void DoQingziClass::save_registrationSheet( ) {
         { u8"序号", u8"姓名", u8"性别", u8"民族", u8"年级", u8"学号", u8"政治面貌", u8"学院", u8"专业", u8"学生职务",
           u8"社团", u8"联系电话", u8"QQ号", u8"邮箱", u8"报名青字班", u8"是否报名班委", u8"报名方式", u8"备注",
           u8"文件地址" }
-    };    // 表格
-    int serial = 1;//序号
-    for (auto& p : personStd_) {
+    };                 // 表格
+    int serial = 1;    // 序号
+    for (auto &p : personStd_) {
         if (p.name.size( ) == 0) continue;
         list< std::string > line;
         line.push_back(std::to_string(serial));
@@ -749,7 +773,6 @@ void DoQingziClass::save_registrationSheet( ) {
         serial++;
     }
     file::save_registrationSheet_to_xlsx(sh);
-
 }
 
 
@@ -930,8 +953,7 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
         } else if (it_inperLine->first == u8"社团") {
             if (it_inperLine->second.size( ) == 0) {
                 per.club = u8"无";
-            }
-            else {
+            } else {
                 per.club = it_inperLine->second;
             }
         } else if ((it_inperLine->first == u8"报名青字班")
