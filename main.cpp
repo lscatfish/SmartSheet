@@ -30,14 +30,14 @@ int main( ) {
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
 
-#if false
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else
 
     test_for_DefFolder( );
     pause( );
-    // test_for__load_sheet_from_img( );
+
 #endif    // true
 
     std::cout << std::endl
@@ -46,7 +46,7 @@ int main( ) {
     return 0;    // 程序正常结束
 }
 
-#else
+#else    // 此预处理模块用于测试icu库
 
 #include <iostream>
 #include <cstring>
@@ -158,7 +158,7 @@ int main( ) {
         return 1;
     }
 }
-    
-    
+
+
 
 #endif

@@ -16,7 +16,6 @@ public:
     DoQingziClass( );
     ~DoQingziClass( );
 
-
     void start( );    // 主控函数
 
     void self_check( );    // 自检程序
@@ -64,6 +63,7 @@ private:
     list< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
     list< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
 
+    /* ========================================================================================= */
 
     // 选择
     int choose_function( );
@@ -71,7 +71,7 @@ private:
     // @brief 加载全学员表的函数
     void load_personnel_information_list( );
 
-
+    /* ========================================================================================= */
 
     // @brief 控制生成签到表的函数
     void attendance( );
@@ -82,9 +82,7 @@ private:
     // @brief 保存签到表
     void save_attendanceSheet( );
 
-
-
-
+    /* ========================================================================================= */
 
     // @brief 控制生成签到考勤表的函数
     void statistics( );
@@ -95,13 +93,15 @@ private:
     // @brief 保存签到考勤表
     void save_statisticsSheet( );
 
-
+    /* ========================================================================================= */
 
     // @brief 青字班报名
     void registration( );
 
     // @brief 保存青字班的报名表
     void save_registrationSheet( );
+
+    /* ========================================================================================= */
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
