@@ -30,7 +30,7 @@ DoQingziClass::~DoQingziClass( ) {
 /*
  * @brief 主控函数
  * @note 这个函数写的有一点像屎山，后来者可以考虑重构
- * @attention 重构到构造函数吧
+ * @todo 重构到构造函数吧
  */
 void DoQingziClass::start( ) {
 
@@ -59,7 +59,7 @@ void DoQingziClass::self_check( ) {
                                         "./input/sign_for_QingziClass/org",
                                         "./output/app_out",
                                         "./output/att_out",
-                                        "./output/sign_for_QingziClass_out",
+                                        "./output/sign_for_QingziClass_out/pdf",
                                         "./storage",
                                         "./models" };
     for (const auto &p : pathList) {
@@ -68,6 +68,7 @@ void DoQingziClass::self_check( ) {
         };
     }
     std::cout << u8"自检完毕..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 
 // 选择
@@ -688,7 +689,7 @@ void DoQingziClass::registration( ) {
     file::DefFolder selfFolder("./input/sign_for_QingziClass/self");
     file::DefFolder orgFolder("./input/sign_for_QingziClass/org");
 
-    list< std::string > paths = selfFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
+    list< std::string > paths = selfFolder.get_filepath_list(list< std::string >{ ".docx" });    // 文件路径
     // 解析文件
     if (paths.size( ) != 0)
         for (const auto &p : paths) {
@@ -696,7 +697,7 @@ void DoQingziClass::registration( ) {
             personStd_.push_back(aDocx.get_person(u8"自主报名"));
         }
 
-    paths = orgFolder.get_filePath_list(list< std::string >{ ".docx" });    // 文件路径
+    paths = orgFolder.get_filepath_list(list< std::string >{ ".docx" });    // 文件路径
     // 解析文件
     if (paths.size( ) != 0)
         for (const auto &p : paths) {
@@ -710,6 +711,8 @@ void DoQingziClass::registration( ) {
      }*/
 
     save_registrationSheet( );
+    std::cout << std::endl
+              << u8"青字班报名表已输出到 ./output/sign_for_QingziClass_out/报名.xlsx 中..." << std::endl;
 }
 
 // @brief 保存青字班的报名表
@@ -721,6 +724,7 @@ void DoQingziClass::save_registrationSheet( ) {
     };    // 表格
     int serial = 1;//序号
     for (auto& p : personStd_) {
+        if (p.name.size( ) == 0) continue;
         list< std::string > line;
         line.push_back(std::to_string(serial));
         line.push_back(p.name);
@@ -924,7 +928,12 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
         } else if (it_inperLine->first == u8"民族") {
             per.ethnicity = it_inperLine->second;
         } else if (it_inperLine->first == u8"社团") {
-            per.club = it_inperLine->second;
+            if (it_inperLine->second.size( ) == 0) {
+                per.club = u8"无";
+            }
+            else {
+                per.club = it_inperLine->second;
+            }
         } else if ((it_inperLine->first == u8"报名青字班")
                    || (it_inperLine->first == u8"青字班")
                    || (fuzzy::search_substring(it_inperLine->first, u8"青字班"))) {

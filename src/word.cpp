@@ -189,10 +189,10 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                     }
                 } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"个人简介") {
                     if (col + 1 < keyTable_[row].size( )) {
-                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人简介极少；";
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 210) {    // 70字
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人简介较少；";
                             col++;
                         }
@@ -202,7 +202,7 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人特长极少；";
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人特长较少；";
                             col++;
                         }
@@ -212,7 +212,7 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历极少；";
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 90) {    // 30字
+                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历较少；";
                             col++;
                         }

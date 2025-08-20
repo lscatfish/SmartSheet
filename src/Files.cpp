@@ -1,4 +1,5 @@
 ﻿
+#include <algorithm>
 #include <basic.hpp>
 #include <Encoding.h>
 #include <errhandlingapi.h>
@@ -7,19 +8,14 @@
 #include <Fuzzy.h>
 #include <helper.h>
 #include <iostream>
-#include <string>
-#include <utility>
-#include <vector>
-#include <Windows.h>
-#include <xlnt/xlnt.hpp>
-
-#include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <utility>
 #include <vector>
+#include <Windows.h>
+#include <xlnt/xlnt.hpp>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -28,6 +24,7 @@
 #include <unistd.h>
 #define mkdir(path) mkdir(path, 0755)
 #endif
+#include <fstream>
 
 namespace file {
 
@@ -67,6 +64,9 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
         } else {
             // 若是文件，添加到路径列表
             filePaths.push_back(fullPath);
+
+
+            std::cout << encoding::sysdcode_to_utf8(fullPath) << std::endl;
         }
 
     } while (FindNextFileA(hFind, &findData) != 0);    // 继续搜索下一项
@@ -79,7 +79,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
  * @brief 输出文件夹下的各个文件路径
  * @return list<string>类型一个列表
  */
-list< std::string > DefFolder::get_filePath_list( ) {
+list< std::string > DefFolder::get_filepath_list( ) {
     return filePathList_;
 }
 
@@ -87,7 +87,7 @@ list< std::string > DefFolder::get_filePath_list( ) {
  * @brief 输出文件夹下的各个文件路径(utf8编码)
  * @return list<string>类型一个列表
  */
-list< std::string > file::DefFolder::get_u8filePath_list( ) {
+list< std::string > file::DefFolder::get_u8filepath_list( ) {
     return u8filePathList_;
 }
 
@@ -96,7 +96,7 @@ list< std::string > file::DefFolder::get_u8filePath_list( ) {
  * @param _extension 指定的后缀
  * @return 输出指定后缀的文件路径
  */
-list< std::string > DefFolder::get_filePath_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_filepath_list(const list< std::string > &_extension) {
     list< std::string > out;
     for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( ); it_path++) {
         auto [n, ex] = split_filename_and_extension(*it_path);
@@ -111,7 +111,7 @@ list< std::string > DefFolder::get_filePath_list(const list< std::string > &_ext
  * @param _extension 指定的后缀
  * @return 输出指定后缀的文件路径（u8编码）
  */
-list< std::string > DefFolder::get_u8filePath_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_u8filepath_list(const list< std::string > &_extension) {
     list< std::string > out;
     for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( ); it_path++) {
         auto [n, ex] = split_filename_and_extension(*it_path);
@@ -151,7 +151,7 @@ size_t DefFolder::keep_with(const list< std::string > &_extension) {
  * @param _extension 指定的后缀
  * @return 剩余文件的数量
  */
-size_t file::DefFolder::erase_with(const list< std::string > &_extension) {
+size_t DefFolder::erase_with(const list< std::string > &_extension) {
     for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( );) {
         auto [n, ex] = split_filename_and_extension(*it_path);
         if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
@@ -169,6 +169,154 @@ size_t file::DefFolder::erase_with(const list< std::string > &_extension) {
         }
     }
     return this->filePathList_.size( );
+}
+
+/*
+ * @brief 复制指定后缀的文件到指定的路径
+ * @param _targetDir 指定路径
+ * @param _extension 指定的后缀
+ * @return 复制到的文件的数量
+ */
+size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) {
+    list< std::string > speFilePathList = get_filepath_list(_extension);    // 特定的文件
+
+    size_t sum = 0;
+    for (const auto &fp : speFilePathList) {
+        if (copy_file_to_folder(fp, _targetDir)) {
+            sum++;
+        }
+    }
+    return size_t(sum);
+}
+
+/*
+ * @brief 返回所有的文件名（包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件（包含后缀）
+ */
+list< std::string > DefFolder::get_file_list( ) {
+    list< std::string > out;
+    for (const auto &fp : filePathList_) {
+        if (fp.size( ) > 0) {
+            out.push_back(split_file_from_path(fp));
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回特定后缀的文件名（包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件（包含后缀）
+ */
+list< std::string > DefFolder::get_file_list(const list< std::string > &_extension) {
+    list< std::string > speFilePathList = get_filepath_list(_extension);
+    list< std::string > out;
+    for (const auto &fp : speFilePathList) {
+        if (fp.size( ) > 0) {
+            out.push_back(split_file_from_path(fp));
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件（包含后缀）
+ */
+list< std::string > DefFolder::get_u8file_list( ) {
+    list< std::string > out;
+    for (const auto &u8fp : u8filePathList_) {
+        if (u8fp.size( ) > 0) {
+            out.push_back(split_file_from_path(u8fp));
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回特定后缀的文件名（包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件（包含后缀）
+ */
+list< std::string > DefFolder::get_u8file_list(const list< std::string > &_extension) {
+    list< std::string > speu8FilePathList = get_u8filepath_list(_extension);
+    list< std::string > out;
+    for (const auto &u8fp : speu8FilePathList) {
+        if (u8fp.size( ) > 0) {
+            out.push_back(split_file_from_path(u8fp));
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（不包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件名（不包含后缀）
+ */
+list< std::string > DefFolder::get_filename_list( ) {
+    list< std::string > fileList = get_file_list( );
+    list< std::string > out;
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            auto [filename, ex] = split_filename_and_extension(f);
+            out.push_back(filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回特定后缀的文件名（不包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件名（不包含后缀）
+ */
+list< std::string > DefFolder::get_filename_list(const list< std::string > &_extension) {
+    list< std::string > fileList = get_file_list(_extension);
+    list< std::string > out;
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            auto [filename, ex] = split_filename_and_extension(f);
+            out.push_back(filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（不包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件名（不包含后缀）
+ */
+list< std::string > DefFolder::get_u8filename_list( ) {
+    list< std::string > u8fileList = get_u8file_list( );
+    list< std::string > out;
+    for (const auto &u8f : u8fileList) {
+        if (u8f.size( ) > 0) {
+            auto [u8filename, ex] = split_filename_and_extension(u8f);
+            out.push_back(u8filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回特定后缀的文件名（不包含后缀）
+ * @param _extension 指定的后缀
+ * @return 返回的文件名（不包含后缀）
+ */
+list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_extension) {
+    list< std::string > u8fileList = get_u8file_list(_extension);
+    list< std::string > out;
+    for (const auto &u8f : u8fileList) {
+        if (u8f.size( ) > 0) {
+            auto [u8filename, ex] = split_filename_and_extension(u8f);
+            out.push_back(u8filename);
+        }
+    }
+    return out;
 }
 
 /* ========================================================================================================================= */
@@ -191,6 +339,97 @@ std::pair< std::string, std::string > split_filename_and_extension(const std::st
     std::string part2 = _input.substr(pos);
     return { part1, part2 };
 }
+
+/*
+ * @brief 从路径中提取文件名（包含后缀）
+ * @param _path 输入的文件路径
+ */
+std::string split_file_from_path(const std::string &_path) {
+    size_t pos = _path.find_last_of("/\\");
+    if (pos == std::string::npos) {
+        return _path;    // 没有找到路径分隔符，整个路径就是文件名
+    }
+    return _path.substr(pos + 1);
+}
+
+/*
+ * @brief 组合文件夹路径和文件名，处理路径分隔符
+ * @param _folder 文件夹路径
+ * @param _filename 文件名字（带后缀）
+ */
+std::string combine_folderdir_and_filename(const std::string &_folder, const std::string &_filename) {
+    if (_folder.empty( )) {
+        return _filename;
+    }
+
+    char lastChar = _folder.back( );
+    if (lastChar == '/' || lastChar == '\\') {
+        return _folder + _filename;
+    } else {
+        // 使用系统默认路径分隔符
+#ifdef _WIN32
+        return _folder + "\\" + _filename;
+#else
+        return folder + "/" + filename;
+#endif
+    }
+}
+
+/*
+ * @brief 复制文件函数，目标为文件夹路径
+ * @param _sourcePath 要复制的文件路径
+ * @param _destFolder 要复制到的文件夹路径
+ */
+bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_destFolder) {
+
+    namespace fs = std::filesystem;
+
+    // 获取源文件的文件名
+    std::string fileName = split_file_from_path(_sourcePath);
+
+    // 组合成完整的目标文件路径
+    std::string destPath = combine_folderdir_and_filename(_destFolder, fileName);
+
+    // 打开源文件（二进制模式）
+    std::ifstream sourceFile(_sourcePath, std::ios::binary);
+    if (!sourceFile) {
+        throw std::runtime_error(encoding::sysdcode_to_utf8("无法打开源文件: " + _sourcePath));
+    }
+
+    // 确保目标文件夹存在
+    try {
+        fs::create_directories(_destFolder);
+    } catch (const fs::filesystem_error &e) {
+        throw std::runtime_error(encoding::sysdcode_to_utf8("无法创建目标文件夹: " + _destFolder + "，错误: " + e.what( )));
+    }
+
+    // 打开目标文件（二进制模式，创建新文件并截断已有内容）
+    std::ofstream destFile(destPath, std::ios::binary | std::ios::trunc);
+    if (!destFile) {
+        throw std::runtime_error(encoding::sysdcode_to_utf8("无法创建目标文件: " + destPath));
+    }
+
+    // 缓冲区大小（4KB）
+    const std::streamsize bufferSize = 4096;
+    char                  buffer[bufferSize];
+
+    // 读取并写入文件内容
+    while (sourceFile.read(buffer, bufferSize)) {
+        destFile.write(buffer, sourceFile.gcount( ));
+    }
+
+    // 处理最后一部分数据
+    destFile.write(buffer, sourceFile.gcount( ));
+
+    // 检查是否发生错误
+    if (!sourceFile.eof( ) || !destFile) {
+        throw std::runtime_error(encoding::sysdcode_to_utf8("复制文件过程中发生错误"));
+    }
+
+    return true;
+}
+
+
 
 /*
  * @brief 从一个文件下获取所有符合后缀条件的文件
@@ -578,20 +817,17 @@ void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
  * @brief 保存青字班报名表
  * @param _sheet 表格
  */
-void save_registrationSheet_to_xlsx(const table< std::string >& _sheet) {
+void save_registrationSheet_to_xlsx(const table< std::string > &_sheet) {
 
-        xlnt::workbook wb;
+    xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
     // 逐行逐列写入
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save("./output/sign_for_QingziClass_out/s.xlsx");
+    wb.save(u8"./output/sign_for_QingziClass_out/报名.xlsx");
 }
-
-
-
 
 // 替换字符串中的所有指定字符
 std::string replace_all(const std::string &_str, char _oldChar, char _newChar) {

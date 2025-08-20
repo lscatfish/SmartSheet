@@ -98,7 +98,6 @@ void test_main( ) {
     wss.active_sheet( ).cell("B6").value(sysdcode_to_utf8("1中国234"));
     wss.save(sysdcode_to_utf8("./1我/ou操.xlsx"));
 
-
     list< std::string > className_;          // 班级名字
     list< std::string > filePathAndName_;    // 每个xlsx文件的位置
     file::get_filepath_from_folder(className_, filePathAndName_, sysdcode_to_utf8("./input/all/"), list< std::string >{ ".xlsx" });
@@ -110,7 +109,7 @@ void test_main( ) {
         { sysdcode_to_utf8("3"), sysdcode_to_utf8("李四"), sysdcode_to_utf8("324234"), "" },
 
     };
-    file::save_attSheet_to_xlsx(test1, "test1.xlsx", sysdcode_to_utf8("测试签到表"));
+    file::save_attSheet_to_xlsx(test1, "test1.xlsx", u8"测试签到表");
 }
 
 // 测试ENCODING
@@ -194,9 +193,34 @@ void test_for_ppocr( ) {
 
 // 测试DefFolder
 void test_for_DefFolder( ) {
-    file::DefFolder     af("./input");
-    list< std::string > p = af.get_u8filePath_list( );
-    for (auto &l : p) {
+    file::DefFolder     af("./input/app");
+    list< std::string > p1 = af.get_u8filepath_list( );
+    list< std::string > p2 = af.get_u8file_list( );
+    list< std::string > p3 = af.get_u8filename_list( );
+    for (const auto &l : p1) {
+        std::cout << l << std::endl;
+    }
+    std::cout << std::endl;
+    for (const auto &l : p2) {
+        std::cout << l << std::endl;
+    }
+    std::cout << std::endl;
+    for (const auto &l : p3) {
+        std::cout << l << std::endl;
+    }
+    std::cout << std::endl;
+    list< std::string > p4 = af.get_u8filepath_list(list< std::string >{ ".xlsx" });
+    list< std::string > p5 = af.get_u8file_list(list< std::string >{ ".xlsx" });
+    list< std::string > p6 = af.get_u8filename_list(list< std::string >{ ".xlsx" });
+    for (const auto &l : p4) {
+        std::cout << l << std::endl;
+    }
+    std::cout << std::endl;
+    for (const auto &l : p5) {
+        std::cout << l << std::endl;
+    }
+    std::cout << std::endl;
+    for (const auto &l : p6) {
         std::cout << l << std::endl;
     }
 }
@@ -229,3 +253,4 @@ void test_for_icu_encoding_handler( ) {
    std::cout<< encoding::sysdcode_to_utf8(anycode);
 
 }
+
