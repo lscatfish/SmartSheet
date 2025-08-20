@@ -41,8 +41,6 @@ set(THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/third_party/lib/")
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
-include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/")
-include_directories("${THIRD_PARTY_DLL_DIR}/uchardet/src/LangModels/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
 
@@ -117,11 +115,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
 )
-# 链接到uchardet
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.lib>
-)
 # 链接到zlib
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
@@ -151,11 +144,6 @@ set(OPENCV_DLL_PATH
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100d.dll>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100.dll>
 )
-# uchardet的动态链接库地址
-set(UCHARDET_DLL_PATH
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/uchardet/Debug/uchardet.dll>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/uchardet/Release/uchardet.dll>
-)
 # zlib的动态链接库地址
 set(ZLIB_DLL_PATH
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.dll>
@@ -174,12 +162,6 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             ${OPENCV_DLL_PATH}
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${UCHARDET_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying uchardet dll to output directory"
 )
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different

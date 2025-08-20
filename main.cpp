@@ -29,8 +29,9 @@ int main( ) {
 
     SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
+    encoding::Init( );
 
-#if false
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else
