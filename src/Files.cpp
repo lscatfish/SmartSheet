@@ -76,7 +76,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
 }
 
 /*
- * @brief 输出文件夹下的各个文件路径(utf8编码)
+ * @brief 输出文件夹下的各个文件路径
  * @return list<string>类型一个列表
  */
 list< std::string > DefFolder::get_filePath_list( ) {
@@ -84,7 +84,7 @@ list< std::string > DefFolder::get_filePath_list( ) {
 }
 
 /*
- * @brief 输出文件夹下的各个文件路径
+ * @brief 输出文件夹下的各个文件路径(utf8编码)
  * @return list<string>类型一个列表
  */
 list< std::string > file::DefFolder::get_u8filePath_list( ) {
@@ -172,9 +172,6 @@ size_t file::DefFolder::erase_with(const list< std::string > &_extension) {
 }
 
 /* ========================================================================================================================= */
-
-
-
 
 /*
  * @brief 解析文件名的后缀与文件名字（不含后缀）

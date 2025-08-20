@@ -19,15 +19,9 @@
 #include <Windows.h>
 #include <word.h>
 
-/*
- * @brief 将整数类型转化为string类型
- * @param in 输入的整型
- */
-static std::string trans_integer_to_string(int in) {
-    return std::to_string(in);
-}
 
 DoQingziClass::DoQingziClass( ) {
+    self_check( );
 }
 
 DoQingziClass::~DoQingziClass( ) {
@@ -39,7 +33,6 @@ DoQingziClass::~DoQingziClass( ) {
  * @attention 重构到构造函数吧
  */
 void DoQingziClass::start( ) {
-    self_check( );
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
     int outWhichSheet = choose_function( );    // 生成那一张表：1签到表  2出勤记录表
@@ -303,6 +296,10 @@ void DoQingziClass::stats_applicants( ) {
     //=======================================================================================/
     std::cout << std ::endl
               << u8"读取各班的报名表..." << std::endl;
+    /* 
+    * 为什么不用DefFolder类： [@lscatfish]我不想改了，还有两个向量信息对齐的原因
+    * DefFolder
+    */
     file::get_filepath_from_folder(
         app_classname,
         app_filePathAndName,
@@ -381,7 +378,7 @@ void DoQingziClass::save_attendanceSheet( ) {
         for (auto it_person = personStd_.begin( ); it_person != personStd_.end( ); it_person++) {
             if (it_person->classname == *it_classname && it_person->ifsign == true) {
                 list< std::string > aRow;
-                aRow.push_back(trans_integer_to_string(serialNum));
+                aRow.push_back(std::to_string(serialNum));
                 aRow.push_back(it_person->name);
                 aRow.push_back(it_person->studentID);
                 aRow.push_back("");
@@ -725,7 +722,7 @@ void DoQingziClass::save_registrationSheet( ) {
     int serial = 1;//序号
     for (auto& p : personStd_) {
         list< std::string > line;
-        line.push_back(trans_integer_to_string(serial));
+        line.push_back(std::to_string(serial));
         line.push_back(p.name);
         line.push_back(p.gender);
         line.push_back(p.ethnicity);
