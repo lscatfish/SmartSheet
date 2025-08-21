@@ -1,7 +1,7 @@
 ﻿
 #include "Files.h"
 #include "PersonnelInformation.h"
-#include "test.h"
+#include <test/test.h>
 #include <algorithm>
 #include <basic.hpp>
 #include <chstring.hpp>
@@ -255,10 +255,10 @@ void test_for_icu_encoding_handler( ) {
 }
 
 
-#include <poppler/cpp/poppler-document.h>
-#include <poppler/cpp/poppler-page.h>
-#include <poppler/cpp/poppler-global.h>
-#include <poppler/cpp/poppler-rectangle.h>
+#include <poppler-document.h>
+#include <poppler-page.h>
+#include <poppler-global.h>
+#include <poppler-rectangle.h>
 
 
 bool testPopplerMinimal(const std::string &pdfPath) {

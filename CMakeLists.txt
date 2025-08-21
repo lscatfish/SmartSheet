@@ -39,14 +39,16 @@ set(THIRD_PARTY_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/dll/")
 set(THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/third_party/lib/")
 
 include_directories("${CMAKE_SOURCE_DIR}/include/")
+include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
-include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include/")
+include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include/poppler/cpp")
 
 # 找到 src 文件夹下所有的 .cpp 文件
-file(GLOB SOURCES "src/*.cpp" "include/*.h" "include/*.hpp" 
+file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/*.c"
+                    "test/*.h" "test/*.hpp" "test/*.c"
 )
 
 ###########################################################################################
