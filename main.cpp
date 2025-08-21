@@ -20,6 +20,7 @@
 #include <string>
 #include <stringapiset.h>
 #include <test/test.h>
+#include <test/test_for_pdfium.h>
 #include <test/test_for_poppler.h>
 #include <vector>
 #include <Windows.h>
@@ -32,11 +33,11 @@ int main( ) {
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
 
-#if true
+#if false
     DoQingziClass qClass;
     qClass.start( );
 #else
-    tmain( );
+    test_for_pdfium_can_using( );
     // test_for_poppler_could_use( );
     pause( );
 
