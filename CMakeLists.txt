@@ -44,7 +44,7 @@ include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
-include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include/poppler/cpp")
+include_directories("${THIRD_PARTY_DLL_DIR}/pdfium/include/")
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/*.c"
@@ -100,31 +100,6 @@ endif()
 ##################################icu的相关文件############################################
 ###########################################################################################
 
-###########################################################################################
-################################poppler的相关文件##########################################
-
-# icu的相关动态链接库
-# 首先检查icu DLL目录是否存在，然后查找文件
-set(POPPLER_DLL_DIR "${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/bin")
-if(NOT EXISTS ${POPPLER_DLL_DIR})
-    message(WARNING "poppler DLL directory not found: ${POPPLER_DLL_DIR}")
-else()
-    # 使用LIST_DIRECTORIES false确保只获取文件
-    file(GLOB POPPLER_DLL_RELEASE_FILES LIST_DIRECTORIES false 
-    "${POPPLER_DLL_DIR}/*.dll"
-    )
-    
-    # 验证是否找到了DLL文件
-    if(NOT POPPLER_DLL_RELEASE_FILES)
-        message(WARNING "No poppler DLL files found in ${POPPLER_DLL_DIR}")
-    else()
-        message(STATUS "Found ${CMAKE_ARGC} poppler DLL files to copy")
-    endif()
-endif()
-
-################################poppler的相关文件##########################################
-###########################################################################################
-
 
 
 # 添加执行文件
@@ -156,11 +131,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
 )
-# 链接到poppler
+# 链接到pdfium
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/pdfium/lib/pdfium.dll.lib>
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
@@ -182,6 +155,10 @@ set(ZLIB_DLL_PATH
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.dll>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.dll>
 )
+# pdfium的动态链接库地址
+set(PDFIUM_DLL_PATH
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/pdfium/bin/pdfium.dll>
+)
 
 # 把 DLL 拷贝到目标可执行文件目录
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -199,6 +176,12 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${ZLIB_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying zlib dll to output directory"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${PDFIUM_DLL_PATH}
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying zlib dll to output directory"
 )
@@ -245,20 +228,4 @@ if(ICU_DLL_RELEASE_FILES)
     endforeach()
 else()
     message(WARNING "No ICU DLL files will be copied - none found")
-endif()
-
-# 遍历每个 poppler-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(POPPLER_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${POPPLER_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No poppler DLL files will be copied - none found")
 endif()
