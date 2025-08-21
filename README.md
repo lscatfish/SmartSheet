@@ -13,7 +13,7 @@ Gitee国内镜像仓库地址： [Gitee](https://gitee.com/sicheng-liu/SmartShee
 - **依赖工具**：
 	- cmake3.20
 	- MSVC v143
-	- Windows 11 SDK (10.0.26100.4188+)
+	- Windows 11 SDK (10.0+)
 	- （可选）VS2022
 - **其他依赖**：
 	- PaddleOCR-v3.1.0 &nbsp;&nbsp;&nbsp; 仓库地址：[Github](https://github.com/PaddlePaddle/PaddleOCR.git)&nbsp;&nbsp;&nbsp;[Gitee](https://gitee.com/paddlepaddle/PaddleOCR.git)

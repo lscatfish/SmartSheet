@@ -8,6 +8,7 @@
 #include <pugixml.hpp>
 #include <QingziClass.h>
 #include <unzip.h>
+#include <vector>
 #include <word.h>
 #include <zip.h>
 
@@ -170,9 +171,12 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
  * @param _reMeth 报名方式
  */
 DefPerson DefDocx::get_person(const std::string _reMeth) {
-    DefLine   perLine;
-    perLine.information[u8"备注"] = "";
-
+    DefLine perLine;
+    perLine.information[u8"备注"]     = "";
+    perLine.information[u8"个人特长"] = "";
+    perLine.information[u8"工作经历"] = "";
+    perLine.information[u8"获奖情况"] = "";
+    perLine.information[u8"个人简介"] = "";
     DefPerson per;
     // 定义关键的词
     const list< std::string > headerLib{ u8"姓名", u8"性别", u8"年级", u8"学号", u8"政治面貌", u8"学院",
@@ -189,6 +193,8 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                     }
                 } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"个人简介") {
                     if (col + 1 < keyTable_[row].size( )) {
+                        if (keyTable_[row][col + 1].content.size( ) != 0)
+                            perLine.information[u8"个人简介"] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人简介极少；";
                             col++;
@@ -199,6 +205,8 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                     }
                 } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"个人特长") {
                     if (col + 1 < keyTable_[row].size( )) {
+                        if (keyTable_[row][col + 1].content.size( ) != 0)
+                            perLine.information[u8"个人特长"] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"个人特长极少；";
                             col++;
@@ -209,6 +217,8 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                     }
                 } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"工作经历") {
                     if (col + 1 < keyTable_[row].size( )) {
+                        if (keyTable_[row][col + 1].content.size( ) != 0)
+                            perLine.information[u8"工作经历"] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历极少；";
                             col++;
@@ -216,6 +226,12 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                             perLine.information[u8"备注"] = perLine.information[u8"备注"] + u8"工作经历较少；";
                             col++;
                         }
+                    }
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == u8"获奖情况") {
+                    if (col + 1 < keyTable_[row].size( )) {
+                        if (keyTable_[row][col + 1].content.size( ) != 0)
+                            perLine.information[u8"获奖情况"] = trim_leading_spaces(keyTable_[row][col + 1].content);
+                        col++;
                     }
                 }
             }

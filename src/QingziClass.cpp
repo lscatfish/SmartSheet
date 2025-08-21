@@ -717,8 +717,8 @@ void DoQingziClass::save_statisticsSheet( ) {
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {
-    file::DefFolder selfFolder("./input/sign_for_QingziClass/self");
-    file::DefFolder orgFolder("./input/sign_for_QingziClass/org");
+    file::DefFolder selfFolder(file::_INPUT_SIGN_QC_SELF_DIR_);
+    file::DefFolder orgFolder(file::_INPUT_SIGN_QC_ORG_DIR_);
 
     list< std::string > paths = selfFolder.get_filepath_list(list< std::string >{ ".docx" });    // 文件路径
     // 解析文件
@@ -740,8 +740,14 @@ void DoQingziClass::registration( ) {
     /* for (const auto &p : personStd_) {
          std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
      }*/
-
     save_registrationSheet( );
+
+    // 筛选pdf文件
+    std::cout << std::endl
+              << u8"复制了"
+              << selfFolder.copy_files_to(file::_OUTPUT_SIGN_QC_PDF_DIR_, list< std::string >{ ".pdf", ".PDF" })
+              << u8"份pdf文件到" << file::_OUTPUT_SIGN_QC_PDF_DIR_ << std::endl;
+
     std::cout << std::endl
               << u8"青字班报名表已输出到 ./output/sign_for_QingziClass_out/报名.xlsx 中..." << std::endl;
 }
@@ -751,7 +757,7 @@ void DoQingziClass::save_registrationSheet( ) {
     table< std::string > sh{
         { u8"序号", u8"姓名", u8"性别", u8"民族", u8"年级", u8"学号", u8"政治面貌", u8"学院", u8"专业", u8"学生职务",
           u8"社团", u8"联系电话", u8"QQ号", u8"邮箱", u8"报名青字班", u8"是否报名班委", u8"报名方式", u8"备注",
-          u8"文件地址" }
+          u8"个人简介", u8"个人特长", u8"工作经历", u8"获奖情况", u8"文件地址" }
     };                 // 表格
     int serial = 1;    // 序号
     for (auto &p : personStd_) {
@@ -775,6 +781,10 @@ void DoQingziClass::save_registrationSheet( ) {
         line.push_back(u8"否");
         line.push_back(p.otherInformation[u8"报名方式"]);
         line.push_back(p.otherInformation[u8"备注"]);
+        line.push_back(p.otherInformation[u8"个人简介"]);
+        line.push_back(p.otherInformation[u8"个人特长"]);
+        line.push_back(p.otherInformation[u8"工作经历"]);
+        line.push_back(p.otherInformation[u8"获奖情况"]);
         line.push_back(p.otherInformation[u8"文件地址"]);
         sh.push_back(line);
         serial++;

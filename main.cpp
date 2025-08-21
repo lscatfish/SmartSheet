@@ -30,12 +30,12 @@ int main( ) {
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
 
-#if true
+#if false
     DoQingziClass qClass;
     qClass.start( );
 #else
 
-    test_for_DefFolder( );
+    test_for_poppler_could_use( );
     pause( );
 
 #endif    // true
