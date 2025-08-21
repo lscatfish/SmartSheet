@@ -1,5 +1,6 @@
 ﻿
 #if true
+
 #include <chstring.hpp>
 #include <consoleapi2.h>
 #include <Encoding.h>
@@ -18,7 +19,8 @@
 #include <QingziClass.h>
 #include <string>
 #include <stringapiset.h>
-#include <test.h>
+#include <test/test.h>
+#include <test/test_for_poppler.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
@@ -34,8 +36,8 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-
-    test_for_poppler_could_use( );
+    tmain( );
+    // test_for_poppler_could_use( );
     pause( );
 
 #endif    // true
