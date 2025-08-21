@@ -50,9 +50,9 @@ void test_main( ) {
     SetConsoleCP(65001);          // 输入代码页也设为 UTF-8
 
     /* 1. 载入 Excel 文件 ---------------------------------------------------- */
-    xlnt::workbook wb;                        // 创建一个工作簿对象
+    xlnt::workbook wb;                          // 创建一个工作簿对象
     wb.load(sysdcode_to_utf8("123我.xlsx"));    // 将磁盘上的 1.xlsx 加载到内存
-    auto ws = wb.active_sheet( );             // 获取当前激活的工作表（第一张）
+    auto ws = wb.active_sheet( );               // 获取当前激活的工作表（第一张）
 
     /* 2. 在控制台提示用户 --------------------------------------------------- */
     std::cout << "正在处理电子表格..." << std::endl;
@@ -251,7 +251,69 @@ void test_for_icu_encoding_handler( ) {
     for (auto &r : results) {
         std::cout << r.encodingName << "    " << r.confidence << std::endl;
     }
-   std::cout<< encoding::sysdcode_to_utf8(anycode);
-
+    std::cout << encoding::sysdcode_to_utf8(anycode);
 }
 
+
+#include <poppler/cpp/poppler-document.h>
+#include <poppler/cpp/poppler-page.h>
+#include <poppler/cpp/poppler-global.h>
+#include <poppler/cpp/poppler-rectangle.h>
+
+
+bool testPopplerMinimal(const std::string &pdfPath) {
+    // 1. 核心功能：加载PDF文档
+    std::unique_ptr< poppler::document > doc(poppler::document::load_from_file(pdfPath));
+    if (!doc) {
+        std::cerr << u8"❌ 无法加载PDF文件: " << pdfPath << std::endl;
+        return false;
+    }
+
+    // 2. 检查文档是否加密
+    if (doc->is_locked( )) {
+        std::cerr << u8"❌ PDF已加密，无法处理" << std::endl;
+        return false;
+    }
+
+    try {
+        // 3. 验证页面计数功能（最基础接口）
+        int page_count = doc->pages( );
+        std::cout << u8"✅ 成功加载PDF文档！" << std::endl;
+        std::cout << u8"📄 文档总页数: " << page_count << std::endl;
+
+        // 4. 验证文本提取功能（核心功能）
+        if (page_count > 0) {
+            // 获取第一页（若create_page不存在，可尝试其他命名如get_page）
+            std::unique_ptr< poppler::page > page(doc->create_page(0));
+            if (page) {
+                // 提取文本（最稳定的核心接口）
+                poppler::ustring page_text = page->text( );
+
+                // 避免使用is_empty()，通过转换后的字符串长度判断
+                std::string text = page_text.to_utf8( ).data( );
+                if (text.empty( )) {
+                    std::cout << u8"📝 第一页无文本内容（可能是图片或扫描件）" << std::endl;
+                } else {
+                    std::cout << u8"📝 第一页文本预览（前200字符）：" << std::endl;
+                    std::cout << "   " << encoding::sysdcode_to_utf8(text.substr(0, (std::min)(size_t(200), text.size( ))))
+                              << (text.size( ) > 200 ? "..." : "") << std::endl;
+                }
+            } else {
+                std::cerr << u8"⚠️ 无法获取第一页内容" << std::endl;
+            }
+        } else {
+            std::cout << u8"⚠️ PDF文档为空（0页）" << std::endl;
+        }
+
+    } catch (const std::exception &e) {
+        std::cerr << u8"❌ 处理错误: " << e.what( ) << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+// 测试poppler可以使用
+void test_for_poppler_could_use( ) {
+    testPopplerMinimal(u8"./测.pdf");
+}
