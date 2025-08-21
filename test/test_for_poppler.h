@@ -5,7 +5,4 @@
 
 void tmain( );
 
-
-
-
 #endif    // !TEST_FOR_POPPLER_H

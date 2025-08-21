@@ -111,11 +111,6 @@ if(NOT EXISTS ${POPPLER_DLL_DIR})
 else()
     # 使用LIST_DIRECTORIES false确保只获取文件
     file(GLOB POPPLER_DLL_RELEASE_FILES LIST_DIRECTORIES false 
-    "${POPPLER_DLL_DIR}/pixman-1-0.dll"
-    "${POPPLER_DLL_DIR}/poppler.dll"
-    "${POPPLER_DLL_DIR}/poppler-glib.dll"
-    "${POPPLER_DLL_DIR}/poppler-cpp.dll"
-    "${POPPLER_DLL_DIR}/poppler-cpp.dll"
     "${POPPLER_DLL_DIR}/*.dll"
     )
     

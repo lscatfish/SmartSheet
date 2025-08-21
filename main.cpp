@@ -32,7 +32,7 @@ int main( ) {
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
 
-#if false
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else
