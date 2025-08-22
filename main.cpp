@@ -21,11 +21,11 @@
 #include <stringapiset.h>
 #include <test/test.h>
 #include <test/test_for_pdfium.h>
-#include <test/test_for_poppler.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
+#include <pdf.h>
 
 int main( ) {
 
@@ -37,7 +37,7 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-    test_for_pdfium_can_using( );
+    // pdfmain( );
     // test_for_poppler_could_use( );
     pause( );
 
