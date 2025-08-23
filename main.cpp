@@ -43,7 +43,7 @@ int main( ) {
 #endif    // true
 
     std::cout << std::endl
-              << reinterpret_cast< const char * >(u8"程序结束...");
+              << U8C(u8"程序结束...");
     pause( );
     return 0;    // 程序正常结束
 }

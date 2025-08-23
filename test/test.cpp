@@ -35,7 +35,7 @@ int test_for_docx( ) {
 
     auto tables = d.get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"性别") });
     if (tables.empty( )) {
-        std::cout << reinterpret_cast< const char * >(u8"未找到任何表格") << std::endl;
+        std::cout << U8C(u8"未找到任何表格") << std::endl;
         return 0;
     }
 
@@ -109,14 +109,14 @@ void test_main( ) {
         { sysdcode_to_utf8("3"), sysdcode_to_utf8("李四"), sysdcode_to_utf8("324234"), "" },
 
     };
-    file::save_attSheet_to_xlsx(test1, "test1.xlsx", reinterpret_cast< const char * >(u8"测试签到表"));
+    file::save_attSheet_to_xlsx(test1, "test1.xlsx", U8C(u8"测试签到表"));
 }
 
 // 测试ENCODING
 void test_for_ENCODING( ) {
     namespace ec = encoding;
     list< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
-                             "****加拿大", "曾经多次uy蒂娜", reinterpret_cast< const char * >(u8"顶峰那我"),
+                             "****加拿大", "曾经多次uy蒂娜", U8C(u8"顶峰那我"),
                              "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh",
                              "./input/sign_k/青公班-报名表" };
     for (auto &a : str) {
@@ -128,7 +128,7 @@ void test_for_ENCODING( ) {
 void test_for_chstring( ) {
     namespace ec = encoding;
     std::vector< chstring > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
-                                 "****加拿大", "曾经多次uy蒂娜", reinterpret_cast< const char * >(u8"顶峰那我"),
+                                 "****加拿大", "曾经多次uy蒂娜", U8C(u8"顶峰那我"),
                                  "顶峰那我", "图片" };
     for (auto &a : str) {
         std::cout << a << std::endl;
@@ -140,24 +140,24 @@ void test_for_cv_imread( ) {
     std::string path = "./input/att_imgs/青书班1.jpeg";
     cv::Mat     img  = cv::imread(path);
     if (img.empty( )) {
-        std::cout << reinterpret_cast< const char * >(u8"gbk图片 ")
-                  << path << reinterpret_cast< const char * >(u8" 打开失败") << std::endl;
+        std::cout << U8C(u8"gbk图片 ")
+                  << path << U8C(u8" 打开失败") << std::endl;
         return;
     } else {
-        std::cout << reinterpret_cast< const char * >(u8"gbk图片 ")
-                  << path << reinterpret_cast< const char * >(u8" 打开成功!!!!") << std::endl;
+        std::cout << U8C(u8"gbk图片 ")
+                  << path << U8C(u8" 打开成功!!!!") << std::endl;
     }
 
-    std::string u8path = reinterpret_cast< const char * >(u8"./input/att_imgs/青书班1.jpeg");
+    std::string u8path = U8C(u8"./input/att_imgs/青书班1.jpeg");
     // u8path             = encoding::utf8_to_gbk(u8path);
     cv::Mat u8img = cv::imread(u8path);
     if (u8img.empty( )) {
-        std::cout << reinterpret_cast< const char * >(u8"u8图片 ")
-                  << u8path << reinterpret_cast< const char * >(u8" 打开失败") << std::endl;
+        std::cout << U8C(u8"u8图片 ")
+                  << u8path << U8C(u8" 打开失败") << std::endl;
         return;
     } else {
-        std::cout << reinterpret_cast< const char * >(u8"u8图片 ")
-                  << u8path << reinterpret_cast< const char * >(u8" 打开成功!!!!") << std::endl;
+        std::cout << U8C(u8"u8图片 ")
+                  << u8path << U8C(u8" 打开成功!!!!") << std::endl;
     }
 }
 

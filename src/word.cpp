@@ -11,6 +11,7 @@
 #include <vector>
 #include <word.h>
 #include <zip.h>
+#include <string>
 
 namespace docx {
 
@@ -24,25 +25,25 @@ std::vector< char > DefDocx::read_docx_file(const std::string &_docx_path, const
     unzFile zip_file = unzOpen(_docx_path.c_str( ));
 
     if (!zip_file) {
-        std::cerr << reinterpret_cast< const char * >(u8"无法打开DOCX文件: ") << _docx_path << std::endl;
+        std::cerr << U8C(u8"无法打开DOCX文件: ") << _docx_path << std::endl;
         return { };
     }
 
     if (unzLocateFile(zip_file, _inner_file_path.c_str( ), 0) != UNZ_OK) {
-        std::cerr << reinterpret_cast< const char * >(u8"DOCX中未找到文件: ") << _inner_file_path << std::endl;
+        std::cerr << U8C(u8"DOCX中未找到文件: ") << _inner_file_path << std::endl;
         unzClose(zip_file);
         return { };
     }
 
     unz_file_info file_info;
     if (unzGetCurrentFileInfo(zip_file, &file_info, nullptr, 0, nullptr, 0, nullptr, 0) != UNZ_OK) {
-        std::cerr << reinterpret_cast< const char * >(u8"获取文件信息失败") << std::endl;
+        std::cerr << U8C(u8"获取文件信息失败") << std::endl;
         unzClose(zip_file);
         return { };
     }
 
     if (unzOpenCurrentFile(zip_file) != UNZ_OK) {
-        std::cerr << reinterpret_cast< const char * >(u8"打开文件失败") << std::endl;
+        std::cerr << U8C(u8"打开文件失败") << std::endl;
         unzClose(zip_file);
         return { };
     }
@@ -50,7 +51,7 @@ std::vector< char > DefDocx::read_docx_file(const std::string &_docx_path, const
     std::vector< char > buffer(file_info.uncompressed_size);
     int                 bytes_read = unzReadCurrentFile(zip_file, buffer.data( ), buffer.size( ));
     if (bytes_read != static_cast< int >(file_info.uncompressed_size)) {
-        std::cerr << reinterpret_cast< const char * >(u8"文件读取不完整") << std::endl;
+        std::cerr << U8C(u8"文件读取不完整") << std::endl;
         unzCloseCurrentFile(zip_file);
         unzClose(zip_file);
         return { };
@@ -72,7 +73,7 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
     pugi::xml_document     doc;
     pugi::xml_parse_result result = doc.load_buffer(_xml_data.data( ), _xml_data.size( ));
     if (!result) {
-        std::cerr << reinterpret_cast< const char * >(u8"XML解析失败: ") << result.description( ) << std::endl;
+        std::cerr << U8C(u8"XML解析失败: ") << result.description( ) << std::endl;
         return all_tables;
     }
 
@@ -116,13 +117,13 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
 
 // 打印带位置信息的表格
 void DefDocx::print_tables_with_position( ) {
-    std::cout << reinterpret_cast< const char * >(u8"docx文件 ")
-              << u8path_ << reinterpret_cast< const char * >(u8" 共发现 ")
-              << tableList_.size( ) << reinterpret_cast< const char * >(u8" 个表格") << std::endl;
+    std::cout << U8C(u8"docx文件 ")
+              << u8path_ << U8C(u8" 共发现 ")
+              << tableList_.size( ) << U8C(u8" 个表格") << std::endl;
     std::cout << "----------------------------------------" << std::endl;
 
     for (size_t table_idx = 0; table_idx < tableList_.size( ); ++table_idx) {
-        std::cout << reinterpret_cast< const char * >(u8"表格 ") << table_idx + 1 << ":" << std::endl;
+        std::cout << U8C(u8"表格 ") << table_idx + 1 << ":" << std::endl;
         for (const auto &row : tableList_[table_idx]) {
             for (const auto &cell : row) {
                 // 输出格式：[行,列]内容
@@ -174,27 +175,27 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
  */
 DefPerson DefDocx::get_person(const std::string _reMeth) {
     DefLine perLine;
-    perLine.information[reinterpret_cast< const char * >(u8"备注")]     = "";
-    perLine.information[reinterpret_cast< const char * >(u8"个人特长")] = "";
-    perLine.information[reinterpret_cast< const char * >(u8"工作经历")] = "";
-    perLine.information[reinterpret_cast< const char * >(u8"获奖情况")] = "";
-    perLine.information[reinterpret_cast< const char * >(u8"个人简介")] = "";
+    perLine.information[U8C(u8"备注")]     = "";
+    perLine.information[U8C(u8"个人特长")] = "";
+    perLine.information[U8C(u8"工作经历")] = "";
+    perLine.information[U8C(u8"获奖情况")] = "";
+    perLine.information[U8C(u8"个人简介")] = "";
     DefPerson per;
     // 定义关键的词
     const list< std::string > headerLib{
-        reinterpret_cast< const char * >(u8"姓名"),
-        reinterpret_cast< const char * >(u8"性别"), reinterpret_cast< const char * >(u8"年级"),
-        reinterpret_cast< const char * >(u8"学号"), reinterpret_cast< const char * >(u8"政治面貌"),
-        reinterpret_cast< const char * >(u8"学院"), reinterpret_cast< const char * >(u8"专业"),
-        reinterpret_cast< const char * >(u8"电话"), reinterpret_cast< const char * >(u8"联系方式"),
-        reinterpret_cast< const char * >(u8"联系电话"), reinterpret_cast< const char * >(u8"电话号码"),
-        reinterpret_cast< const char * >(u8"QQ号"), reinterpret_cast< const char * >(u8"qq号"),
-        reinterpret_cast< const char * >(u8"qq"), reinterpret_cast< const char * >(u8"QQ"),
-        reinterpret_cast< const char * >(u8"所任职务"), reinterpret_cast< const char * >(u8"职务"),
-        reinterpret_cast< const char * >(u8"学生职务"),
-        reinterpret_cast< const char * >(u8"邮箱"), reinterpret_cast< const char * >(u8"民族"),
-        reinterpret_cast< const char * >(u8"社团"), reinterpret_cast< const char * >(u8"报名青字班"),
-        reinterpret_cast< const char * >(u8"青字班")
+        U8C(u8"姓名"),
+        U8C(u8"性别"), U8C(u8"年级"),
+        U8C(u8"学号"), U8C(u8"政治面貌"),
+        U8C(u8"学院"), U8C(u8"专业"),
+        U8C(u8"电话"), U8C(u8"联系方式"),
+        U8C(u8"联系电话"), U8C(u8"电话号码"),
+        U8C(u8"QQ号"), U8C(u8"qq号"),
+        U8C(u8"qq"), U8C(u8"QQ"),
+        U8C(u8"所任职务"), U8C(u8"职务"),
+        U8C(u8"学生职务"),
+        U8C(u8"邮箱"), U8C(u8"民族"),
+        U8C(u8"社团"), U8C(u8"报名青字班"),
+        U8C(u8"青字班")
     };
     for (size_t row = 0; row < keyTable_.size( ); row++) {
         for (size_t col = 0; col < keyTable_[row].size( ); col++) {
@@ -204,60 +205,60 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
                         perLine.information[trim_leading_spaces(keyTable_[row][col].content)] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         col++;
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == reinterpret_cast< const char * >(u8"个人简介")) {
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"个人简介")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[reinterpret_cast< const char * >(u8"个人简介")] =
+                            perLine.information[U8C(u8"个人简介")] =
                                 trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] =
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")]
-                                + reinterpret_cast< const char * >(u8"个人简介极少；");
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")]
+                                + U8C(u8"个人简介极少；");
                             col++;
                         } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] =
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")] 
-                                + reinterpret_cast< const char * >(u8"个人简介较少；");
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")] 
+                                + U8C(u8"个人简介较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == reinterpret_cast< const char * >(u8"个人特长")) {
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"个人特长")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[reinterpret_cast< const char * >(u8"个人特长")] = 
+                            perLine.information[U8C(u8"个人特长")] = 
                             trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] = 
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")] 
-                                + reinterpret_cast< const char * >(u8"个人特长极少；");
+                            perLine.information[U8C(u8"备注")] = 
+                                perLine.information[U8C(u8"备注")] 
+                                + U8C(u8"个人特长极少；");
                             col++;
                         } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] =
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")] 
-                                + reinterpret_cast< const char * >(u8"个人特长较少；");
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")] 
+                                + U8C(u8"个人特长较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == reinterpret_cast< const char * >(u8"工作经历")) {
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"工作经历")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[reinterpret_cast< const char * >(u8"工作经历")] = trim_leading_spaces(keyTable_[row][col + 1].content);
+                            perLine.information[U8C(u8"工作经历")] = trim_leading_spaces(keyTable_[row][col + 1].content);
                         if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] =
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")] 
-                                + reinterpret_cast< const char * >(u8"工作经历极少；");
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")] 
+                                + U8C(u8"工作经历极少；");
                             col++;
                         } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[reinterpret_cast< const char * >(u8"备注")] = 
-                                perLine.information[reinterpret_cast< const char * >(u8"备注")] 
-                                + reinterpret_cast< const char * >(u8"工作经历较少；");
+                            perLine.information[U8C(u8"备注")] = 
+                                perLine.information[U8C(u8"备注")] 
+                                + U8C(u8"工作经历较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == reinterpret_cast< const char * >(u8"获奖情况")) {
+                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"获奖情况")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[reinterpret_cast< const char * >(u8"获奖情况")] =
+                            perLine.information[U8C(u8"获奖情况")] =
                             trim_leading_spaces(keyTable_[row][col + 1].content);
                         col++;
                     }
@@ -266,8 +267,8 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
         }
     }
     DoQingziClass::trans_line_to_person(perLine, per);
-    per.otherInformation[reinterpret_cast< const char * >(u8"报名方式")] = _reMeth;
-    per.otherInformation[reinterpret_cast< const char * >(u8"文件地址")] = u8path_;
+    per.otherInformation[U8C(u8"报名方式")] = _reMeth;
+    per.otherInformation[U8C(u8"文件地址")] = u8path_;
     return per;
 }
 
