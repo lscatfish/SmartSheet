@@ -7,6 +7,7 @@
  * 此文件用于定义人员信息
  */
 
+#include <basic.hpp>
 #include <Encoding.h>
 #include <map>
 #include <string>
@@ -136,10 +137,10 @@ public:
         ifsign    = false;
         classname = _classname;
 
-        information[std::string(reinterpret_cast< const char * >(u8"姓名"))]     = encoding::sysdcode_to_utf8(_name);
-        information[std::string(reinterpret_cast< const char * >(u8"学号"))]     = encoding::sysdcode_to_utf8(_studentID);
-        information[std::string(reinterpret_cast< const char * >(u8"学院"))]     = encoding::sysdcode_to_utf8(_academy);
-        information[std::string(reinterpret_cast< const char * >(u8"联系电话"))] = encoding::sysdcode_to_utf8(_phonenumber);
+        information[std::string(U8C(u8"姓名"))]     = encoding::sysdcode_to_utf8(_name);
+        information[std::string(U8C(u8"学号"))]     = encoding::sysdcode_to_utf8(_studentID);
+        information[std::string(U8C(u8"学院"))]     = encoding::sysdcode_to_utf8(_academy);
+        information[std::string(U8C(u8"联系电话"))] = encoding::sysdcode_to_utf8(_phonenumber);
     };
 
     /*

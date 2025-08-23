@@ -3,7 +3,10 @@
 #include <iostream>
 #include <memory>
 #include <poppler/cpp/poppler-document.h>
+#include <poppler/cpp/poppler-global.h>
 #include <poppler/cpp/poppler-page.h>
+#include <poppler/cpp/poppler-rectangle.h>
+#include <poppler/cpp/poppler-version.h>
 #include <poppler/Gfx.h>
 #include <poppler/GfxState.h>
 #include <poppler/GlobalParams.h>
@@ -87,6 +90,50 @@ std::vector< LineSegment > extractLineSegments(const std::string &pdfPath, int p
     return extractor.lines;
 }
 
+struct TextBox {
+    double      x1, y1;    // 左上角坐标
+    double      x2, y2;    // 右下角坐标
+    std::string text;      // 文本内容
+
+    TextBox(double _x1, double _y1, double _x2, double _y2, poppler::byte_array _text) {
+        x1 = _x1;
+        y1 = _y1;
+        x2 = _x2;
+        y2 = _y2;
+        for (auto &c : _text)
+            text.push_back(c);
+    }
+};
+
+std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
+    auto doc = poppler::document::load_from_file(pdfPath);
+    if (!doc) {
+        std::cerr << "Failed to load PDF document.\n";
+        return { };
+    }
+
+    std::vector< TextBox > textBoxes;
+
+    for (int pageNum = 0; pageNum < doc->pages( ); ++pageNum) {
+        auto page     = doc->create_page(pageNum);
+        auto textList = page->text_list( );
+
+
+        for (auto &textBlock : textList) {
+            poppler::rectf bbox = textBlock.bbox( );
+            TextBox        aaa(bbox.left( ),
+                               bbox.top( ),
+                               bbox.right( ),
+                               bbox.bottom( ),
+                               textBlock.text( ).to_utf8( ));
+            textBoxes.push_back(aaa);
+        }
+    }
+
+    return textBoxes;
+}
+
+
 // 示例用法
 void tmain( ) {
     auto lines = extractLineSegments(U8C(u8"测.pdf"), 1);
@@ -95,5 +142,11 @@ void tmain( ) {
         std::cout << "Line: (" << l.x1 << ", " << l.y1 << ") -> ("
                   << l.x2 << ", " << l.y2 << ")\n";
     }
+    auto boxs = extractTextBlocks(U8C(u8"测.pdf"));
+    for ( const auto &b : boxs) {
+        std::cout << "TextBox: (" << b.x1 << ", " << b.y1 << ") - ("
+                  << b.x2 << ", " << b.y2 << ") : " << b.text << "\n";
+    }
+
     return;
 }
