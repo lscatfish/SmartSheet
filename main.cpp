@@ -15,6 +15,7 @@
 #include <limits>
 #include <minwindef.h>
 #include <opencv2/opencv.hpp>
+#include <pdf.h>
 #include <PersonnelInformation.h>
 #include <QingziClass.h>
 #include <string>
@@ -31,6 +32,7 @@ int main( ) {
     SetConsoleOutputCP(CP_UTF8);    // 输出代码页设为 UTF-8
     SetConsoleCP(CP_UTF8);          // 输入代码页也设为 UTF-8
     encoding::Init( );
+    pdf::Init( );    // 初始化poppler
 
 #if false
     DoQingziClass qClass;
