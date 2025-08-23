@@ -70,7 +70,6 @@ public:
  */
 std::vector< LineSegment > extractLineSegments(const std::string &pdfPath, int pageNum) {
 
-
     PDFDoc doc(std::make_unique< GooString >(pdfPath.c_str( )));
     if (!doc.isOk( ) || pageNum < 1 || pageNum > doc.getNumPages( )) {
         std::cerr << "Invalid PDF or page number.\n";
