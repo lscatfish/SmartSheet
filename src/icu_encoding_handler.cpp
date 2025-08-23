@@ -14,6 +14,7 @@
 #include <unicode/unistr.h>
 #include <vector>
 #include <windows.h>
+#include <stdexcept>
 
 
 namespace ICUEncodingHandler {
@@ -89,14 +90,14 @@ bool convert_to_utf8(const char *srcData, int32_t srcDataLen,
                      std::string       &errorMsg) {
     // 入参校验
     if (!srcData || srcDataLen <= 0 || srcEncoding.empty( )) {
-        errorMsg = u8"无效的输入参数";
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"无效的输入参数"));
         return false;
     }
 
     UErrorCode  status    = U_ZERO_ERROR;
     UConverter *converter = ucnv_open(srcEncoding.c_str( ), &status);
     if (U_FAILURE(status)) {
-        errorMsg = u8"创建转换器失败: " + std::string(u_errorName(status));
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"创建转换器失败： ")) + std::string(u_errorName(status));
         return false;
     }
 
@@ -127,14 +128,14 @@ bool convert_to_utf8(const char *srcData, int32_t srcDataLen,
 
             // 检查转换结果
             if (U_FAILURE(status)) {
-                errorMsg = u8"转换到Unicode失败: " + std::string(u_errorName(status));
+                errorMsg = std::string(reinterpret_cast< const char * >(u8"转换到Unicode失败: ")) + std::string(u_errorName(status));
                 throw std::runtime_error(errorMsg);
             }
 
             // 计算实际转换的长度（关键修复：用原始地址计算差值）
             int32_t actualLen = static_cast< int32_t >(destBuffer - originalDestBuffer);
             if (actualLen < 0 || actualLen > destCapacity) {
-                errorMsg = u8"转换结果长度异常（可能内存访问越界）";
+                errorMsg = std::string(reinterpret_cast< const char * >(u8"转换结果长度异常（可能内存访问越界）"));
                 throw std::runtime_error(errorMsg);
             }
 
@@ -148,13 +149,13 @@ bool convert_to_utf8(const char *srcData, int32_t srcDataLen,
         }
         // 处理其他错误
         else if (U_FAILURE(status)) {
-            errorMsg = u8"获取缓冲区大小失败: " + std::string(u_errorName(status));
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"获取缓冲区大小失败: ")) + std::string(u_errorName(status));
             throw std::runtime_error(errorMsg);
         }
 
         // 确认所有源数据都被处理
         if (srcCurrent != srcEnd) {
-            errorMsg = u8"未处理完所有源数据（可能缓冲区不足）";
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"未处理完所有源数据（可能缓冲区不足）"));
             throw std::runtime_error(errorMsg);
         }
 
@@ -180,7 +181,7 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
                        std::string       &destData,
                        std::string       &errorMsg) {
     if (!utf8Data || utf8DataLen <= 0 || destEncoding.empty( )) {
-        errorMsg = u8"无效的输入参数";
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"无效的输入参数"));
         return false;
     }
 
@@ -190,7 +191,7 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
 
     // 检查是否为 "bogus" 字符串（严重解析错误）
     if (unicodeStr.isBogus( )) {
-        errorMsg = u8"UTF-8 数据解析失败，结果为无效字符串";
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"UTF-8 数据解析失败，结果为无效字符串"));
         return false;
     }
 
@@ -198,7 +199,7 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
     UErrorCode  status    = U_ZERO_ERROR;
     UConverter *converter = ucnv_open(destEncoding.c_str( ), &status);
     if (U_FAILURE(status)) {
-        errorMsg = u8"创建转换器失败: " + std::string(u_errorName(status));
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"创建转换器失败: ")) + std::string(u_errorName(status));
         return false;
     }
 
@@ -208,7 +209,7 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
         int32_t maxCharSize  = ucnv_getMaxCharSize(converter);
         int32_t destCapacity = unicodeStr.length( ) * maxCharSize + 1;
         if (destCapacity <= 0) {
-            errorMsg = u8"计算缓冲区大小失败，结果无效";
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"计算缓冲区大小失败，结果无效"));
             ucnv_close(converter);
             return false;
         }
@@ -224,19 +225,19 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
 
         // 4. 校验转换结果
         if (U_FAILURE(status)) {
-            errorMsg = u8"转换到目标编码失败: " + std::string(u_errorName(status));
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"转换到目标编码失败: ")) + std::string(u_errorName(status));
             delete[] destBuffer;
             ucnv_close(converter);
             return false;
         }
         if (srcBuffer != srcEnd) {
-            errorMsg = u8"部分 UTF-8 数据未完成转换";
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"部分 UTF-8 数据未完成转换"));
             delete[] destBuffer;
             ucnv_close(converter);
             return false;
         }
         if (destCurrent < destBuffer || destCurrent >= destBuffer + destCapacity) {
-            errorMsg = u8"转换结果超出缓冲区范围，可能导致内存问题";
+            errorMsg = std::string(reinterpret_cast< const char * >(u8"转换结果超出缓冲区范围，可能导致内存问题"));
             delete[] destBuffer;
             ucnv_close(converter);
             return false;
@@ -256,7 +257,7 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
             delete[] destBuffer;
         }
         ucnv_close(converter);
-        errorMsg = u8"转换过程中发生未知异常";
+        errorMsg = std::string(reinterpret_cast< const char * >(u8"转换过程中发生未知异常"));
         return false;
     }
 }

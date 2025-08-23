@@ -5,7 +5,7 @@
 
 /* **************************************************************************************************
  * @brief 此文件用于解析docx文件
- * 
+ *
  * **************************************************************************************************/
 
 #include <basic.hpp>
@@ -76,7 +76,7 @@ public:
         std::vector< char > xml_data = read_docx_file(path_, "word/document.xml");
         if (xml_data.empty( )) {
             // 空文件或者是错误
-            std::cout << u8"docx文件 " << u8path_ << u8" 有概率损坏" << std::endl;
+            std::cout << std::string(reinterpret_cast< const char * >(u8"docx文件 ")) << u8path_ << reinterpret_cast< const char * >(u8" 有概率损坏") << std::endl;
             return;
         }
 
@@ -84,12 +84,14 @@ public:
         tableList_ = parse_tables_with_position(xml_data);
         if (tableList_.empty( )) {
             // 未解析到表格
-            std::cout << u8"docx文件 " << u8path_ << u8" 无表格" << std::endl;
+            std::cout << reinterpret_cast< const char * >(u8"docx文件 ")
+                      << u8path_ << reinterpret_cast< const char * >(u8" 无表格") << std::endl;
         }
 
-        keyTable_ = get_table_with(list< std::string >{ u8"姓名", u8"学号" });
+        keyTable_ = get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"学号") });
 
-        std::cout << u8"docx文件 " << u8path_ << u8" 解析完毕" << std::endl;
+        std::cout << reinterpret_cast< const char * >(u8"docx文件 ")
+                  << u8path_ << reinterpret_cast< const char * >(u8" 解析完毕") << std::endl;
     };
 
     ~DefDocx( ) = default;

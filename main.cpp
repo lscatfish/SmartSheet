@@ -20,12 +20,11 @@
 #include <string>
 #include <stringapiset.h>
 #include <test/test.h>
-#include <test/test_for_pdfium.h>
+#include <test/test_for_poppler.h>
 #include <vector>
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
-#include <pdf.h>
 
 int main( ) {
 
@@ -37,14 +36,14 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-    // pdfmain( );
+    tmain( );
     // test_for_poppler_could_use( );
     pause( );
 
 #endif    // true
 
     std::cout << std::endl
-              << u8"程序结束...";
+              << reinterpret_cast< const char * >(u8"程序结束...");
     pause( );
     return 0;    // 程序正常结束
 }
