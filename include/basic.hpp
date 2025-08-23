@@ -15,4 +15,6 @@ using table = std::vector< std::vector< _T > >;
 template < typename _T >
 using list = std::vector< _T >;
 
+#define U8C(s) reinterpret_cast< const char * >(s)
+
 #endif    // !BASIC_H

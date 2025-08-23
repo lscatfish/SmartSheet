@@ -27,13 +27,13 @@ public:
     std::string phonenumber;         // 电话
     std::string qqnumber;            // QQ号
 
-    std::string position;            // 所任职务
-    std::string email;               // 邮箱
-    std::string ethnicity;           // 民族
-    std::string club;                // 社团
+    std::string position;     // 所任职务
+    std::string email;        // 邮箱
+    std::string ethnicity;    // 民族
+    std::string club;         // 社团
 
-    bool        ifcheck;             // 是否签到
-    bool        ifsign;              // 是否报名
+    bool ifcheck;    // 是否签到
+    bool ifsign;     // 是否报名
 
     std::map< std::string, std::string > otherInformation;    // 其他信息
 
@@ -91,8 +91,8 @@ public:
         email.erase( );
         ethnicity.erase( );
         club.erase( );
-        ifcheck     = false;
-        ifsign      = false;
+        ifcheck = false;
+        ifsign  = false;
     };
 
     /*
@@ -132,13 +132,14 @@ public:
         std::string _studentID,
         std::string _academy,
         std::string _phonenumber) {
-        ifcheck                   = false;
-        ifsign                    = false;
-        classname                 = _classname;
-        information[u8"姓名"]     = encoding::sysdcode_to_utf8(_name);
-        information[u8"学号"]     = encoding::sysdcode_to_utf8(_studentID);
-        information[u8"学院"]     = encoding::sysdcode_to_utf8(_academy);
-        information[u8"联系电话"] = encoding::sysdcode_to_utf8(_phonenumber);
+        ifcheck   = false;
+        ifsign    = false;
+        classname = _classname;
+
+        information[std::string(reinterpret_cast< const char * >(u8"姓名"))]     = encoding::sysdcode_to_utf8(_name);
+        information[std::string(reinterpret_cast< const char * >(u8"学号"))]     = encoding::sysdcode_to_utf8(_studentID);
+        information[std::string(reinterpret_cast< const char * >(u8"学院"))]     = encoding::sysdcode_to_utf8(_academy);
+        information[std::string(reinterpret_cast< const char * >(u8"联系电话"))] = encoding::sysdcode_to_utf8(_phonenumber);
     };
 
     /*

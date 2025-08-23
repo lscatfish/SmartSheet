@@ -23,7 +23,7 @@ void pause( ) {
     }
 
     std::cout << std::endl;
-    std::cout << u8"请按 Enter 键继续..." << std::endl;
+    std::cout << reinterpret_cast< const char * >(u8"请按 Enter 键继续...") << std::endl;
     std::cin.ignore((std::numeric_limits< std::streamsize >::max)( ), '\n');
     // 这里实际上是std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
     // 加一个括号防止windows.h的宏污染

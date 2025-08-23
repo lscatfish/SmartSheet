@@ -59,7 +59,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
 
     // 检查搜索是否成功
     if (hFind == INVALID_HANDLE_VALUE) {
-        std::cerr << u8"无法打开文件夹: " << folderPath << std::endl;
+        std::cerr << reinterpret_cast< const char * >(u8"无法打开文件夹: ") << folderPath << std::endl;
         return;
     }
 
@@ -447,7 +447,7 @@ bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_des
 
     // 检查是否发生错误
     if (!sourceFile.eof( ) || !destFile) {
-        throw std::runtime_error(u8"复制文件过程中发生错误");
+        throw std::runtime_error(reinterpret_cast< const char * >(u8"复制文件过程中发生错误"));
     }
 
     return true;
@@ -475,8 +475,8 @@ bool get_filepath_from_folder(
     try {
         for (const auto &entry : fs::recursive_directory_iterator(foldern)) {
             if (fs::is_regular_file(entry.status( ))) {
-                fileName.emplace_back(entry.path( ).filename( ).u8string( ));    // 名字(包含后缀)
-                _path.emplace_back(entry.path( ).u8string( ));                   // 路径
+                fileName.emplace_back(U8C(entry.path( ).filename( ).u8string( ).c_str( )));    // 名字(包含后缀)
+                _path.emplace_back(U8C(entry.path( ).u8string( ).c_str( )));                   // 路径
             }
         }
     } catch (const fs::filesystem_error &e) {
@@ -493,7 +493,9 @@ bool get_filepath_from_folder(
         }
     }
 
-    std::cout << u8"请确认各班（共" << _name.size( ) << u8"个班）：" << std::endl;
+    std::cout << reinterpret_cast< const char * >(u8"请确认各班（共")
+              << _name.size( ) << reinterpret_cast< const char * >(u8"个班）：")
+              << std::endl;
     for (auto &s : _name) {
         std::cout << s << std::endl;
     }
@@ -526,9 +528,9 @@ bool get_imgpath_from_folder(
     try {
         for (const auto &entry : fs::recursive_directory_iterator(foldern)) {
             if (fs::is_regular_file(entry.status( ))) {
-                u8fileName.emplace_back(entry.path( ).filename( ).u8string( ));    // 名字(包含后缀)
-                _path.emplace_back(entry.path( ).string( ));                       // 路径
-                _u8path.emplace_back(entry.path( ).u8string( ));                   // 路径
+                u8fileName.emplace_back(U8C(entry.path( ).filename( ).u8string( ).c_str( )));    // 名字(包含后缀)
+                _path.emplace_back(U8C(entry.path( ).string( ).c_str( )));                       // 路径
+                _u8path.emplace_back(U8C(entry.path( ).u8string( ).c_str( )));                   // 路径
             }
         }
     } catch (const fs::filesystem_error &e) {
@@ -545,7 +547,8 @@ bool get_imgpath_from_folder(
         }
     }
 
-    std::cout << u8"请确认各图片（共" << _u8name.size( ) << u8"张图片）：" << std::endl;
+    std::cout << reinterpret_cast< const char * >(u8"请确认各图片（共")
+              << _u8name.size( ) << reinterpret_cast< const char * >(u8"张图片）：") << std::endl;
     for (auto &s : _u8name) {
         std::cout << s << std::endl;
     }
@@ -562,7 +565,7 @@ bool get_imgpath_from_folder(
  */
 void load_sheet_from_xlsx(table< std::string > &_sheet, std::string _path) {
     xlnt::workbook wb;
-    std::cout << u8"load file: " << _path << std::endl;
+    std::cout << reinterpret_cast< const char * >(u8"load file: ") << _path << std::endl;
     wb.load(_path);
     auto ws = wb.active_sheet( );    // 获取当前激活的工作表（唯一一张）
 
@@ -592,7 +595,7 @@ void save_attSheet_to_xlsx(
 
     // 定义字体
     xlnt::font f;
-    f.name(u8"仿宋_GB2312");
+    f.name(reinterpret_cast< const char * >(u8"仿宋_GB2312"));
     f.size(14);
 
     // 创建边框样式
@@ -646,7 +649,7 @@ void save_attSheet_to_xlsx(
 
     // 插入表的标题
     xlnt::font f_title;
-    f_title.name(u8"宋体");
+    f_title.name(reinterpret_cast< const char * >(u8"宋体"));
     f_title.size(24);
     ws.insert_rows(1, 1);    // 插入行
 
@@ -685,9 +688,9 @@ void save_sttSheet_to_xlsx(
     xlnt::font fbody;      // 正文字体
     xlnt::font fheader;    // 表头字体
     xlnt::font ftitle;     // 标题字体
-    fbody.name(u8"宋体");
-    fheader.name(u8"宋体");
-    ftitle.name(u8"方正小标宋简体");
+    fbody.name(reinterpret_cast< const char * >(u8"宋体"));
+    fheader.name(reinterpret_cast< const char * >(u8"宋体"));
+    ftitle.name(reinterpret_cast< const char * >(u8"方正小标宋简体"));
     fbody.size(16);
     fheader.size(16);
     ftitle.size(26);
@@ -794,7 +797,8 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet) {
     if (!fs::exists(path)) {
         std::cout << std::endl
                   << "\033[43;30mWARNING!!!\033[0m" << std::endl;
-        std::cout << u8"\033[43;30m缓存文件 " << path << u8" 不存在" << std::endl;
+        std::cout << reinterpret_cast< const char * >(u8"\033[43;30m缓存文件 ")
+                  << path << reinterpret_cast< const char * >(u8" 不存在") << std::endl;
         std::cout << "WARNING!!!\033[0m" << std::endl
                   << std::endl;
         return;
@@ -802,7 +806,7 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet) {
     xlnt::workbook wb;
     wb.load(path);
     std::cout << std::endl
-              << u8"load file: " << path << std::endl;
+              << reinterpret_cast< const char * >(u8"load file: ") << path << std::endl;
     auto ws = wb.active_sheet( );
 
     // 按行遍历
@@ -848,7 +852,7 @@ void save_registrationSheet_to_xlsx(const table< std::string > &_sheet) {
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save(u8"./output/sign_for_QingziClass_out/报名.xlsx");
+    wb.save(U8C(u8"./output/sign_for_QingziClass_out/报名.xlsx"));
 }
 
 // 替换字符串中的所有指定字符
@@ -898,7 +902,7 @@ bool is_folder_empty(const std::string &folder_path) {
     namespace fs = std::filesystem;
     // 检查路径是否存在且是文件夹
     if (!fs::exists(folder_path) || !fs::is_directory(folder_path)) {
-        std::cerr << u8"路径不存在或不是文件夹: " << folder_path << std::endl;
+        std::cerr << reinterpret_cast< const char * >(u8"路径不存在或不是文件夹: ") << folder_path << std::endl;
         return false;    // 或根据需求抛出异常
     }
 
@@ -920,14 +924,14 @@ bool is_file_exists(const std::string &_path) {
 bool create_folder_recursive(const std::string &_path) {
     // 如果路径已存在，直接返回成功
     if (is_folder_exists(_path)) {
-        std::cout << u8"文件夹已存在: " << _path << std::endl;
+        std::cout << reinterpret_cast< const char * >(u8"文件夹已存在: ") << _path << std::endl;
         return true;
     }
 
     // 分割路径为各个组件
     std::vector< std::string > components = split_path(_path);
     if (components.empty( )) {
-        std::cerr << u8"无效的路径: " << _path << std::endl;
+        std::cerr << reinterpret_cast< const char * >(u8"无效的路径: ") << _path << std::endl;
         return false;
     }
 
@@ -954,10 +958,10 @@ bool create_folder_recursive(const std::string &_path) {
         // 如果当前路径不存在，则创建
         if (!is_folder_exists(currentPath)) {
             if (mkdir(currentPath.c_str( )) != 0) {
-                std::cerr << u8"创建目录失败: " << currentPath << std::endl;
+                std::cerr << reinterpret_cast< const char * >(u8"创建目录失败: ") << currentPath << std::endl;
                 return false;
             }
-            std::cout << u8"创建目录成功: " << currentPath << std::endl;
+            std::cout << reinterpret_cast< const char * >(u8"创建目录成功: ") << currentPath << std::endl;
         }
     }
 

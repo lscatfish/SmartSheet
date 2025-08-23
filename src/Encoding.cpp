@@ -81,7 +81,7 @@ std::string sysdcode_to_utf8(const std::string &_anycode) {
     }
 
     if (ICUEncodingHandler::detect_encoding(ys.c_str( ), ys.size( ), icuResult, 1)) {
-        if (icuResult[0].encodingName == u8"UTF-8")
+        if (icuResult[0].encodingName == "UTF-8")
             return _anycode;
     }
 
