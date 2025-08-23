@@ -1,6 +1,7 @@
 ﻿
 #include <basic.hpp>
 #include <cstdlib>
+#include <Fuzzy.h>
 #include <iostream>
 #include <memory>
 #include <pdf.h>
@@ -45,29 +46,67 @@ list< LineSegment > DefPdf::extract_line_segments(int pageNum_) {
  * 解析pdf文件的所有文本框
  * @param pageNum_ 页码（从1开始）
  */
-list< TextBox > DefPdf::extract_textblocks(int pageNum_) {
-    std::vector< TextBox > textBoxes;
+list< CELL > DefPdf::extract_textblocks(int pageNum_) {
+    list< CELL > textBoxes;
 
     auto page     = document_->create_page(pageNum_ - 1);
     auto textList = page->text_list( );
 
-    for (auto &textBlock : textList) {
-        poppler::rectf bbox = textBlock.bbox( );
-        TextBox        aaa(bbox.left( ),
-                           bbox.top( ),
-                           bbox.right( ),
-                           bbox.bottom( ),
-                           textBlock.text( ).to_utf8( ));
+    for (const auto &textBlock : textList) {
+        CELL aaa(textBlock);
         textBoxes.push_back(aaa);
     }
 
     return textBoxes;
 }
 
+/*
+ * @brief 解析pdf
+ */
+void DefPdf::parse( ) {
+    // 关键词(班委报名)
+    const std::string keyWordCom = U8C(u8"应聘岗位");
+    const std::string keyWordCla = U8C(u8"所任职务");
+
+    list< CELL >        textBoxeList;
+    list< LineSegment > lineSegmentList;
+    for (int ipage = 1; ipage <= num_pages_; ipage++) {
+        textBoxeList = extract_textblocks(ipage);
+        if (textBoxeList.size( ) == 0) continue;
+        // 制作搜索库
+        list< std::string > searchLib;
+        for (const auto &textboxe : textBoxeList) {
+            searchLib.push_back(textboxe.text);
+        }
+
+        if (fuzzy::search(searchLib, keyWordCom, fuzzy::LEVEL::High)) {
+            sheetType_      = SheetType::Committee;
+            lineSegmentList = extract_line_segments(ipage);
+            break;
+        } else if (fuzzy::search(searchLib, keyWordCla, fuzzy::LEVEL::High)) {
+            sheetType_      = SheetType::Classmate;
+            lineSegmentList = extract_line_segments(ipage);
+            break;
+        }
+    }
+    // 解析
+    if (sheetType_ == SheetType::Others) {
+        return;
+    } else {
+    }
+}
+
+/*
+ * 解析表格线
+ */
+void DefPdf::parse_line_to_sheet( ) {
+
+}
 
 
 
-/* ============================================================================================================= */
+
+/* =============================================================================================================== */
 
 // pdf启动函数
 void Init( ) {

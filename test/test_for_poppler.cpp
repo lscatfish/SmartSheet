@@ -134,13 +134,13 @@ std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
 
 // 示例用法
 void tmain( ) {
-    auto lines = extractLineSegments(U8C(u8"测.pdf"), 1);
+    auto lines = extractLineSegments(U8C(u8"0.pdf"), 1);
     std::cout << "Found " << lines.size( ) << " line segments:\n";
     for (const auto &l : lines) {
         std::cout << "Line: (" << l.x1 << ", " << l.y1 << ") -> ("
                   << l.x2 << ", " << l.y2 << ")\n";
     }
-    auto boxs = extractTextBlocks(U8C(u8"测.pdf"));
+    auto boxs = extractTextBlocks(U8C(u8"0.pdf"));
     for ( const auto &b : boxs) {
         std::cout << "TextBox: (" << b.x1 << ", " << b.y1 << ") - ("
                   << b.x2 << ", " << b.y2 << ") : " << b.text << "\n";

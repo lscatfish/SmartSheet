@@ -26,6 +26,7 @@
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
+#include "basic.hpp"
 
 int main( ) {
 
