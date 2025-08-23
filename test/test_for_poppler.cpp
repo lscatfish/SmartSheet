@@ -69,8 +69,7 @@ public:
  * @return  所有线段的列表
  */
 std::vector< LineSegment > extractLineSegments(const std::string &pdfPath, int pageNum) {
-    // 初始化 Poppler
-    globalParams = std::make_unique< GlobalParams >( );
+
 
     PDFDoc doc(std::make_unique< GooString >(pdfPath.c_str( )));
     if (!doc.isOk( ) || pageNum < 1 || pageNum > doc.getNumPages( )) {
