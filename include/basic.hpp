@@ -1,19 +1,18 @@
 ﻿
 /* ====================================================================================================== *
-* 
-* 
-* 考虑到存在头文件的互相调用的问题，这个头文件的设计是不安全的
-* 
-* 
-* ======================================================================================================= */
-
-
+ *
+ *
+ * 考虑到存在头文件的互相调用的问题，这个头文件的设计是不安全的
+ *
+ *
+ * ======================================================================================================= */
 
 #pragma once
 
 #ifndef BASIC_HPP
 #define BASIC_HPP
 
+#include <cstdlib>
 #include <poppler/cpp/poppler-document.h>
 #include <poppler/cpp/poppler-global.h>
 #include <poppler/cpp/poppler-page.h>
@@ -60,16 +59,34 @@ public:
         y1 = _y1;
         y2 = _y2;
         if (std::abs(y1 - y2) < 1.0) {
-            // 取消延长
             t = Type::Horizontal;
+            // 向两端延长
+            if (x1 < x2) {
+                x1 = x1 - 1;
+                x2 = x2 + 1;
+                if (x1 < 0) x1 = 0;
+            } else if (x1 > x2) {
+                x1 = x1 + 1;
+                x2 = x2 - 1;
+                if (x2 < 0) x2 = 0;
+            }
         } else if (std::abs(x1 - x2) < 1.0) {
             t = Type::Vertical;
+            if (y1 < y2) {
+                y1 = y1 - 1;
+                y2 = y2 + 1;
+                if (y1 < 0) y1 = 0;
+            } else if (y1 > y2) {
+                y1 = y1 + 1;
+                y2 = y2 - 1;
+                if (y2 < 0) y2 = 0;
+            }
         } else {
             t = Type::Others;
         }
     };
 };
-}
+}    // namespace pdf
 
 // 定义二维点类型
 struct GridPoint {
@@ -148,8 +165,10 @@ struct CELL {
     /*
      * @brief 基于poppler::text_box构造
      */
-    CELL(const poppler::text_box &tb) {
-        *this = CELL(GridPoint(tb.bbox( ).left( ), tb.bbox( ).top( )), GridPoint(tb.bbox( ).right( ), tb.bbox( ).bottom( )));
+    CELL(const poppler::text_box &tb, double _h) {
+        GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ));
+        GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )));
+        *this = CELL(p1, p2);
         for (const auto &c : tb.text( ).to_utf8( )) {
             this->text.push_back(c);
         }

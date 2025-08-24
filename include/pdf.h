@@ -72,7 +72,7 @@ public:
 
     // 以文件地址进行构造
     DefPdf(std::string _u8path)
-        : pdfdoc_(std::make_unique< GooString >(path_.c_str( ))) {
+        : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
         path_     = _u8path;
         document_ = poppler::document::load_from_file(path_);
         if (!document_) {

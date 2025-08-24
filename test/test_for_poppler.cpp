@@ -82,7 +82,7 @@ std::vector< LineSegment > extractLineSegments(const std::string &pdfPath, int p
         std::cerr << "Failed to load page.\n";
         return { };
     }
-
+    std::cout << "height from PDFDoc:" << page->getCropHeight( )<<"\n";
     LineExtractor extractor;
     page->display(&extractor, 72.0, 72.0, 0, false, false, false);
 
@@ -116,13 +116,14 @@ std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
     for (int pageNum = 0; pageNum < doc->pages( ); ++pageNum) {
         auto page     = doc->create_page(pageNum);
         auto textList = page->text_list( );
-
+        auto h        = page->page_rect( ).height( );
+        std::cout << "page_heigt_from_cpp:" << h << "\n";
         for (auto &textBlock : textList) {
             poppler::rectf bbox = textBlock.bbox( );
-            TextBox        aaa(bbox.left( ),
-                               bbox.top( ),
-                               bbox.right( ),
-                               bbox.bottom( ),
+            TextBox        aaa(bbox.x( ),
+                               h - bbox.y( ),
+                               bbox.x( ) + bbox.width( ),
+                               h - (bbox.y( ) - bbox.height( )),
                                textBlock.text( ).to_utf8( ));
             textBoxes.push_back(aaa);
         }
@@ -133,13 +134,13 @@ std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
 
 // 示例用法
 void tmain( ) {
-    auto lines = extractLineSegments(U8C(u8"0.pdf"), 1);
+    auto lines = extractLineSegments(U8C(u8"测.pdf"), 1);
     std::cout << "Found " << lines.size( ) << " line segments:\n";
     for (const auto &l : lines) {
         std::cout << "Line: (" << l.x1 << ", " << l.y1 << ") -> ("
                   << l.x2 << ", " << l.y2 << ")\n";
     }
-    auto boxs = extractTextBlocks(U8C(u8"0.pdf"));
+    auto boxs = extractTextBlocks(U8C(u8"测.pdf"));
     for (const auto &b : boxs) {
         std::cout << "TextBox: (" << b.x1 << ", " << b.y1 << ") - ("
                   << b.x2 << ", " << b.y2 << ") : " << b.text << "\n";
@@ -158,7 +159,9 @@ void test_for_DefPdf( ) {
         return;
     }
     auto sheet = pdf.get_sheet( );
+    std::cout << "Extracted sheet with " << sheet.size( ) << " rows:\n";
     for (const auto &row : sheet) {
+        std::cout << "size: " << row.size( ) << " | ";
         for (const auto &cell : row) {
             std::cout << cell << " | ";
         }
