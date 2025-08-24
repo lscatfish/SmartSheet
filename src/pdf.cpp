@@ -64,13 +64,14 @@ list< CELL > DefPdf::extract_textblocks(int pageNum_) {
 /*
  * @brief 解析pdf
  */
-void DefPdf::parse( ) {
+bool DefPdf::parse( ) {
     // 关键词(班委报名)
     const std::string keyWordCom = U8C(u8"应聘岗位");
     const std::string keyWordCla = U8C(u8"所任职务");
 
     list< CELL >        textBoxList;
     list< LineSegment > lineSegmentList;
+    // 遍历每一页
     for (int ipage = 1; ipage <= num_pages_; ipage++) {
         textBoxList = extract_textblocks(ipage);
         if (textBoxList.size( ) == 0) continue;
@@ -92,9 +93,14 @@ void DefPdf::parse( ) {
     }
     // 解析
     if (sheetType_ == SheetType::Others) {
-        return;
+        return false;
     } else {
-        parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
+        if (lineSegmentList.size( ) == 0) return false;
+        if (textBoxList.size( ) == 0) return false;
+
+        sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
+        fill_sheet(textBoxList);                          // 填充sheet_
+        return true;
     }
 }
 
@@ -128,25 +134,74 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
      * 构成的格子由四条线构成
      * 合并的单元格按照左上角所对应的行列进行储存
      ******************************************构造sheet***********************************************/
-    for (size_t i = 0; i < horizontalLines.size( ) - 1; i++) {
-        std::vector< CELL > row;    // 一行
-        for (size_t j = 0; j < verticalLines.size( ) - 1; j++) {
-            // 判断相交
-            if (!is_linesegments_intersect(horizontalLines[i], verticalLines[j])) {
-                continue;
-            } else {
-                // 相交，找下一条与竖线相交的水平线
-                for (size_t k = i + 1; k < horizontalLines.size( ); k++) {
-                    if (!is_linesegments_intersect(verticalLines[j], horizontalLines[k])) {
-                        continue;
+    for (size_t h1 = 0; h1 < horizontalLines.size( ) - 1; h1++) {
+        list< CELL > row;
+        for (size_t v1 = 0; v1 < verticalLines.size( ) - 1; v1++) {
+            bool ifnext = false;
+            for (size_t h2 = h1 + 1; h2 < horizontalLines.size( ); h2++) {
+                for (size_t v2 = v1 + 1; v2 < verticalLines.size( ); v2++) {
+                    // 相交判断
+                    if (is_linesegments_intersect(horizontalLines[h1], verticalLines[v1])
+                        && is_linesegments_intersect(horizontalLines[h1], verticalLines[v2])
+                        && is_linesegments_intersect(horizontalLines[h2], verticalLines[v1])
+                        && is_linesegments_intersect(horizontalLines[h2], verticalLines[v2])) {
+                        // 此时是一个单元格
+                        CELL c(horizontalLines[h1], horizontalLines[h2], verticalLines[v1], verticalLines[v2]);
+                        row.push_back(c);
+                        ifnext = true;
+                        break;
                     }
                 }
-
+                if (ifnext) break;
             }
         }
         outSheet.push_back(row);
     }
+    return outSheet;
 }
+
+/*
+ * @brief 填充解析出的表格
+ * @param _textBoxList 解析出的文字块
+ */
+void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
+    for (const auto &t : _textBoxList) {
+        for (auto &r : sheet_) {
+            for (auto &c : r) {
+                if (t.is_contained_for_pdf(c)) {
+                    c.text = c.text + t.text;
+                }
+            }
+        }
+    }
+}
+
+// 返回解析出的表格
+table< std::string > DefPdf::get_sheet( ) {
+    if (sheet_.size( ) == 0) {
+        return table< std::string >{ };
+    }
+    table< std::string > outSheet;
+    for (const auto &row : sheet_) {
+        list< std::string > r;
+        for (const auto &cell : row) {
+            r.push_back(cell.text);
+        }
+        outSheet.push_back(r);
+    }
+    return outSheet;
+}
+
+// 返回是否解析成功
+bool DefPdf::isOKed( ) const {
+    return isOK;
+}
+
+// 返回解析出来的表格的类型
+DefPdf::SheetType DefPdf::get_sheet_type( ) const {
+    return sheetType_;
+}
+
 
 /* =============================================================================================================== */
 
@@ -161,7 +216,7 @@ void Init( ) {
  * @param a 线段a
  * @param b 线段b
  * @return 是否相交
- * 思路：
+ * 思路：(^-^)
  */
 bool is_linesegments_intersect(const LineSegment &a, const LineSegment &b) {
     /* -------------------------------lambda------------------------------------ */

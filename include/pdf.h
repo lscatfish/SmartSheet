@@ -8,16 +8,9 @@
 #include <iostream>
 #include <memory>
 #include <poppler/cpp/poppler-document.h>
-#include <poppler/cpp/poppler-global.h>
-#include <poppler/cpp/poppler-page.h>
-#include <poppler/cpp/poppler-rectangle.h>
-#include <poppler/cpp/poppler-version.h>
-#include <poppler/Gfx.h>
 #include <poppler/GfxState.h>
-#include <poppler/GlobalParams.h>
 #include <poppler/goo/GooString.h>
 #include <poppler/OutputDev.h>
-#include <poppler/Page.h>
 #include <poppler/PDFDoc.h>
 #include <string>
 #include <vector>
@@ -25,53 +18,6 @@
 // 此空间用于解析pdf文件
 // 输入文件名请采用 UTF-8 编码
 namespace pdf {
-
-
-// 定义线段结构体
-struct LineSegment {
-public:
-    // 线段的类型
-    enum class Type {
-        Others = 0,    // 其他类型
-        Horizontal,    // 水平线
-        Vertical       // 竖线
-    };
-    double x1, y1, x2, y2;
-    Type   t;
-
-    LineSegment(double _x1, double _y1, double _x2, double _y2) {
-        x1 = _x1;
-        x2 = _x2;
-        y1 = _y1;
-        y2 = _y2;
-        if (std::abs(y1 - y2) < 1.0) {
-            t = Type::Horizontal;
-            // 向两端延长
-            if (x1 < x2) {
-                x1 = x1 - 1;
-                x2 = x2 + 1;
-                if (x1 < 0) x1 = 0;
-            } else if (x1 > x2) {
-                x1 = x1 + 1;
-                x2 = x2 - 1;
-                if (x2 < 0) x2 = 0;
-            }
-        } else if (std::abs(x1 - x2) < 1.0) {
-            t = Type::Vertical;
-            if (y1 < y2) {
-                y1 = y1 - 1;
-                y2 = y2 + 1;
-                if (y1 < 0) y1 = 0;
-            } else if (y1 > y2) {
-                y1 = y1 + 1;
-                y2 = y2 - 1;
-                if (y2 < 0) y2 = 0;
-            }
-        } else {
-            t = Type::Others;
-        }
-    };
-};
 
 // 定义线段提取类，继承自 OutputDev
 class LineExtractor : public OutputDev {
@@ -127,36 +73,42 @@ public:
     // 以文件地址进行构造
     DefPdf(std::string _u8path)
         : pdfdoc_(std::make_unique< GooString >(path_.c_str( ))) {
-
         path_     = _u8path;
         document_ = poppler::document::load_from_file(path_);
         if (!document_) {
             std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
+            isOK = false;
             return;
         }
         if (!pdfdoc_.isOk( )) {
             std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
+            isOK = false;
             return;
         }
         num_pages_ = pdfdoc_.getNumPages( );
         sheetType_ = SheetType::Others;
-        parse( );
+        isOK       = parse( );    // 解析
     };
 
     ~DefPdf( ) = default;
 
+    // 返回解析出的表格
+    table< std::string > get_sheet( );
+
+    // 返回是否解析成功
+    bool isOKed( ) const;
+
+    // 返回解析出来的表格的类型
+    SheetType get_sheet_type( ) const;
 
 private:
     std::string path_;    // 文件所在的路径
-
-    // list< TextBox >     textboxes_;    // 提取的文本框
-    //  list< LineSegment > lines_;        // 提取的线段
-
-    poppler::document   *document_ = nullptr;
-    PDFDoc               pdfdoc_;
-    table< std::string > sheet_;        // 提取出的表格
-    SheetType            sheetType_;    // 表格的类型
-    int                  num_pages_;
+    poppler::document *document_ = nullptr;
+    PDFDoc             pdfdoc_;
+    table< CELL >      sheet_;        // 提取出的表格
+    SheetType          sheetType_;    // 表格的类型
+    int                num_pages_;
+    bool               isOK;    // 是否解析成功
 
     /**
      * 提取 PDF 页面中的所有线段（直线）
@@ -174,13 +126,19 @@ private:
     /*
      * @brief 解析的控制函数
      */
-    void parse( );
+    bool parse( );
 
     /*
      * 解析表格线
      * @param _lineSegmentList 解析出的线
      */
     table< CELL > parse_line_to_sheet(const list< LineSegment > &_lineSegmentList);
+
+    /*
+     * @brief 填充解析出的表格
+     * @param _textBoxList 解析出的文字块
+     */
+    void fill_sheet(const list< CELL > &_textBoxList);
 };
 
 /*
