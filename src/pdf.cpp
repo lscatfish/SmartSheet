@@ -50,11 +50,12 @@ list< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
 list< CELL > DefPdf::extract_textblocks(int pageNum_) {
     list< CELL > textBoxes;
 
-    auto page     = document_->create_page(pageNum_ - 1);
-    auto textList = page->text_list( );
+    auto   page       = document_->create_page(pageNum_ - 1);
+    auto   textList   = page->text_list( );
+    double pageHeight = page->page_rect( ).height( );
 
     for (const auto &textBlock : textList) {
-        CELL aaa(textBlock);
+        CELL aaa(textBlock, pageHeight);
         textBoxes.push_back(aaa);
     }
 
@@ -127,6 +128,19 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
     // 竖线按照x的升序
     sort_my_list(verticalLines,
                  [](const LineSegment &a, const LineSegment &b) { return ((a.x1 + a.x2) / 2) < ((b.x1 + b.x2) / 2); });
+#if true
+
+    for (const auto &a : horizontalLines) {
+        std::cout << "h:y=" << (a.y1 + a.y2) / 2 << ")\n";
+    }
+    for (const auto &a : verticalLines) {
+        std::cout << "v:x=" << (a.x1 + a.x2) / 2 << ")\n";
+    }
+
+#endif    // true
+
+
+
     /******************************************构造sheet***********************************************
      * 构造思路：
      * 从上部水平线开始遍历，只向下找下一条线
@@ -169,6 +183,9 @@ void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
         for (auto &r : sheet_) {
             for (auto &c : r) {
                 if (t.is_contained_for_pdf(c)) {
+                    //if (t.text.size( ) > static_cast< size_t >(12) * 3) {
+                    //    continue;    // 过长的文本不考虑
+                    //}
                     c.text = c.text + t.text;
                 }
             }
