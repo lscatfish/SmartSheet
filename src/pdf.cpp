@@ -55,7 +55,7 @@ list< CELL > DefPdf::extract_textblocks(int pageNum_) {
     double pageHeight = page->page_rect( ).height( );
 
     for (const auto &textBlock : textList) {
-        CELL aaa(textBlock, pageHeight);
+        CELL aaa(textBlock, pageHeight, -8);    // 降低-8个像素的y坐标误差
         textBoxes.push_back(aaa);
     }
 

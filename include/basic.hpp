@@ -99,6 +99,8 @@ struct GridPoint {
     GridPoint(double _x, double _y) {
         x = _x;
         y = _y;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
     };
     GridPoint(const GridPoint &p) {
         *this = p;
@@ -165,9 +167,9 @@ struct CELL {
     /*
      * @brief 基于poppler::text_box构造
      */
-    CELL(const poppler::text_box &tb, double _h) {
-        GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ));
-        GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )));
+    CELL(const poppler::text_box &tb, double _h, double deltaH = 0) {
+        GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ) + deltaH);
+        GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )) + deltaH);
         *this = CELL(p1, p2);
         for (const auto &c : tb.text( ).to_utf8( )) {
             this->text.push_back(c);
