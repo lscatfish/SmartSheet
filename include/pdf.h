@@ -26,11 +26,10 @@
 // 输入文件名请采用 UTF-8 编码
 namespace pdf {
 
-// pdf启动函数
-void Init( );
 
 // 定义线段结构体
 struct LineSegment {
+public:
     // 线段的类型
     enum class Type {
         Others = 0,    // 其他类型
@@ -47,8 +46,27 @@ struct LineSegment {
         y2 = _y2;
         if (std::abs(y1 - y2) < 1.0) {
             t = Type::Horizontal;
+            // 向两端延长
+            if (x1 < x2) {
+                x1 = x1 - 1;
+                x2 = x2 + 1;
+                if (x1 < 0) x1 = 0;
+            } else if (x1 > x2) {
+                x1 = x1 + 1;
+                x2 = x2 - 1;
+                if (x2 < 0) x2 = 0;
+            }
         } else if (std::abs(x1 - x2) < 1.0) {
             t = Type::Vertical;
+            if (y1 < y2) {
+                y1 = y1 - 1;
+                y2 = y2 + 1;
+                if (y1 < 0) y1 = 0;
+            } else if (y1 > y2) {
+                y1 = y1 + 1;
+                y2 = y2 - 1;
+                if (y2 < 0) y2 = 0;
+            }
         } else {
             t = Type::Others;
         }
@@ -95,8 +113,6 @@ public:
         }
     }
 };
-
-
 
 // 此类用于处理pdf文件
 class DefPdf {
@@ -147,7 +163,7 @@ private:
      * @param pageNum_  页码（从 1 开始）[一般是1]
      * @return  所有线段的列表
      */
-    list< LineSegment > extract_line_segments(int pageNum_);
+    list< LineSegment > extract_linesegments(int pageNum_);
 
     /*
      * 解析pdf文件的所有文本框
@@ -156,16 +172,27 @@ private:
     list< CELL > extract_textblocks(int pageNum_);
 
     /*
-     * @brief 解析每一页
+     * @brief 解析的控制函数
      */
     void parse( );
 
     /*
      * 解析表格线
+     * @param _lineSegmentList 解析出的线
      */
-    void parse_line_to_sheet( );
+    table< CELL > parse_line_to_sheet(const list< LineSegment > &_lineSegmentList);
 };
 
+/*
+ * @brief 判断两线段是否相交
+ * @param a 线段a
+ * @param b 线段b
+ * @return 是否相交
+ */
+bool is_linesegments_intersect(const LineSegment &a, const LineSegment &b);
+
+// pdf启动函数
+void Init( );
 
 }    // namespace pdf
 
