@@ -2,6 +2,7 @@
 #include <basic.hpp>
 #include <iostream>
 #include <memory>
+#include <pdf.h>
 #include <poppler/cpp/poppler-document.h>
 #include <poppler/cpp/poppler-global.h>
 #include <poppler/cpp/poppler-page.h>
@@ -130,7 +131,6 @@ std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
     return textBoxes;
 }
 
-
 // 示例用法
 void tmain( ) {
     auto lines = extractLineSegments(U8C(u8"0.pdf"), 1);
@@ -140,10 +140,28 @@ void tmain( ) {
                   << l.x2 << ", " << l.y2 << ")\n";
     }
     auto boxs = extractTextBlocks(U8C(u8"0.pdf"));
-    for ( const auto &b : boxs) {
+    for (const auto &b : boxs) {
         std::cout << "TextBox: (" << b.x1 << ", " << b.y1 << ") - ("
                   << b.x2 << ", " << b.y2 << ") : " << b.text << "\n";
     }
 
     return;
+}
+
+// 测试defpdf
+void test_for_DefPdf( ) {
+    std::cout << std::endl
+              << std::endl;
+    pdf::DefPdf pdf(U8C(u8"测.pdf"));
+    if (!pdf.isOKed( )) {
+        std::cerr << "PDF parsing failed.\n";
+        return;
+    }
+    auto sheet = pdf.get_sheet( );
+    for (const auto &row : sheet) {
+        for (const auto &cell : row) {
+            std::cout << cell << " | ";
+        }
+        std::cout << "\n";
+    }
 }

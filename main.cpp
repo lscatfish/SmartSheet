@@ -40,7 +40,7 @@ int main( ) {
     qClass.start( );
 #else
     tmain( );
-    // test_for_poppler_could_use( );
+    test_for_DefPdf( );
     pause( );
 
 #endif    // true
