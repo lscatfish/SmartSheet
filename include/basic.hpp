@@ -24,6 +24,12 @@ using table = std::vector< std::vector< _T > >;
 template < typename _T >
 using list = std::vector< _T >;
 
+// 模板函数：对 vector<T>按指定成员变量排序
+// 参数：容器引用、比较函数（决定排序规则和依据的成员）
+template < typename _T,typename Compare >
+void sort_my_list(list< _T > &vec, Compare comp) {
+    std::sort(vec.begin( ), vec.end( ), comp);
+}
 
 // 定义二维点类型
 struct GridPoint {

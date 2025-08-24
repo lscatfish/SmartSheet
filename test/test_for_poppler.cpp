@@ -116,7 +116,6 @@ std::vector< TextBox > extractTextBlocks(const std::string &pdfPath) {
         auto page     = doc->create_page(pageNum);
         auto textList = page->text_list( );
 
-
         for (auto &textBlock : textList) {
             poppler::rectf bbox = textBlock.bbox( );
             TextBox        aaa(bbox.left( ),
