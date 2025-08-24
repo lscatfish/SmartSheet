@@ -5,4 +5,7 @@
 
 void tmain( );
 
+// 测试defpdf
+void test_for_DefPdf( );
+
 #endif    // !TEST_FOR_POPPLER_H
