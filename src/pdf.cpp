@@ -21,7 +21,7 @@
 #include <poppler/OutputDev.h>
 #include <poppler/Page.h>
 #include <poppler/PDFDoc.h>
-#include<QingziClass.h>
+#include <QingziClass.h>
 #include <string>
 #include <vector>
 
@@ -134,7 +134,6 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
     // 竖线按照x的升序
     sort_my_list(verticalLines,
                  [](const LineSegment &a, const LineSegment &b) { return ((a.x1 + a.x2) / 2) < ((b.x1 + b.x2) / 2); });
-
 
     /******************************************构造sheet***********************************************
      * 构造思路：
