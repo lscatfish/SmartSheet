@@ -750,7 +750,7 @@ void DoQingziClass::registration( ) {
 
     // 处理pdf
     file::DefFolder pdfFiles(selfFolder, list< std::string >{ ".pdf", ".PDF" });
-    paths = pdfFiles.get_filepath_list( );    // 文件路径
+    paths = pdfFiles.get_u8filepath_list( );    // 文件路径
     // 解析pdf文件
     if (paths.size( ) != 0)
         for (const auto &p : paths) {
