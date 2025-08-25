@@ -35,11 +35,11 @@ int main( ) {
     encoding::Init( );
     pdf::Init( );    // 初始化poppler
 
-#if false
+#if true
     DoQingziClass qClass;
     qClass.start( );
 #else
-    tmain( );
+    //tmain( );
     test_for_DefPdf( );
     pause( );
 

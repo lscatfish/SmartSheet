@@ -153,7 +153,7 @@ void tmain( ) {
 void test_for_DefPdf( ) {
     std::cout << std::endl
               << std::endl;
-    pdf::DefPdf pdf(U8C(u8"测.pdf"));
+    pdf::DefPdf pdf(U8C(u8"组织推荐班委-马雨蕊.pdf"));
     if (!pdf.isOKed( )) {
         std::cerr << "PDF parsing failed.\n";
         return;

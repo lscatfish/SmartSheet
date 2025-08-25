@@ -1,6 +1,8 @@
 ﻿
+#include <algorithm>
 #include <basic.hpp>
 #include <cctype>    // 用于 std::isdigit
+#include <cstdlib>
 #include <Encoding.h>
 #include <helper.h>
 #include <ios>
@@ -10,7 +12,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include<cstdlib>
 
 /*
  * @brief 按回车键继续
@@ -48,14 +49,22 @@ std::pair< std::string, std::string > split_chinese_and_number(const std::string
 void mergeHelper(table< std::string > &result) {}
 
 
-// 清除字符串前面的所有空格
-std::string trim_leading_spaces(const std::string &str) {
-    // 找到第一个非空格字符的位置
+// 清除字符串前后的所有空白字符（包括空格、\t、\n等）
+std::string trim_whitespace(const std::string &str) {
+    // 找到第一个非空白字符的位置
     auto firstNonSpace = std::find_if(str.begin( ), str.end( ),
                                       [](unsigned char c) { return !std::isspace(c); });
 
-    // 从第一个非空格字符开始截取字符串
-    return std::string(firstNonSpace, str.end( ));
+    // 如果字符串全是空白字符，返回空字符串
+    if (firstNonSpace == str.end( )) {
+        return "";
+    }
+
+    // 找到最后一个非空白字符的位置
+    auto lastNonSpace = std::find_if(str.rbegin( ), str.rend( ), [](unsigned char c) { return !std::isspace(c); }).base( );
+
+    // 从第一个非空白字符截取到最后一个非空白字符
+    return std::string(firstNonSpace, lastNonSpace);
 }
 
 // 清空控制台

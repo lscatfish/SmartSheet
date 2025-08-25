@@ -99,6 +99,20 @@ bool search(
     std::string                _target,
     const list< std::string > &_searchingLib,
     LEVEL                      _matchLevel) {
+
+    if ( _matchLevel == LEVEL::Part ) {
+        // 部分匹配，直接使用子串匹配
+        for (auto &libstr : _searchingLib) {
+            if (search_substring(libstr, _target)) {
+                _outList.push_back(libstr);
+            }
+        }
+        if (_outList.size( ) == 0)
+            return false;
+        else
+            return true;
+    }
+
     // 目标wstring
     std::wstring targrt = encoding::utf8_to_wstring_win(_target);
 
@@ -128,6 +142,16 @@ bool search(
     const list< std::string > &_searchingLib,
     std::string                _target,
     LEVEL                      _matchLevel) {
+
+    if ( _matchLevel == LEVEL::Part ) {
+        // 部分匹配，直接使用子串匹配
+        for (auto &libstr : _searchingLib) {
+            if (search_substring(libstr, _target)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
     if (_matchLevel == LEVEL::High) {

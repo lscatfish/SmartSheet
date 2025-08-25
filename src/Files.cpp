@@ -99,7 +99,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
  * @brief 输出文件夹下的各个文件路径
  * @return list<string>类型一个列表
  */
-list< std::string > DefFolder::get_filepath_list( ) {
+list< std::string > DefFolder::get_filepath_list( ) const {
     return filePathList_;
 }
 
@@ -107,7 +107,7 @@ list< std::string > DefFolder::get_filepath_list( ) {
  * @brief 输出文件夹下的各个文件路径(utf8编码)
  * @return list<string>类型一个列表
  */
-list< std::string > file::DefFolder::get_u8filepath_list( ) {
+list< std::string > file::DefFolder::get_u8filepath_list( ) const {
     return u8filePathList_;
 }
 
@@ -116,7 +116,7 @@ list< std::string > file::DefFolder::get_u8filepath_list( ) {
  * @param _extension 指定的后缀
  * @return 输出指定后缀的文件路径
  */
-list< std::string > DefFolder::get_filepath_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_filepath_list(const list< std::string > &_extension) const {
     list< std::string > out;
     for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( ); it_path++) {
         auto [n, ex] = split_filename_and_extension(*it_path);
@@ -131,7 +131,7 @@ list< std::string > DefFolder::get_filepath_list(const list< std::string > &_ext
  * @param _extension 指定的后缀
  * @return 输出指定后缀的文件路径（u8编码）
  */
-list< std::string > DefFolder::get_u8filepath_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_u8filepath_list(const list< std::string > &_extension) const {
     list< std::string > out;
     for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( ); it_path++) {
         auto [n, ex] = split_filename_and_extension(*it_path);
@@ -192,13 +192,58 @@ size_t DefFolder::erase_with(const list< std::string > &_extension) {
 }
 
 /*
+ * @brief 擦除指定文件名的文件
+ * @param _path 指定的文件路径
+ * @return 是否成功
+ */
+bool file::DefFolder::erase_with(const std::string _path) {
+    // 强行转化为utf8 的编码
+    std::string u8 = encoding::sysdcode_to_utf8(_path);
+    // 查找
+    size_t idx    = 0;
+    bool   iffind = false;
+    for (; idx < this->u8filePathList_.size( ); idx++) {
+        if (this->u8filePathList_.front( ) == u8) {
+            iffind = true;
+            break;
+        }
+    }
+    // 擦除
+    if (iffind) {
+        auto it_u8 = this->u8filePathList_.begin( ) + idx;
+        auto it_ss = this->filePathList_.begin( ) + idx;
+        u8filePathList_.erase(it_u8);
+        filePathList_.erase(it_ss);
+        return true;
+    }
+    return false;
+}
+
+/*
  * @brief 复制指定后缀的文件到指定的路径
  * @param _targetDir 指定路径
  * @param _extension 指定的后缀
  * @return 复制到的文件的数量
  */
-size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) {
+size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) const {
     list< std::string > speFilePathList = get_filepath_list(_extension);    // 特定的文件
+
+    size_t sum = 0;
+    for (const auto &fp : speFilePathList) {
+        if (copy_file_to_folder(fp, _targetDir)) {
+            sum++;
+        }
+    }
+    return size_t(sum);
+}
+
+/*
+ * @brief 复制文件到指定的路径
+ * @param _targetDir 指定路径
+ * @return 复制到的文件的数量
+ */
+size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
+    list< std::string > speFilePathList = get_filepath_list();    // 特定的文件
 
     size_t sum = 0;
     for (const auto &fp : speFilePathList) {
@@ -214,7 +259,7 @@ size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_file_list( ) {
+list< std::string > DefFolder::get_file_list( ) const {
     list< std::string > out;
     for (const auto &fp : filePathList_) {
         if (fp.size( ) > 0) {
@@ -229,7 +274,7 @@ list< std::string > DefFolder::get_file_list( ) {
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_file_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_file_list(const list< std::string > &_extension) const {
     list< std::string > speFilePathList = get_filepath_list(_extension);
     list< std::string > out;
     for (const auto &fp : speFilePathList) {
@@ -245,7 +290,7 @@ list< std::string > DefFolder::get_file_list(const list< std::string > &_extensi
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_u8file_list( ) {
+list< std::string > DefFolder::get_u8file_list( ) const {
     list< std::string > out;
     for (const auto &u8fp : u8filePathList_) {
         if (u8fp.size( ) > 0) {
@@ -260,7 +305,7 @@ list< std::string > DefFolder::get_u8file_list( ) {
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_u8file_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_u8file_list(const list< std::string > &_extension) const {
     list< std::string > speu8FilePathList = get_u8filepath_list(_extension);
     list< std::string > out;
     for (const auto &u8fp : speu8FilePathList) {
@@ -276,7 +321,7 @@ list< std::string > DefFolder::get_u8file_list(const list< std::string > &_exten
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_filename_list( ) {
+list< std::string > DefFolder::get_filename_list( ) const {
     list< std::string > fileList = get_file_list( );
     list< std::string > out;
     for (const auto &f : fileList) {
@@ -293,7 +338,7 @@ list< std::string > DefFolder::get_filename_list( ) {
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_filename_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_filename_list(const list< std::string > &_extension) const {
     list< std::string > fileList = get_file_list(_extension);
     list< std::string > out;
     for (const auto &f : fileList) {
@@ -310,7 +355,7 @@ list< std::string > DefFolder::get_filename_list(const list< std::string > &_ext
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_u8filename_list( ) {
+list< std::string > DefFolder::get_u8filename_list( ) const {
     list< std::string > u8fileList = get_u8file_list( );
     list< std::string > out;
     for (const auto &u8f : u8fileList) {
@@ -327,7 +372,7 @@ list< std::string > DefFolder::get_u8filename_list( ) {
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_extension) {
+list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_extension) const {
     list< std::string > u8fileList = get_u8file_list(_extension);
     list< std::string > out;
     for (const auto &u8f : u8fileList) {

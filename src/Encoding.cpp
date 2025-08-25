@@ -74,16 +74,8 @@ std::string sysdcode_to_utf8(const std::string &_anycode) {
     std::string out;    // 输出
     std::string e;      // 错误
 
-    std::vector< EncodingDetectionResult > icuResult;
-    std::string                            ys = _anycode;
-    while (ys.size( ) < 100) {
-        ys = ys + ys;
-    }
-
-    if (ICUEncodingHandler::detect_encoding(ys.c_str( ), ys.size( ), icuResult, 1)) {
-        if (icuResult[0].encodingName == "UTF-8")
-            return _anycode;
-    }
+    if (is_utf8(_anycode))
+        return _anycode;
 
     if (ICUEncodingHandler::convert_to_utf8(_anycode.c_str( ), _anycode.size( ), systemDefaultEncoding, out, e)) {
         return out;
@@ -92,6 +84,27 @@ std::string sysdcode_to_utf8(const std::string &_anycode) {
                   << e << std::endl;
         pause( );
         return "error";
+    }
+}
+
+/*
+ * @brief 检测字符串的编码格式是否为utf8
+ * @param _u8 待检测的字符串
+ * @return 是utf8返回true，否则返回false
+ */
+bool is_utf8(const std::string &_u8) {
+    std::string ys = _u8;
+    while (ys.size( ) < 100) {
+        ys = ys + ys;
+    }
+    std::vector< EncodingDetectionResult > icuResult;
+    if (ICUEncodingHandler::detect_encoding(ys.c_str( ), ys.size( ), icuResult, 1)) {
+        if (icuResult[0].encodingName == "UTF-8")
+            return true;
+        else
+            return false;
+    } else {
+        return false;
     }
 }
 

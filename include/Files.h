@@ -14,6 +14,7 @@
 #include <cstdlib>
 #include <Encoding.h>
 #include <filesystem>
+#include <Fuzzy.h>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -56,6 +57,24 @@ public:
             std::cout << f << std::endl;
         }
     };
+
+    // @brief 按照DefFolder变量来构造
+    DefFolder(const DefFolder &other)
+        : folderDir_(other.folderDir_),
+          filePathList_(other.filePathList_),
+          u8filePathList_(other.u8filePathList_) {};
+
+    /*
+     * @brief 选择一个DefFolder，按照一定的后缀来选择构造
+     * @param _other 另一个DefFolder
+     * @param _extension 指定的后缀
+     */
+    DefFolder(const DefFolder &_other, const list< std::string > &_extension)
+        : folderDir_(_other.folderDir_) {
+        filePathList_   = _other.get_filepath_list(_extension);
+        u8filePathList_ = _other.get_u8filepath_list(_extension);
+    };
+
     ~DefFolder( ) = default;
 
     /*
@@ -69,27 +88,27 @@ public:
      * @brief 输出文件夹下的各个文件的相对路径
      * @return list<string>类型一个列表
      */
-    list< std::string > get_filepath_list( );
+    list< std::string > get_filepath_list( ) const;
 
     /*
      * @brief 输出文件夹下的各个文件的相对路径(utf8编码)
      * @return list<string>类型一个列表
      */
-    list< std::string > get_u8filepath_list( );
+    list< std::string > get_u8filepath_list( ) const;
 
     /*
      * @brief 输出指定后缀的文件路径
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径
      */
-    list< std::string > get_filepath_list(const list< std::string > &_extension);
+    list< std::string > get_filepath_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 输出指定后缀的文件路径(u8编码)
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径（u8编码）
      */
-    list< std::string > get_u8filepath_list(const list< std::string > &_extension);
+    list< std::string > get_u8filepath_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 保留指定后缀的文件
@@ -106,68 +125,82 @@ public:
     size_t erase_with(const list< std::string > &_extension);
 
     /*
+     * @brief 擦除指定文件名的文件
+     * @param _path 指定的文件路径
+     * @return 是否成功
+     */
+    bool erase_with(const std::string _path);
+
+    /*
      * @brief 复制指定后缀的文件到指定的路径
      * @param _targetDir 指定路径
      * @param _extension 指定的后缀
      * @return 复制到的文件的数量
      */
-    size_t copy_files_to(const std::string &_targetDir, const list< std::string > &_extension);
+    size_t copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) const;
+
+    /*
+     * @brief 复制文件到指定的路径
+     * @param _targetDir 指定路径
+     * @return 复制到的文件的数量
+     */
+    size_t copy_files_to(const std::string &_targetDir) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_file_list( );
+    list< std::string > get_file_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_file_list(const list< std::string > &_extension);
+    list< std::string > get_file_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_u8file_list( );
+    list< std::string > get_u8file_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_u8file_list(const list< std::string > &_extension);
+    list< std::string > get_u8file_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_filename_list( );
+    list< std::string > get_filename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_filename_list(const list< std::string > &_extension);
+    list< std::string > get_filename_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_u8filename_list( );
+    list< std::string > get_u8filename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_u8filename_list(const list< std::string > &_extension);
+    list< std::string > get_u8filename_list(const list< std::string > &_extension) const;
 
 
 private:

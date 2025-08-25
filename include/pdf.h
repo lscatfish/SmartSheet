@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <PersonnelInformation.h>
 #include <poppler/cpp/poppler-document.h>
 #include <poppler/GfxState.h>
 #include <poppler/goo/GooString.h>
@@ -101,8 +102,14 @@ public:
     // 返回解析出来的表格的类型
     SheetType get_sheet_type( ) const;
 
+    // 获取人员的信息
+    DefPerson get_person( ) const;
+
+    // 打印表格
+    void print_sheet( ) const;
+
 private:
-    std::string path_;    // 文件所在的路径
+    std::string        path_;    // 文件所在的路径
     poppler::document *document_ = nullptr;
     PDFDoc             pdfdoc_;
     table< CELL >      sheet_;        // 提取出的表格
