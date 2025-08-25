@@ -88,7 +88,8 @@ public:
         }
         num_pages_ = pdfdoc_.getNumPages( );
         sheetType_ = SheetType::Others;
-        isOK       = parse( );    // 解析
+        isOK = parse( );    // 解析
+        std::cout << "Opening PDF file: " << _u8path << std::endl;
     };
 
     ~DefPdf( ) = default;
