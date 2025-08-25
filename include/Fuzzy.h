@@ -31,7 +31,8 @@ enum class LEVEL {
     High = 0,    //   1.0 - 0.9    Levenshtein  0
     Medium,      //   0.9 - 0.7    Levenshtein  0-1
     Low,         //   0.7 - 0.5    Levenshtein  0-2
-    NONE         //   (^-^)        离谱
+    NONE,        //   (^-^)        离谱
+    Part,        //   部分匹配    子串匹配
 };
 
 /*

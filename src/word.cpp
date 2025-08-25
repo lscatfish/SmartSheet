@@ -200,66 +200,66 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
     for (size_t row = 0; row < keyTable_.size( ); row++) {
         for (size_t col = 0; col < keyTable_[row].size( ); col++) {
             if (keyTable_[row][col].content.size( ) != 0) {
-                if (fuzzy::search(headerLib, trim_leading_spaces(keyTable_[row][col].content), fuzzy::LEVEL::High)) {
+                if (fuzzy::search(headerLib, trim_whitespace(keyTable_[row][col].content), fuzzy::LEVEL::High)) {
                     if (col + 1 < keyTable_[row].size( )) {
-                        perLine.information[trim_leading_spaces(keyTable_[row][col].content)] = trim_leading_spaces(keyTable_[row][col + 1].content);
+                        perLine.information[trim_whitespace(keyTable_[row][col].content)] = trim_whitespace(keyTable_[row][col + 1].content);
                         col++;
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"个人简介")) {
+                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"个人简介")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
                             perLine.information[U8C(u8"个人简介")] =
-                                trim_leading_spaces(keyTable_[row][col + 1].content);
-                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
+                                trim_whitespace(keyTable_[row][col + 1].content);
+                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
                                 + U8C(u8"个人简介极少；");
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
+                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")] 
                                 + U8C(u8"个人简介较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"个人特长")) {
+                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"个人特长")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
                             perLine.information[U8C(u8"个人特长")] = 
-                            trim_leading_spaces(keyTable_[row][col + 1].content);
-                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
+                            trim_whitespace(keyTable_[row][col + 1].content);
+                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[U8C(u8"备注")] = 
                                 perLine.information[U8C(u8"备注")] 
                                 + U8C(u8"个人特长极少；");
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
+                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")] 
                                 + U8C(u8"个人特长较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"工作经历")) {
+                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"工作经历")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"工作经历")] = trim_leading_spaces(keyTable_[row][col + 1].content);
-                        if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
+                            perLine.information[U8C(u8"工作经历")] = trim_whitespace(keyTable_[row][col + 1].content);
+                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")] 
                                 + U8C(u8"工作经历极少；");
                             col++;
-                        } else if (trim_leading_spaces(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
+                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] = 
                                 perLine.information[U8C(u8"备注")] 
                                 + U8C(u8"工作经历较少；");
                             col++;
                         }
                     }
-                } else if (trim_leading_spaces(keyTable_[row][col].content) == U8C(u8"获奖情况")) {
+                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"获奖情况")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
                             perLine.information[U8C(u8"获奖情况")] =
-                            trim_leading_spaces(keyTable_[row][col + 1].content);
+                            trim_whitespace(keyTable_[row][col + 1].content);
                         col++;
                     }
                 }

@@ -1,11 +1,14 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
+#include <basic.hpp>
 #include <cstdlib>
 #include <Fuzzy.h>
+#include <helper.h>
 #include <iostream>
 #include <memory>
 #include <pdf.h>
+#include <PersonnelInformation.h>
 #include <poppler/cpp/poppler-document.h>
 #include <poppler/cpp/poppler-global.h>
 #include <poppler/cpp/poppler-page.h>
@@ -18,6 +21,7 @@
 #include <poppler/OutputDev.h>
 #include <poppler/Page.h>
 #include <poppler/PDFDoc.h>
+#include<QingziClass.h>
 #include <string>
 #include <vector>
 
@@ -55,7 +59,7 @@ list< CELL > DefPdf::extract_textblocks(int pageNum_) {
     double pageHeight = page->page_rect( ).height( );
 
     for (const auto &textBlock : textList) {
-        CELL aaa(textBlock, pageHeight, -8);    // 降低-8个像素的y坐标误差
+        CELL aaa(textBlock, pageHeight, -13.5);    // 降低-13.5个像素的y坐标误差
         textBoxes.push_back(aaa);
     }
 
@@ -76,22 +80,24 @@ bool DefPdf::parse( ) {
     for (int ipage = 1; ipage <= num_pages_; ipage++) {
         textBoxList = extract_textblocks(ipage);
         if (textBoxList.size( ) == 0) continue;
-        // 制作搜索库
-        list< std::string > searchLib;
-        for (const auto &textboxe : textBoxList) {
-            searchLib.push_back(textboxe.text);
+        bool ifBreak = false;
+        // 采用字串匹配到keyWord
+        for (const auto &t : textBoxList) {
+            if (fuzzy::search_substring(keyWordCom, t.text)) {
+                sheetType_      = SheetType::Committee;
+                lineSegmentList = extract_linesegments(ipage);
+                ifBreak         = true;
+                break;
+            } else if (fuzzy::search_substring(keyWordCla, t.text)) {
+                sheetType_      = SheetType::Classmate;
+                lineSegmentList = extract_linesegments(ipage);
+                ifBreak         = true;
+                break;
+            }
         }
-
-        if (fuzzy::search(searchLib, keyWordCom, fuzzy::LEVEL::High)) {
-            sheetType_      = SheetType::Committee;
-            lineSegmentList = extract_linesegments(ipage);
-            break;
-        } else if (fuzzy::search(searchLib, keyWordCla, fuzzy::LEVEL::High)) {
-            sheetType_      = SheetType::Classmate;
-            lineSegmentList = extract_linesegments(ipage);
-            break;
-        }
+        if (ifBreak) break;
     }
+
     // 解析
     if (sheetType_ == SheetType::Others) {
         return false;
@@ -183,9 +189,6 @@ void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
         for (auto &r : sheet_) {
             for (auto &c : r) {
                 if (t.is_contained_for_pdf(c)) {
-                    //if (t.text.size( ) > static_cast< size_t >(12) * 3) {
-                    //    continue;    // 过长的文本不考虑
-                    //}
                     c.text = c.text + t.text;
                 }
             }
@@ -217,6 +220,79 @@ bool DefPdf::isOKed( ) const {
 // 返回解析出来的表格的类型
 DefPdf::SheetType DefPdf::get_sheet_type( ) const {
     return sheetType_;
+}
+
+// 获取人员的信息
+DefPerson DefPdf::get_person( ) const {
+    if (sheet_.size( ) == 0) {
+        return DefPerson( );
+    }
+    DefPerson per;
+    DefLine   perLine;
+    // 定义关键的词
+    const list< std::string > headerLib{
+        U8C(u8"姓名"),
+        U8C(u8"性别"), U8C(u8"年级"),
+        U8C(u8"学号"), U8C(u8"政治面貌"),
+        U8C(u8"学院"), U8C(u8"专业"),
+        U8C(u8"电话"), U8C(u8"联系方式"),
+        U8C(u8"联系电话"), U8C(u8"电话号码"),
+        U8C(u8"QQ号"), U8C(u8"qq号"),
+        U8C(u8"qq"), U8C(u8"QQ"),
+        U8C(u8"所任职务"), U8C(u8"职务"),
+        U8C(u8"学生职务"),
+        U8C(u8"邮箱"), U8C(u8"民族"),
+        U8C(u8"社团"), U8C(u8"报名青字班"),
+        U8C(u8"青字班")
+    };
+    if (sheetType_ == SheetType::Committee) {
+        // 班委，只用记录报了哪些名
+        for (size_t r = 0; r < sheet_.size( ); r++) {
+            for (size_t c = 0; c < sheet_[r].size( ); c++) {
+                if (sheet_[r][c].text.size( ) != 0) {
+                    if (fuzzy::search(headerLib, trim_whitespace(sheet_[r][c].text), fuzzy::LEVEL::High)) {
+                        std::string key = trim_whitespace(sheet_[r][c].text);
+                        if (c + 1 < sheet_[r].size( )) {
+                            perLine.information[key] = trim_whitespace(sheet_[r][c + 1].text);
+                        } else {
+                            perLine.information[key] = "";
+                        }
+                    } else if (fuzzy::search_substring(U8C(u8"应聘岗位"), trim_whitespace(sheet_[r][c].text))) {
+                        if (c + 1 < sheet_[r].size( )) {
+                            perLine.information[U8C(u8"应聘岗位")] = trim_whitespace(sheet_[r][c + 1].text);
+                        } else {
+                            perLine.information[U8C(u8"应聘岗位")] = "UNKNOWN";
+                        }
+                    }
+                }
+            }
+        }
+        DoQingziClass::trans_line_to_person(perLine, per);
+        per.ifsign = true;
+        return per;
+    } else if (sheetType_ == SheetType::Classmate) {
+        // 普通同学
+        return per;
+    }
+
+    return DefPerson( );
+}
+
+// 打印表格
+void DefPdf::print_sheet( ) const {
+    if (sheet_.size( ) == 0) {
+        std::cout << "Empty sheet.\n";
+        return;
+    }
+    std::cout << "Extracted sheet with " << sheet_.size( ) << " rows:\n";
+    for (const auto &row : sheet_) {
+        std::cout << "size: " << row.size( ) << " | ";
+        for (const auto &cell : row) {
+            std::cout << "core(" << cell.corePoint.x << "," << cell.corePoint.y << ")" << cell.text << "\t";
+        }
+        std::cout << "\n";
+    }
+    std::cout << std::endl;
 }
 
 

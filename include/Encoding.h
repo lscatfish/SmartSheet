@@ -30,6 +30,12 @@ std::wstring utf8_to_wstring_win(const std::string u8);
  */
 std::string sysdcode_to_utf8(const std::string &_anycode);
 
+/*
+ * @brief 检测字符串的编码格式是否为utf8
+ * @param _u8 待检测的字符串
+ * @return 是utf8返回true，否则返回false
+ */
+bool is_utf8(const std::string &_u8);
 
 }    // namespace encoding
 

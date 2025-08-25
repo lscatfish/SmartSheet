@@ -10,6 +10,7 @@
 #include <imgs.h>
 #include <iostream>
 #include <map>
+#include <pdf.h>
 #include <PersonnelInformation.h>
 #include <ppocr_API.h>
 #include <QingziClass.h>
@@ -747,16 +748,32 @@ void DoQingziClass::registration( ) {
             personStd_.push_back(aDocx.get_person(U8C(u8"组织推荐")));
         }
 
-    // 尝试输出
-    /* for (const auto &p : personStd_) {
-         std::cout << p.classname << "    " << p.name << "    " << p.studentID << "    " << std::endl;
-     }*/
+    // 处理pdf
+    file::DefFolder pdfFiles(selfFolder, list< std::string >{ ".pdf", ".PDF" });
+    paths = pdfFiles.get_filepath_list( );    // 文件路径
+    // 解析pdf文件
+    if (paths.size( ) != 0)
+        for (const auto &p : paths) {
+            pdf::DefPdf aPdf(p);
+            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {
+                DefPerson per = aPdf.get_person( );
+                auto      it  = personStd_.end( );
+                search_person(it, per);
+                if (it != personStd_.end( )) {
+                    it->otherInformation[U8C(u8"文件地址")] += (p + " ; ");
+                    it->ifsign       = true;
+                    it->signPosition = per.signPosition;
+                    pdfFiles.erase_with(p);
+                }
+            }
+        }
+
     save_registrationSheet( );
 
     // 筛选pdf文件
     std::cout << std::endl
               << U8C(u8"复制了")
-              << selfFolder.copy_files_to(file::_OUTPUT_SIGN_QC_PDF_DIR_, list< std::string >{ ".pdf", ".PDF" })
+              << pdfFiles.copy_files_to(file::_OUTPUT_SIGN_QC_PDF_DIR_)
               << U8C(u8"份pdf文件到") << file::_OUTPUT_SIGN_QC_PDF_DIR_ << std::endl;
 
     std::cout << std::endl
@@ -775,6 +792,7 @@ void DoQingziClass::save_registrationSheet( ) {
           U8C(u8"社团"), U8C(u8"联系电话"),
           U8C(u8"QQ号"), U8C(u8"邮箱"),
           U8C(u8"报名青字班"), U8C(u8"是否报名班委"),
+          U8C(u8"应聘岗位"),
           U8C(u8"报名方式"), U8C(u8"备注"),
           U8C(u8"个人简介"), U8C(u8"个人特长"),
           U8C(u8"工作经历"), U8C(u8"获奖情况"),
@@ -799,7 +817,11 @@ void DoQingziClass::save_registrationSheet( ) {
         line.push_back(p.qqnumber);
         line.push_back(p.email);
         line.push_back(p.classname);
-        line.push_back(U8C(u8"否"));
+        if (p.ifsign)
+            line.push_back(U8C(u8"是"));
+        else
+            line.push_back(U8C(u8"否"));
+        line.push_back(p.signPosition);
         line.push_back(p.otherInformation[U8C(u8"报名方式")]);
         line.push_back(p.otherInformation[U8C(u8"备注")]);
         line.push_back(p.otherInformation[U8C(u8"个人简介")]);
@@ -998,6 +1020,8 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
                    || (it_inperLine->first == U8C(u8"青字班"))
                    || (fuzzy::search_substring(it_inperLine->first, U8C(u8"青字班")))) {
             per.classname = it_inperLine->second;
+        } else if (it_inperLine->first == U8C(u8"应聘岗位")) {
+            per.signPosition = it_inperLine->second;
         } else {
             per.otherInformation[it_inperLine->first] = it_inperLine->second;
         }
@@ -1013,7 +1037,7 @@ void DoQingziClass::trans_line_to_person(const DefLine &_inperLine, DefPerson &_
  */
 void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine &_outperLine) {
     DefLine per;
-    per.classname                                                   = _inperStd.classname;
+    per.classname                      = _inperStd.classname;
     per.information[U8C(u8"姓名")]     = _inperStd.name;
     per.information[U8C(u8"性别")]     = _inperStd.gender;
     per.information[U8C(u8"年级")]     = _inperStd.grade;
@@ -1022,8 +1046,8 @@ void DoQingziClass::trans_person_to_line(const DefPerson &_inperStd, DefLine &_o
     per.information[U8C(u8"学院")]     = _inperStd.academy;
     per.information[U8C(u8"专业")]     = _inperStd.majors;
     per.information[U8C(u8"QQ号")]     = _inperStd.qqnumber;
-    per.ifcheck                                                     = _inperStd.ifcheck;
-    per.ifsign                                                      = _inperStd.ifcheck;
+    per.ifcheck                        = _inperStd.ifcheck;
+    per.ifsign                         = _inperStd.ifcheck;
     if (_inperStd.otherInformation.size( ) != 0) {
         for (auto it_in = _inperStd.otherInformation.begin( );
              it_in != _inperStd.otherInformation.end( );

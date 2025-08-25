@@ -33,6 +33,8 @@ public:
     std::string ethnicity;    // 民族
     std::string club;         // 社团
 
+    std::string signPosition;    // 报名岗位
+
     bool ifcheck;    // 是否签到
     bool ifsign;     // 是否报名
 
@@ -55,6 +57,7 @@ public:
         email.erase( );
         ethnicity.erase( );
         club.erase( );
+        signPosition.erase( );
         ifcheck = false;
         ifsign  = false;
     };
@@ -92,6 +95,7 @@ public:
         email.erase( );
         ethnicity.erase( );
         club.erase( );
+        signPosition.erase( );
         ifcheck = false;
         ifsign  = false;
     };
