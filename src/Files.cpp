@@ -33,8 +33,7 @@ namespace file {
 std::string _INPUT_ALL_DIR_          = "./input/all/";
 std::string _INPUT_APP_DIR_          = "./input/app/";
 std::string _INPUT_ATT_IMGS_DIR_     = "./input/att_imgs/";
-std::string _INPUT_SIGN_QC_SELF_DIR_ = "./input/sign_for_QingziClass/self/";
-std::string _INPUT_SIGN_QC_ORG_DIR_  = "./input/sign_for_QingziClass/org/";
+std::string _INPUT_SIGN_QC_ALL_DIR_  = "./input/sign_for_QingziClass/all/";
 
 std::string _OUTPUT_APP_DIR_         = "./output/app_out/";
 std::string _OUTPUT_ATT_DIR_         = "./output/att_out/";

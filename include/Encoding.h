@@ -31,6 +31,13 @@ std::wstring utf8_to_wstring_win(const std::string u8);
 std::string sysdcode_to_utf8(const std::string &_anycode);
 
 /*
+ * @brief 将utf8转化为系统默认的中文（简体）编码
+ * @param _anycode 任意u8格式的string
+ * @return 转化为系统格式格式的string
+ */
+std::string utf8_to_sysdcode(const std::string &_u8);
+
+/*
  * @brief 检测字符串的编码格式是否为utf8
  * @param _u8 待检测的字符串
  * @return 是utf8返回true，否则返回false

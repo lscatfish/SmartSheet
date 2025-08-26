@@ -30,7 +30,7 @@ void Init( ) {
  * @brief utf8转wstring
  * @param u8 utf8编码的string
  * @return 宽字符wstring（win里面实际是utf-16）
- * @note 只能在windows编译
+ * @note 只能在windows编译,可以考虑兼容到icu
  **/
 std::wstring utf8_to_wstring_win(const std::string u8) {
     if (u8.empty( )) return { };
@@ -65,25 +65,43 @@ static std::string remove_ascii_characters(const std::string &input) {
 }
 
 /*
- * @brief 将系统默认的中文（简体）格式转化为utf8
+ * @brief 将系统默认的中文（简体）编码转化为utf8
  * @param _anycode 任意中文（简体）格式的string
  * @return 转化为utf8格式的string
  */
 std::string sysdcode_to_utf8(const std::string &_anycode) {
-
     std::string out;    // 输出
     std::string e;      // 错误
-
     if (is_utf8(_anycode))
         return _anycode;
-
     if (ICUEncodingHandler::convert_to_utf8(_anycode.c_str( ), _anycode.size( ), systemDefaultEncoding, out, e)) {
         return out;
     } else {
         std::cout << std::endl
                   << e << std::endl;
         pause( );
-        return "error";
+        return "encoding error";
+    }
+}
+
+/*
+ * @brief 将utf8转化为系统默认的中文（简体）编码
+ * @param _anycode 任意u8格式的string
+ * @return 转化为系统格式格式的string
+ */
+std::string utf8_to_sysdcode(const std::string &_u8) {
+    if (!is_utf8(_u8)) {
+        return _u8;
+    }
+    std::string out;
+    std::string e;
+    if (ICUEncodingHandler::convert_from_utf8(_u8.c_str( ), _u8.size( ), systemDefaultEncoding, out, e)) {
+        return out;
+    } else {
+        std::cout << std::endl
+                  << e << std::endl;
+        pause( );
+        return "encoding error";
     }
 }
 

@@ -56,9 +56,8 @@ public:
 
     /*
      * @brief 返回一个标准人员信息
-     * @param _reMeth 报名方式
      */
-    DefPerson get_person(const std::string _reMeth);
+    DefPerson get_person();
 
     // 打印带位置信息的表格
     void print_tables_with_position( );

@@ -59,8 +59,7 @@ bool DoQingziClass::self_check( ) {
         file::_INPUT_ALL_DIR_,
         file::_INPUT_APP_DIR_,
         file::_INPUT_ATT_IMGS_DIR_,
-        file::_INPUT_SIGN_QC_ORG_DIR_,
-        file::_INPUT_SIGN_QC_SELF_DIR_,
+        file::_INPUT_SIGN_QC_ALL_DIR_,
         file::_OUTPUT_APP_DIR_,
         file::_OUTPUT_ATT_DIR_,
         file::_OUTPUT_SIGN_QC_DIR_,
@@ -176,9 +175,6 @@ void DoQingziClass::load_personnel_information_list( ) {
                     per.qqnumber = sh[rowIndex][colIndex];
                 } else {
                     per.otherInformation[sh[0][colIndex]] = sh[rowIndex][colIndex];
-#ifdef DO_TEST
-                    std::cout << "row" << rowIndex << ": " << sh[0][colIndex] << "  " << sh[rowIndex][colIndex] << std::endl;
-#endif
                 }
             }
             // 推送之前检查
@@ -729,30 +725,25 @@ void DoQingziClass::save_statisticsSheet( ) {
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {
-    file::DefFolder selfFolder(file::_INPUT_SIGN_QC_SELF_DIR_);
-    file::DefFolder orgFolder(file::_INPUT_SIGN_QC_ORG_DIR_);
+    file::DefFolder *aFolder = new file::DefFolder(file::_INPUT_SIGN_QC_ALL_DIR_);
+    if (!aFolder) {
+        std::cout << U8C(u8"内存分配失败") << std::endl;
+    }
 
-    list< std::string > paths = selfFolder.get_filepath_list(list< std::string >{ ".docx" });    // 文件路径
+    list< std::string > paths = aFolder->get_filepath_list(list< std::string >{ ".docx", ".DOCX" });    // 文件路径
     // 解析文件
-    if (paths.size( ) != 0)
+    if (paths.size( ) != 0) {
         for (const auto &p : paths) {
             docx::DefDocx aDocx(p);
-            personStd_.push_back(aDocx.get_person(U8C(u8"自主报名")));
+            personStd_.push_back(aDocx.get_person( ));
         }
-
-    paths = orgFolder.get_filepath_list(list< std::string >{ ".docx" });    // 文件路径
-    // 解析文件
-    if (paths.size( ) != 0)
-        for (const auto &p : paths) {
-            docx::DefDocx aDocx(p);
-            personStd_.push_back(aDocx.get_person(U8C(u8"组织推荐")));
-        }
+    }
 
     // 处理pdf
-    file::DefFolder pdfFiles(selfFolder, list< std::string >{ ".pdf", ".PDF" });
+    file::DefFolder pdfFiles(*aFolder, list< std::string >{ ".pdf", ".PDF" });
     paths = pdfFiles.get_u8filepath_list( );    // 文件路径
     // 解析pdf文件
-    if (paths.size( ) != 0)
+    if (paths.size( ) != 0) {
         for (const auto &p : paths) {
             pdf::DefPdf aPdf(p);
             if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {
@@ -764,9 +755,16 @@ void DoQingziClass::registration( ) {
                     it->ifsign       = true;
                     it->signPosition = per.signPosition;
                     pdfFiles.erase_with(p);
+                } else {
+                    per.ifsign                              = true;
+                    per.otherInformation[U8C(u8"文件地址")] = p;
+                    per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
+                    personStd_.push_back(per);
+                    pdfFiles.erase_with(p);
                 }
             }
         }
+    }
 
     save_registrationSheet( );
 
@@ -779,6 +777,8 @@ void DoQingziClass::registration( ) {
     std::cout << std::endl
               << U8C(u8"青字班报名表已输出到 ./output/sign_for_QingziClass_out/报名.xlsx 中...")
               << std::endl;
+    delete aFolder;
+    aFolder = nullptr;    // 还是不要有野指针
 }
 
 // @brief 保存青字班的报名表
@@ -822,13 +822,35 @@ void DoQingziClass::save_registrationSheet( ) {
         else
             line.push_back(U8C(u8"否"));
         line.push_back(p.signPosition);
-        line.push_back(p.otherInformation[U8C(u8"报名方式")]);
-        line.push_back(p.otherInformation[U8C(u8"备注")]);
-        line.push_back(p.otherInformation[U8C(u8"个人简介")]);
-        line.push_back(p.otherInformation[U8C(u8"个人特长")]);
-        line.push_back(p.otherInformation[U8C(u8"工作经历")]);
-        line.push_back(p.otherInformation[U8C(u8"获奖情况")]);
-        line.push_back(p.otherInformation[U8C(u8"文件地址")]);
+        if (p.otherInformation.find(U8C(u8"报名方式")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"报名方式")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"备注")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"备注")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"个人简介")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"个人简介")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"个人特长")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"个人特长")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"工作经历")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"工作经历")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"获奖情况")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"获奖情况")]);
+        else
+            line.push_back("");
+        if (p.otherInformation.find(U8C(u8"文件地址")) != p.otherInformation.end( ))
+            line.push_back(p.otherInformation[U8C(u8"文件地址")]);
+        else
+            line.push_back("");
+
         sh.push_back(line);
         serial++;
     }

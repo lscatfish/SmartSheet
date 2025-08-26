@@ -27,8 +27,8 @@ namespace file {
 extern std::string _INPUT_ALL_DIR_;
 extern std::string _INPUT_APP_DIR_;
 extern std::string _INPUT_ATT_IMGS_DIR_;
-extern std::string _INPUT_SIGN_QC_SELF_DIR_;
-extern std::string _INPUT_SIGN_QC_ORG_DIR_;
+extern std::string  _INPUT_SIGN_QC_ALL_DIR_;
+
 
 extern std::string _OUTPUT_APP_DIR_;
 extern std::string _OUTPUT_ATT_DIR_;
