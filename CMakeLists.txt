@@ -1,5 +1,8 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 
+# 打印原始系统名称（用于调试）
+message(STATUS "调试信息: CMAKE_SYSTEM_NAME = ${CMAKE_SYSTEM_NAME}")
+message(STATUS "调试信息: CMAKE_HOST_SYSTEM_NAME = ${CMAKE_HOST_SYSTEM_NAME}")
 
 # 如果支持，请为 MSVC 编译器启用热重载。
 if(POLICY CMP0141)
@@ -13,13 +16,13 @@ project(SmartSheet)
 
 # 使用ninja编译时强制定义以下宏
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "AMD64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "x64")
-    add_definitions(-D_AMD64_)
+    add_definitions(-D_AMD64_)          # x64位
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
-    add_definitions(-D_ARM64_)
+    add_definitions(-D_ARM64_)          # arm64位
 elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM")
     add_definitions(-D_ARM_)
 else()
-    add_definitions(-D_X86_)
+    add_definitions(-D_X86_)            # x86位
 endif()
 
 # Windows SDK 可保留
@@ -53,6 +56,8 @@ file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/
                     "test/*.h" "test/*.hpp" "test/*.c"
 )
 
+# windows下可运行，linux下需要重新写
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 ###########################################################################################
 ##################################OCR的相关文件############################################
 
@@ -264,3 +269,10 @@ if(POPPLER_DLL_RELEASE_FILES)
 else()
     message(WARNING "No poppler DLL files will be copied - none found")
 endif()
+
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    message(FATAL_ERROR "当前配置仅支持Windows系统，Linux系统的配置尚未完成，请根据需要自行修改CMakeLists.txt文件")
+
+# mac  ?????什么垃圾系统
+
+endif() # windows下可运行，linux下需要重新写

@@ -197,7 +197,7 @@ void test_for_ppocr( ) {
 
 // 测试DefFolder
 void test_for_DefFolder( ) {
-    file::DefFolder     af("./input/app");
+    file::DefFolder     af("./input/app", false);
     list< std::string > p1 = af.get_u8filepath_list( );
     list< std::string > p2 = af.get_u8file_list( );
     list< std::string > p3 = af.get_u8filename_list( );

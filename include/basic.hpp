@@ -27,11 +27,11 @@
 
 // 表格
 template < typename _T >
-using table = std::vector< std::vector< _T > >;
+using table = std::vector< std::vector< _T > >;    // 如果冲突，请封装到namespace中，或者改名为 MyTable
 
 // 一行（列）
 template < typename _T >
-using list = std::vector< _T >;
+using list = std::vector< _T >;    // 如果冲突，请封装到namespace中，或者改名为 MyList
 
 // 模板函数：对 vector<T>按指定成员变量排序
 // 参数：容器引用、比较函数（决定排序规则和依据的成员）

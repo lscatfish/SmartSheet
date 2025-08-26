@@ -32,11 +32,13 @@
 
 namespace file {
 
+std::string _INPUT_DIR_             = "./input/";
 std::string _INPUT_ALL_DIR_         = "./input/all/";
 std::string _INPUT_APP_DIR_         = "./input/app/";
 std::string _INPUT_ATT_IMGS_DIR_    = "./input/att_imgs/";
 std::string _INPUT_SIGN_QC_ALL_DIR_ = "./input/sign_for_QingziClass/all/";
 
+std::string _OUTPUT_DIR_             = "./output/";
 std::string _OUTPUT_APP_DIR_         = "./output/app_out/";
 std::string _OUTPUT_ATT_DIR_         = "./output/att_out/";
 std::string _OUTPUT_SIGN_QC_DIR_     = "./output/sign_for_QingziClass_out/";
@@ -437,6 +439,40 @@ list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_e
         if (u8f.size( ) > 0) {
             auto [u8filename, ex] = split_filename_and_extension(u8f);
             out.push_back(u8filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 检测此文件夹下是否有有被占用的文件
+ * @param ifp 是否打印被占用的文件
+ * @param _occu8PathList 输出被占用的文件路径(utf8)
+ */
+list< std::string > DefFolder::check_occupied_utf8(bool ifp) const {
+    list< std::string > out;
+    for (size_t i = 0; i < filePathList_.size( ); i++) {
+        if (is_file_inuse(filePathList_[i])) {
+            if (ifp)
+                std::cout << U8C(u8"被占用的文件: ") << u8filePathList_[i] << std::endl;
+            out.push_back(u8filePathList_[i]);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 检测此文件夹下是否有有被占用的文件
+ * @param ifp 是否打印被占用的文件
+ * @return 输出被占用的文件路径(sys)
+ */
+list< std::string > DefFolder::check_occupied_sys(bool ifp) const {
+    list< std::string > out;
+    for (size_t i = 0; i < filePathList_.size( ); i++) {
+        if (is_file_inuse(filePathList_[i])) {
+            if (ifp)
+                std::cout << U8C(u8"被占用的文件: ") << encoding::sysdcode_to_utf8(u8filePathList_[i]) << std::endl;
+            out.push_back(filePathList_[i]);
         }
     }
     return out;
@@ -1086,5 +1122,83 @@ bool create_folder_recursive(const std::string &_path) {
 
     return true;
 }
+
+
+#ifdef _WIN32
+/**
+ * @brief 检查文件是否被其他程序占用（Windows 平台，支持 std::string 路径）
+ * @param file_path 目标文件的路径（如 "D:/test.txt"，支持相对/绝对路径）,系统编码
+ * @return true：文件被占用；false：文件未被占用或其他错误（如文件不存在）
+ */
+bool is_file_inuse(const std::string &file_path) {
+    // 关键：使用 CreateFileA（ANSI 版本），直接接收 std::string 的 c_str()
+    HANDLE hFile = CreateFileA(
+        file_path.c_str( ),       // 1. 目标文件路径（ANSI 字符串）
+        GENERIC_READ,             // 2. 访问权限：只读（避免误修改文件）
+        0,                        // 3. 共享模式：0 = 禁止其他进程共享（核心参数）
+                                  //    若文件已被占用，此参数会导致打开失败
+        nullptr,                  // 4. 安全属性：默认（nullptr）
+        OPEN_EXISTING,            // 5. 创建方式：仅打开已存在的文件（避免创建新文件）
+        FILE_ATTRIBUTE_NORMAL,    // 6. 文件属性：普通文件
+        nullptr                   // 7. 模板文件：无（nullptr）
+    );
+
+    // 1. 判断文件是否打开成功（无效句柄表示打开失败）
+    if (hFile == INVALID_HANDLE_VALUE) {
+        DWORD error_code = GetLastError( );    // 获取具体错误码
+
+        // 2. 仅当错误码为 "共享冲突" 或 "锁定冲突" 时，判定为文件被占用
+        if (error_code == ERROR_SHARING_VIOLATION ||    // 错误码 32：文件被其他进程独占
+            error_code == ERROR_LOCK_VIOLATION) {       // 错误码 33：文件被其他进程锁定
+            std::cout << U8C(u8"文件被占用：") << encoding::sysdcode_to_utf8(file_path) << std::endl;
+            return true;
+        }
+        // 3. 其他错误（如文件不存在、权限不足等），判定为 "未被占用"
+        else {
+            // 可选：打印错误详情（便于调试）
+            std::cout << U8C(u8"文件未被占用（或其他错误）：") << encoding::sysdcode_to_utf8(file_path)
+                      << U8C(u8"，错误码：") << error_code << std::endl;
+            return false;
+        }
+    }
+
+    // 4. 若打开成功（文件未被占用），需关闭句柄避免内存泄漏
+    CloseHandle(hFile);
+    // std::cout << U8C(u8"文件未被占用：") << encoding::sysdcode_to_utf8(file_path) << std::endl;
+    return false;
+}
+#else
+#include <fcntl.h>     // 包含 open()、O_RDONLY 等宏
+#include <unistd.h>    // 包含 close()
+#include <errno.h>     // 包含 errno、EBUSY 等错误码
+
+// 检查文件是否被占用（Linux/macOS 平台）
+bool is_file_inuse(const std::string &file_path) {
+    // 尝试以 "只读 + 非阻塞" 模式打开文件
+    // 关键参数：
+    // - O_RDONLY：只读权限
+    // - O_NONBLOCK：非阻塞模式（避免因文件锁定导致进程阻塞）
+    int fd = open(file_path.c_str( ), O_RDONLY | O_NONBLOCK);
+
+    // 判断是否打开成功
+    if (fd == -1) {
+        // 检查是否为 "文件被占用" 错误（EBUSY）
+        if (errno == EBUSY) {
+            std::cout << U8C(u8"文件被占用：") << encoding::sysdcode_to_utf8(file_path) << std::endl;
+            return true;
+        } else {
+            // 其他错误（如文件不存在、权限不足等）
+            std::cout << "文件未被占用（或其他错误），错误码：" << errno << std::endl;
+            return false;
+        }
+    }
+
+    // 若打开成功，关闭文件描述符避免泄漏
+    close(fd);
+    // std::cout << "文件未被占用：" << file_path << std::endl;
+    return false;
+}
+#endif                 // _WIN32
+
 
 }    // namespace file

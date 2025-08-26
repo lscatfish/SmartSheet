@@ -3,6 +3,7 @@
 #include <Encoding.h>
 #include <Fuzzy.h>
 #include <helper.h>
+#include <iostream>
 #include <PersonnelInformation.h>
 #include <pugiconfig.hpp>
 #include <pugixml.hpp>
