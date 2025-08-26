@@ -1,4 +1,4 @@
-/**
+﻿/**
  * pugixml parser - version 1.15
  * --------------------------------------------------------
  * Report bugs and download new versions at https://pugixml.org/

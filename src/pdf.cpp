@@ -258,6 +258,7 @@ DefPerson DefPdf::get_person( ) const {
         }
         DoQingziClass::trans_line_to_person(perLine, per);
         per.ifsign = true;
+        per.optimize( );
         return per;
     } else if (sheetType_ == SheetType::Classmate) {
         // 普通同学

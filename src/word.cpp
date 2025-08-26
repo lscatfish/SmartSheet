@@ -7,11 +7,11 @@
 #include <pugiconfig.hpp>
 #include <pugixml.hpp>
 #include <QingziClass.h>
+#include <string>
 #include <unzip.h>
 #include <vector>
 #include <word.h>
 #include <zip.h>
-#include <string>
 
 namespace docx {
 
@@ -173,7 +173,7 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
  * @brief 返回一个标准人员信息
  * @param _reMeth 报名方式
  */
-DefPerson DefDocx::get_person() {
+DefPerson DefDocx::get_person( ) {
     DefLine perLine;
     perLine.information[U8C(u8"备注")]     = "";
     perLine.information[U8C(u8"个人特长")] = "";
@@ -217,7 +217,7 @@ DefPerson DefDocx::get_person() {
                             col++;
                         } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
                             perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")] 
+                                perLine.information[U8C(u8"备注")]
                                 + U8C(u8"个人简介较少；");
                             col++;
                         }
@@ -225,16 +225,16 @@ DefPerson DefDocx::get_person() {
                 } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"个人特长")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"个人特长")] = 
-                            trim_whitespace(keyTable_[row][col + 1].content);
+                            perLine.information[U8C(u8"个人特长")] =
+                                trim_whitespace(keyTable_[row][col + 1].content);
                         if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
-                            perLine.information[U8C(u8"备注")] = 
-                                perLine.information[U8C(u8"备注")] 
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")]
                                 + U8C(u8"个人特长极少；");
                             col++;
                         } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")] 
+                                perLine.information[U8C(u8"备注")]
                                 + U8C(u8"个人特长较少；");
                             col++;
                         }
@@ -245,12 +245,12 @@ DefPerson DefDocx::get_person() {
                             perLine.information[U8C(u8"工作经历")] = trim_whitespace(keyTable_[row][col + 1].content);
                         if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")] 
+                                perLine.information[U8C(u8"备注")]
                                 + U8C(u8"工作经历极少；");
                             col++;
                         } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[U8C(u8"备注")] = 
-                                perLine.information[U8C(u8"备注")] 
+                            perLine.information[U8C(u8"备注")] =
+                                perLine.information[U8C(u8"备注")]
                                 + U8C(u8"工作经历较少；");
                             col++;
                         }
@@ -259,7 +259,7 @@ DefPerson DefDocx::get_person() {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
                             perLine.information[U8C(u8"获奖情况")] =
-                            trim_whitespace(keyTable_[row][col + 1].content);
+                                trim_whitespace(keyTable_[row][col + 1].content);
                         col++;
                     }
                 }
@@ -269,9 +269,12 @@ DefPerson DefDocx::get_person() {
     DoQingziClass::trans_line_to_person(perLine, per);
     if (fuzzy::search_substring(u8path_, U8C(u8"自主报名")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
+    else if (fuzzy::search_substring(u8path_, U8C(u8"重庆大学团校")))
+        per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
     else
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
     per.otherInformation[U8C(u8"文件地址")] = u8path_;
+    per.optimize( );
     return per;
 }
 
