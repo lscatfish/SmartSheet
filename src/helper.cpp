@@ -13,16 +13,19 @@
 #include <utility>
 #include <vector>
 
-/*
- * @brief 按回车键继续
- */
-void pause( ) {
-
+// 清理缓冲区
+void clear_input_buffer( ) {
     std::streambuf *sb = std::cin.rdbuf( );
     while (sb->in_avail( ) > 0) {
         sb->sbumpc( );    // 读取并丢弃一个字符
     }
+}
 
+/*
+ * @brief 按回车键继续
+ */
+void pause( ) {
+    clear_input_buffer( );
     std::cout << std::endl;
     std::cout << U8C(u8"请按 Enter 键继续...") << std::endl;
     std::cin.ignore((std::numeric_limits< std::streamsize >::max)( ), '\n');
@@ -76,4 +79,64 @@ void clearConsole( ) {
     // Linux/macOS 系统使用 "clear" 命令
     system("clear");
 #endif
+}
+
+#ifdef _WIN32
+#include <windows.h>    // Windows系统需要的头文件
+#else
+#include <locale>    // Linux/macOS需要的头文件
+#include <csetjmp>
+#endif
+
+/**
+ * 设置控制台输入输出编码为UTF-8
+ * 支持Windows和Linux/macOS系统
+ */
+void set_console_utf8( ) {
+#ifdef _WIN32
+    // Windows系统设置控制台编码为UTF-8
+    // 获取标准输入、输出、错误流的句柄
+    HANDLE hInput  = GetStdHandle(STD_INPUT_HANDLE);
+    HANDLE hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    // 设置输入输出编码为UTF-8 (CP_UTF8)
+    SetConsoleCP(CP_UTF8);          // 设置控制台输入编码
+    SetConsoleOutputCP(CP_UTF8);    // 设置控制台输出编码
+
+    // 可选：设置标准流的locale为UTF-8
+    std::wcin.imbue(std::locale(""));
+    std::wcout.imbue(std::locale(""));
+#else
+    // Linux/macOS系统设置locale为UTF-8
+    std::setlocale(LC_ALL, "en_US.UTF-8");
+
+    // 设置标准输入输出流的编码
+    std::cin.imbue(std::locale("en_US.UTF-8"));
+    std::cout.imbue(std::locale("en_US.UTF-8"));
+#endif
+}
+
+
+
+// 开始前警告
+bool start_warning( ) {
+    clearConsole( );
+    std::cout << U8C(u8"请确保已经关闭工作区（input、output与storage文件夹下所有文件都必须关闭）!!!") << std::endl;
+    std::cout << std::endl
+              << U8C(u8"-程序运行过程中会在output文件夹内生成结果，请勿删除output文件夹!!!") << std::endl;
+    std::cout << U8C(u8"-如果output文件夹内有旧的结果，程序会自动覆盖，请注意备份重要数据!!!") << std::endl;
+    std::cout << std::endl
+              << U8C(u8"详细的使用教程请参看本程序同目录下的“教程”文件") << std::endl;
+    std::cout << std::endl
+              << U8C(u8"你是否已确认关闭工作区  [Y/n]  （请输入Y以开始程序）:") << std::endl;
+    clear_input_buffer( );
+    std::string yn;
+    std::cin >> yn;
+    if (yn != "Y" && yn != "y") {
+        std::cout << U8C(u8"你未输入Y，程序终止...") << std::endl;
+        pause( );
+        return false;
+    }
+    clear_input_buffer( );
+    return true;
 }

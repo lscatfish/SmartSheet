@@ -21,8 +21,6 @@
 
 
 DoQingziClass::DoQingziClass( ) {
-    if (!self_check( ))
-        return;
 }
 
 DoQingziClass::~DoQingziClass( ) {
@@ -96,7 +94,21 @@ bool DoQingziClass::self_check( ) {
     std::cout << U8C(u8"模型文件检测通过！！！") << std::endl
               << std::endl;
 
-    file::DefFolder f(file::_OUTPUT_SIGN_QC_PDF_DIR_);
+    // 检测是否被占用
+    std::cout << U8C(u8"检测工作区文件夹是否被占用") << std::endl;
+    file::DefFolder ipt(file::_INPUT_DIR_, false);
+    file::DefFolder opt(file::_OUTPUT_DIR_, false);
+    file::DefFolder stg(file::_STORAGE_DIR_, false);
+    if (ipt.check_occupied_utf8(true).size( ) != 0
+        && opt.check_occupied_utf8(true).size( ) != 0
+        && stg.check_occupied_utf8(true).size( ) != 0) {
+        return false;
+    } else {
+        std::cout << U8C(u8"工作区文件夹未被占用，检测通过！！！") << std::endl;
+    }
+
+    std::cout << std::endl;
+    file::DefFolder f(file::_OUTPUT_SIGN_QC_PDF_DIR_, false);
     f.delete_with( );
 
     std::cout << std::endl
@@ -730,7 +742,7 @@ void DoQingziClass::save_statisticsSheet( ) {
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {
-    file::DefFolder *aFolder = new file::DefFolder(file::_INPUT_SIGN_QC_ALL_DIR_);
+    file::DefFolder *aFolder = new file::DefFolder(file::_INPUT_SIGN_QC_ALL_DIR_, true);
     if (!aFolder) {
         std::cout << U8C(u8"内存分配失败") << std::endl;
     }

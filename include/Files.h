@@ -24,12 +24,13 @@
 // 此空间用于操作系统的文件以及文件夹
 namespace file {
 
+extern std::string _INPUT_DIR_;
 extern std::string _INPUT_ALL_DIR_;
 extern std::string _INPUT_APP_DIR_;
 extern std::string _INPUT_ATT_IMGS_DIR_;
 extern std::string _INPUT_SIGN_QC_ALL_DIR_;
 
-
+extern std::string _OUTPUT_DIR_;
 extern std::string _OUTPUT_APP_DIR_;
 extern std::string _OUTPUT_ATT_DIR_;
 extern std::string _OUTPUT_SIGN_QC_DIR_;
@@ -43,8 +44,9 @@ public:
     /*
      * @brief 标准构造
      * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
+     * @param ifp 是否打印加载的文件夹和文件
      */
-    DefFolder(std::string _folderDir) {
+    DefFolder(std::string _folderDir, bool ifp) {
         if (*_folderDir.rbegin( ) == '\\' || *_folderDir.rbegin( ) == '/' && _folderDir.size( ) != 0)
             _folderDir.pop_back( );
 
@@ -53,10 +55,8 @@ public:
         for (const auto &fP : this->filePathList_) {
             u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
         }
-        std::cout << U8C(u8"已加载文件夹：") << encoding::sysdcode_to_utf8(_folderDir) << std::endl;
-        for (const auto &f : u8filePathList_) {
-            std::cout << f << std::endl;
-        }
+        if (ifp)
+            std::cout << U8C(u8"已加载文件夹：") << encoding::sysdcode_to_utf8(_folderDir) << std::endl;
         folderDir_ = _folderDir;
     };
 
@@ -224,6 +224,19 @@ public:
      */
     list< std::string > get_u8filename_list(const list< std::string > &_extension) const;
 
+    /*
+     * @brief 检测此文件夹下是否有有被占用的文件
+     * @param ifp 是否打印被占用的文件
+     * @return 输出被占用的文件路径(utf8)
+     */
+    list< std::string > check_occupied_utf8(bool ifp = false) const;
+
+    /*
+     * @brief 检测此文件夹下是否有有被占用的文件
+     * @param ifp 是否打印被占用的文件
+     * @return 输出被占用的文件路径(sys)
+     */
+    list< std::string > check_occupied_sys(bool ifp = false) const;
 
 private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
@@ -395,6 +408,12 @@ bool delete_file(const std::string &file_path);
  */
 bool create_folder_recursive(const std::string &path);
 
+/**
+ * @brief 检查文件是否被其他程序占用（支持 std::string 路径）
+ * @param file_path 目标文件的路径（如 "D:/test.txt"，支持相对/绝对路径）,系统编码
+ * @return true：文件被占用；false：文件未被占用或其他错误（如文件不存在）
+ */
+bool is_file_inuse(const std::string &file_path);
 
 }    // namespace file
 

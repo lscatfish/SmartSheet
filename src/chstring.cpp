@@ -1,17 +1,18 @@
-﻿#include <chstring.hpp>
+﻿
+#include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
 #include <iostream>
 
-
 // 比较运算符实现
 bool chstring::operator==(const chstring &b) const {
-    return str == b.str;
+    return u8str == b.u8str;
 }
 bool chstring::operator>(const chstring &b) const {
-    return str > b.str;
+    return u8str > b.u8str;
 }
 bool chstring::operator<(const chstring &b) const {
-    return str < b.str;
+    return u8str < b.u8str;
 }
 bool chstring::operator>=(const chstring &b) const {
     return !(*this < b);
@@ -22,53 +23,57 @@ bool chstring::operator<=(const chstring &b) const {
 
 // 访问指定位置的字符
 char &chstring::operator[](size_t pos) {
-    return this->str[pos];
+    return this->u8str[pos];
 }
 const char &chstring::operator[](size_t pos) const {
-    return this->str[pos];
+    return this->u8str[pos];
 }
 
 // 字符串拼接实现（修正返回类型为chstring）
 chstring chstring::operator+(const chstring &b) const {
-    return chstring(str + b.str);
+    return chstring(u8str + b.u8str);
 }
 
 // 迭代器相关方法
 chstring::iterator chstring::begin( ) {
-    return this->str.begin( );
+    return this->u8str.begin( );
 }    // 返回起始迭代器
 chstring::iterator chstring::end( ) {
-    return this->str.end( );
+    return this->u8str.end( );
 }    // 返回结束迭代器
 chstring::const_iterator chstring::begin( ) const {
-    return this->str.begin( );
+    return this->u8str.begin( );
 }    // 常量版本起始迭代器
 chstring::const_iterator chstring::end( ) const {
-    return this->str.end( );
+    return this->u8str.end( );
 }    // 常量版本结束迭代器
 chstring::const_iterator chstring::cbegin( ) const {
-    return this->str.cbegin( );
+    return this->u8str.cbegin( );
 }    // 常量迭代器（C++11）
 chstring::const_iterator chstring::cend( ) const {
-    return this->str.cend( );
+    return this->u8str.cend( );
 }    // 常量迭代器（C++11）
 
 // 获取长度
 size_t chstring::length( ) const {
-    return this->str.length( );
+    return this->u8str.length( );
 }
 
 // 检查是否为空
 bool chstring::empty( ) const {
-    return this->str.empty( );
+    return this->u8str.empty( );
 }
 
 // 获取大小
 size_t chstring::size( ) const {
-    return this->str.size( );
+    return this->u8str.size( );
 }
 
 // 获取底层字符串
-std::string chstring::get_string( ) const {
-    return this->str;
+std::string chstring::get_u8string( ) const {
+    return this->u8str;
+}
+
+std::string chstring::get_sysstring( ) const {
+    return this->sysstr;
 }

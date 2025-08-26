@@ -12,6 +12,9 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+// 清理缓冲区
+void clear_input_buffer( );
+
 /*
  * @brief 按回车键继续
  */
@@ -47,6 +50,15 @@ std::string trim_whitespace(const std::string &str);
 
 // 清空控制台
 void clearConsole( );
+
+/**
+ * 设置控制台输入输出编码为UTF-8
+ * 支持Windows和Linux/macOS系统
+ */
+void set_console_utf8( );
+
+// 开始前警告
+bool start_warning( );
 
 
 #endif    // !HELPER_H
