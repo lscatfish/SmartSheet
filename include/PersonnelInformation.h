@@ -104,6 +104,9 @@ public:
      * @brief 析构函数
      */
     ~DefPerson( ) {};
+
+    // 用于优化DefPerson中的信息
+    void optimize( );
 };
 
 /*

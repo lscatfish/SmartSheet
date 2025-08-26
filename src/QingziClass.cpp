@@ -731,7 +731,7 @@ void DoQingziClass::registration( ) {
     }
 
     list< std::string > paths = aFolder->get_filepath_list(list< std::string >{ ".docx", ".DOCX" });    // 文件路径
-    // 解析文件
+    // 解析docx文件
     if (paths.size( ) != 0) {
         for (const auto &p : paths) {
             docx::DefDocx aDocx(p);
@@ -759,6 +759,7 @@ void DoQingziClass::registration( ) {
                     per.ifsign                              = true;
                     per.otherInformation[U8C(u8"文件地址")] = p;
                     per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
+                    per.otherInformation[U8C(u8"备注")] = U8C(u8"未找到docx文档");
                     personStd_.push_back(per);
                     pdfFiles.erase_with(p);
                 }
