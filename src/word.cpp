@@ -173,7 +173,7 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
  * @brief 返回一个标准人员信息
  * @param _reMeth 报名方式
  */
-DefPerson DefDocx::get_person(const std::string _reMeth) {
+DefPerson DefDocx::get_person() {
     DefLine perLine;
     perLine.information[U8C(u8"备注")]     = "";
     perLine.information[U8C(u8"个人特长")] = "";
@@ -267,7 +267,10 @@ DefPerson DefDocx::get_person(const std::string _reMeth) {
         }
     }
     DoQingziClass::trans_line_to_person(perLine, per);
-    per.otherInformation[U8C(u8"报名方式")] = _reMeth;
+    if (fuzzy::search_substring(u8path_, U8C(u8"自主报名")))
+        per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
+    else
+        per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
     per.otherInformation[U8C(u8"文件地址")] = u8path_;
     return per;
 }

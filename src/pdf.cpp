@@ -42,7 +42,7 @@ list< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
     }
 
     LineExtractor extractor;
-    page->display(&extractor, 72.0, 72.0, 0, false, false, false);
+    page->display(&extractor, 72.0, 72.0, 0, false, false, false);//默认解析的dpi
 
     return extractor.lines;
 }
@@ -98,15 +98,14 @@ bool DefPdf::parse( ) {
         if (ifBreak) break;
     }
 
+    if (lineSegmentList.size( ) == 0) return false;
+    if (textBoxList.size( ) == 0) return false;
+    sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
+    fill_sheet(textBoxList);                          // 填充sheet_
     // 解析
     if (sheetType_ == SheetType::Others) {
         return false;
     } else {
-        if (lineSegmentList.size( ) == 0) return false;
-        if (textBoxList.size( ) == 0) return false;
-
-        sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
-        fill_sheet(textBoxList);                          // 填充sheet_
         return true;
     }
 }
@@ -245,12 +244,14 @@ DefPerson DefPdf::get_person( ) const {
                         } else {
                             perLine.information[key] = "";
                         }
+                        c++;
                     } else if (fuzzy::search_substring(U8C(u8"应聘岗位"), trim_whitespace(sheet_[r][c].text))) {
                         if (c + 1 < sheet_[r].size( )) {
                             perLine.information[U8C(u8"应聘岗位")] = trim_whitespace(sheet_[r][c + 1].text);
                         } else {
                             perLine.information[U8C(u8"应聘岗位")] = "UNKNOWN";
                         }
+                        c++;
                     }
                 }
             }
