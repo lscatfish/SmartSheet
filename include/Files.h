@@ -27,7 +27,7 @@ namespace file {
 extern std::string _INPUT_ALL_DIR_;
 extern std::string _INPUT_APP_DIR_;
 extern std::string _INPUT_ATT_IMGS_DIR_;
-extern std::string  _INPUT_SIGN_QC_ALL_DIR_;
+extern std::string _INPUT_SIGN_QC_ALL_DIR_;
 
 
 extern std::string _OUTPUT_APP_DIR_;
@@ -53,9 +53,11 @@ public:
         for (const auto &fP : this->filePathList_) {
             u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
         }
+        std::cout << U8C(u8"已加载文件夹：") << encoding::sysdcode_to_utf8(_folderDir) << std::endl;
         for (const auto &f : u8filePathList_) {
             std::cout << f << std::endl;
         }
+        folderDir_ = _folderDir;
     };
 
     // @brief 按照DefFolder变量来构造
@@ -130,6 +132,26 @@ public:
      * @return 是否成功
      */
     bool erase_with(const std::string _path);
+
+    /*
+     * @brief 删除指定文件名的文件
+     * @param _path 指定的文件路径
+     * @return 是否成功
+     */
+    bool delete_with(const std::string _path);
+
+    /*
+     * @brief 删除指定后缀的文件
+     * @param _extension 指定的后缀
+     * @return 删除的文件数量
+     */
+    size_t delete_with(const list< std::string > _extension);
+
+    /*
+     * @brief 删除所有文件
+     * @return 删除的文件数量
+     */
+    size_t delete_with( );
 
     /*
      * @brief 复制指定后缀的文件到指定的路径
@@ -353,6 +375,13 @@ bool is_folder_empty(const std::string &folder_path);
 
 // 检查文件是否存在（仅检测普通文件）
 bool is_file_exists(const std::string &_path);
+
+/**
+ * 删除指定路径的文件
+ * @param file_path 要删除的文件路径
+ * @return 成功返回 true，失败返回 false
+ */
+bool delete_file(const std::string &file_path);
 
 /**
  * 递归创建文件夹，支持Windows正反斜杠

@@ -93,7 +93,12 @@ bool DoQingziClass::self_check( ) {
         pause( );
         return false;
     }
-    std::cout << U8C(u8"模型文件检测通过！！！") << std::endl;
+    std::cout << U8C(u8"模型文件检测通过！！！") << std::endl
+              << std::endl;
+
+    file::DefFolder f(file::_OUTPUT_SIGN_QC_PDF_DIR_);
+    f.delete_with( );
+
     std::cout << std::endl
               << U8C(u8"自检完毕...") << std::endl;
     std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -759,7 +764,7 @@ void DoQingziClass::registration( ) {
                     per.ifsign                              = true;
                     per.otherInformation[U8C(u8"文件地址")] = p;
                     per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-                    per.otherInformation[U8C(u8"备注")] = U8C(u8"未找到docx文档");
+                    per.otherInformation[U8C(u8"备注")]     = U8C(u8"未找到docx文档");
                     personStd_.push_back(per);
                     pdfFiles.erase_with(p);
                 }

@@ -1,6 +1,7 @@
 ﻿
 #if true
 
+#include "basic.hpp"
 #include <chstring.hpp>
 #include <consoleapi2.h>
 #include <Encoding.h>
@@ -26,7 +27,6 @@
 #include <Windows.h>
 #include <WinNls.h>
 #include <xlnt/xlnt.hpp>
-#include "basic.hpp"
 
 int main( ) {
 
@@ -39,8 +39,9 @@ int main( ) {
     DoQingziClass qClass;
     qClass.start( );
 #else
-    //tmain( );
-    test_for_DefPdf( );
+
+    file::DefFolder a(file::_OUTPUT_SIGN_QC_PDF_DIR_);
+    a.delete_with( );
     pause( );
 
 #endif    // true

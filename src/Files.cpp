@@ -1,6 +1,8 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
+#include <cstdio>
+#include <cstdlib>
 #include <cstdlib>
 #include <Encoding.h>
 #include <errhandlingapi.h>
@@ -30,10 +32,10 @@
 
 namespace file {
 
-std::string _INPUT_ALL_DIR_          = "./input/all/";
-std::string _INPUT_APP_DIR_          = "./input/app/";
-std::string _INPUT_ATT_IMGS_DIR_     = "./input/att_imgs/";
-std::string _INPUT_SIGN_QC_ALL_DIR_  = "./input/sign_for_QingziClass/all/";
+std::string _INPUT_ALL_DIR_         = "./input/all/";
+std::string _INPUT_APP_DIR_         = "./input/app/";
+std::string _INPUT_ATT_IMGS_DIR_    = "./input/att_imgs/";
+std::string _INPUT_SIGN_QC_ALL_DIR_ = "./input/sign_for_QingziClass/all/";
 
 std::string _OUTPUT_APP_DIR_         = "./output/app_out/";
 std::string _OUTPUT_ATT_DIR_         = "./output/att_out/";
@@ -85,7 +87,7 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
             filePaths.push_back(fullPath);
 
 
-            std::cout << encoding::sysdcode_to_utf8(fullPath) << std::endl;
+            // std::cout << encoding::sysdcode_to_utf8(fullPath) << std::endl;
         }
 
     } while (FindNextFileA(hFind, &findData) != 0);    // 继续搜索下一项
@@ -219,6 +221,63 @@ bool file::DefFolder::erase_with(const std::string _path) {
 }
 
 /*
+ * @brief 删除指定文件名的文件
+ * @param _path 指定的文件路径
+ * @return 是否成功
+ */
+bool DefFolder::delete_with(const std::string _path) {
+    if (erase_with(_path)) {
+        // 强行转化为sys 的编码
+        std::string sys = encoding::utf8_to_sysdcode(_path);
+        if (is_file_exists(sys)) {
+            erase_with(sys);    // 擦除
+            std::cout << U8C(u8"删除 ") << sys << std::endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+/*
+ * @brief 删除指定后缀的文件
+ * @param _extension 指定的后缀
+ * @return 删除的文件数量
+ */
+size_t DefFolder::delete_with(const list< std::string > _extension) {
+    size_t sum             = 0;
+    auto   speFilePathList = get_filepath_list(_extension);    // 特定的文件
+    for (auto it = speFilePathList.begin( ); it != speFilePathList.end( ); it++) {
+        if (is_file_exists(*it)) {
+            erase_with(*it);    // 擦除
+            if (delete_file(*it)) {
+                std::cout << U8C(u8"删除 ") << encoding::sysdcode_to_utf8(*it) << std::endl;    // 尝试删除u8
+                sum++;
+            }
+        }
+    }
+    return sum;
+}
+
+/*
+ * @brief 删除所有文件
+ * @return 删除的文件数量
+ */
+size_t DefFolder::delete_with( ) {
+    size_t sum = 0;
+    for (auto it = filePathList_.begin( ); sum < filePathList_.size( ); sum++) {
+        if (delete_file(*(it + sum))) {
+            std::cout << U8C(u8"删除 ") << encoding::sysdcode_to_utf8(*(it + sum)) << std::endl;    // 尝试删除u8
+        }
+    }
+    filePathList_.clear( );    // 清空
+    u8filePathList_.clear( );
+    filePathList_.shrink_to_fit( );
+    u8filePathList_.shrink_to_fit( );
+    std::cout << U8C(u8"已清空文件夹 ") << encoding::sysdcode_to_utf8(folderDir_) << std::endl;
+    return sum;
+}
+
+/*
  * @brief 复制指定后缀的文件到指定的路径
  * @param _targetDir 指定路径
  * @param _extension 指定的后缀
@@ -242,7 +301,7 @@ size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::
  * @return 复制到的文件的数量
  */
 size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
-    list< std::string > speFilePathList = get_filepath_list();    // 特定的文件
+    list< std::string > speFilePathList = get_filepath_list( );    // 特定的文件
 
     size_t sum = 0;
     for (const auto &fp : speFilePathList) {
@@ -962,6 +1021,22 @@ bool is_file_exists(const std::string &_path) {
         return false;    // 路径不存在
     }
     return (info.st_mode & S_IFREG) != 0;    // 检查是否为普通文件
+}
+
+/**
+ * 删除指定路径的文件
+ * @param file_path 要删除的文件路径
+ * @return 成功返回 true，失败返回 false
+ */
+bool delete_file(const std::string &file_path) {
+#ifdef _WIN32
+    // Windows 系统使用 DeleteFileA 函数
+    // 注意：如果文件正在被使用，会删除失败
+    return DeleteFileA(file_path.c_str( )) != 0;
+#else
+    // Linux/macOS 等 POSIX 兼容系统使用 remove 函数
+    return std::remove(file_path.c_str( )) == 0;
+#endif
 }
 
 // 递归创建文件夹，支持Windows正反斜杠
