@@ -45,8 +45,13 @@ table< std::string > mergeMultipleSheets(Args &&...args) {
     return result;
 }
 
-// 清除字符串前面的所有空格
+// 清除字符串前后的所有空白字符（包括空格、\t、\n等）
 std::string trim_whitespace(const std::string &str);
+
+// 分割字符串，获取'='前后的内容
+// 返回值: pair的first是'='前的字符串，second是'='后的字符串
+// 如果没有找到'='，则first为原字符串，second为空
+std::pair< std::string, std::string > split_by_equal(const std::string &str);
 
 // 清空控制台
 void clearConsole( );

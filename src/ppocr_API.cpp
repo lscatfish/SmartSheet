@@ -10,13 +10,20 @@
 
 namespace ppocr {
 
-// 模型地址
+// 模型地址（采用系统编码）
 DefDirs _ppocrDir_ = {
     "./models/ppocr_keys.txt",    // 字典库
     "./models/ch_PP-OCRv4_det_infer",
     "./models/ch_PP-OCRv4_rec_infer",
     "./models/ch_ppocr_mobile_v2.0_cls_infer"
 };
+
+//DefDirs _ppocrDir_ = {
+//    "./models/ppocr_keys.txt",    // 字典库
+//    "./models/ch_PP-OCRv4_det_infer",
+//    "./models/ch_PP-OCRv4_rec_infer",
+//    "./models/ch_ppocr_mobile_v2.0_cls_infer"
+//};
 
 // 获取导出函数地址
 SetModelDirFunc setModelDir = nullptr;
