@@ -3,9 +3,10 @@
 #ifndef PERSONNELINFORMATION_H
 #define PERSONNELINFORMATION_H
 
-/*
+/*******************************************************************************
  * 此文件用于定义人员信息
- */
+ * 作者：lscatfish、KIMI
+ *******************************************************************************/
 
 #include <basic.hpp>
 #include <Encoding.h>

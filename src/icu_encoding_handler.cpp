@@ -1,6 +1,9 @@
 ﻿/**
  * @file icu_encoding_handler.cpp
  * @brief ICU 77.1编码处理工具实现
+ * 
+ * 作者：lscatfish、KIMI
+ * 
  */
 
 #include <basic.hpp>

@@ -1,4 +1,13 @@
-﻿#include <consoleapi2.h>    // SetConsoleOutputCP / SetConsoleCP
+﻿/**************************************************************************
+ * @file dll.cpp
+ * @brief 用于动态加载和调用 DLL 的辅助函数
+ *
+ * 作者：lscatfish、KIMI
+ * 邮箱：2561925435@qq.com
+ *
+ ************************************************************************/
+
+#include <consoleapi2.h>    // SetConsoleOutputCP / SetConsoleCP
 #include <dll.h>
 #include <iostream>              // 标准输入输出
 #include <libloaderapi.h>        // LoadLibrary / GetProcAddress

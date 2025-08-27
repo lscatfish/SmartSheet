@@ -1,4 +1,8 @@
-﻿
+﻿/*
+ * @file ppocr_API.cpp
+ * 
+ * 作者：lscatfish、KIMI
+ */
 #include <dll.h>
 #include <iostream>
 #include <libloaderapi.h>

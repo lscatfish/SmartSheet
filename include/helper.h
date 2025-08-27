@@ -1,16 +1,21 @@
 ﻿#pragma once
+
+/*
+ * @file helper.h
+ * @brief 一些辅助功能的函数
+ * 
+ * 作者：lscatfish
+ * 邮箱：2561925435@qq.com
+ */
+
+#ifndef HELPER_H
+#define HELPER_H
+
 #include <basic.hpp>
 #include <string>
 #include <utility>
 #include <vector>
 
-/*
- * @file helper.h
- * @brief 一些辅助功能的函数
- */
-
-#ifndef HELPER_H
-#define HELPER_H
 
 // 清理缓冲区
 void clear_input_buffer( );
