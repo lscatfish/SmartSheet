@@ -93,8 +93,12 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
     std::string before = str.substr(0, equalPos);
 
     // 提取'='后面的子字符串
-    std::string after = str.substr(equalPos + 1);
 
+    std::string after;
+    if (equalPos + 1 < str.size( ))
+        after = str.substr(equalPos + 1);
+    else
+        after = "";
     return { before, after };
 }
 

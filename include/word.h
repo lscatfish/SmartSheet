@@ -57,7 +57,7 @@ public:
     /*
      * @brief 返回一个标准人员信息
      */
-    DefPerson get_person();
+    DefPerson get_person( );
 
     // 打印带位置信息的表格
     void print_tables_with_position( );
@@ -72,10 +72,12 @@ public:
         path_   = _path;
         u8path_ = encoding::sysdcode_to_utf8(_path);
 
+        std::cout << "Parse DOCX file: \"" << u8path_;
+
         std::vector< char > xml_data = read_docx_file(path_, "word/document.xml");
         if (xml_data.empty( )) {
             // 空文件或者是错误
-            std::cout << std::string(U8C(u8"docx文件 ")) << u8path_ << U8C(u8" 有概率损坏") << std::endl;
+            std::cout << U8C(u8"\" 有概率损坏") << std::endl;
             return;
         }
 
@@ -83,14 +85,12 @@ public:
         tableList_ = parse_tables_with_position(xml_data);
         if (tableList_.empty( )) {
             // 未解析到表格
-            std::cout << U8C(u8"docx文件 ")
-                      << u8path_ << U8C(u8" 无表格") << std::endl;
+            std::cout << U8C(u8"\" 无表格") << std::endl;
         }
 
         keyTable_ = get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"学号") });
 
-        std::cout << U8C(u8"docx文件 ")
-                  << u8path_ << U8C(u8" 解析完毕") << std::endl;
+        std::cout << "\" Over" << std::endl;
     };
 
     ~DefDocx( ) = default;

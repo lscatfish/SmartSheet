@@ -40,6 +40,7 @@ constexpr auto KEY_OCRMODEL_REC  = "rec";
 // 设置路径
 void set_path( ) {
 
+    clearConsole( );
     auto printDirs = []( ) -> void {
         std::cout << U8C(u8"dict=") << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
         std::cout << U8C(u8"cls=") << ppocr::_ppocrDir_.cls_model_dir << std::endl;
@@ -75,25 +76,32 @@ void set_path( ) {
     size_t      serLine = 0;    // 行号
     while (std::getline(fin, line)) {
         serLine++;
+        line = trim_whitespace(line);
         if ((line.size( ) != 0 && line[0] == '#') || line.size( ) == 0) continue;
-        line                 = trim_whitespace(line);
+
         auto [before, after] = split_by_equal(line);
 
-        if (before == KEY_OCRMODEL_CLS) {
-            ppocr::_ppocrDir_.cls_model_dir = after.c_str( );
-            std::cout << U8C(u8"设置ocr模型cls模型地址： ") << KEY_OCRMODEL_CLS << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
-        } else if (before == KEY_OCRMODEL_DET) {
-            ppocr::_ppocrDir_.det_model_dir = after.c_str( );
-            std::cout << U8C(u8"设置ocr模型det模型地址： ") << KEY_OCRMODEL_DET << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
-        } else if (before == KEY_OCRMODEL_DICT) {
-            ppocr::_ppocrDir_.rec_char_dict_path = after.c_str( );
-            std::cout << U8C(u8"设置ocr模型字典库地址：  ") << KEY_OCRMODEL_DICT << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
-        } else if (before == KEY_OCRMODEL_REC) {
-            ppocr::_ppocrDir_.rec_model_dir = after.c_str( );
-            std::cout << U8C(u8"设置ocr模型rec模型地址： ") << KEY_OCRMODEL_REC << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+        if (after.size( ) != 0) {
+            after = trim_whitespace(after);
+            if (before == KEY_OCRMODEL_CLS) {
+                ppocr::_ppocrDir_.cls_model_dir = after;
+                std::cout << U8C(u8"设置ocr模型cls模型地址： ") << KEY_OCRMODEL_CLS << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+            } else if (before == KEY_OCRMODEL_DET) {
+                ppocr::_ppocrDir_.det_model_dir = after;
+                std::cout << U8C(u8"设置ocr模型det模型地址： ") << KEY_OCRMODEL_DET << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+            } else if (before == KEY_OCRMODEL_DICT) {
+                ppocr::_ppocrDir_.rec_char_dict_path = after;
+                std::cout << U8C(u8"设置ocr模型字典库地址：  ") << KEY_OCRMODEL_DICT << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+            } else if (before == KEY_OCRMODEL_REC) {
+                ppocr::_ppocrDir_.rec_model_dir = after;
+                std::cout << U8C(u8"设置ocr模型rec模型地址： ") << KEY_OCRMODEL_REC << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+            } else {
+                std::cout << _SETTINGS_ << U8C(u8" 中行") << serLine << " : \"" << encoding::sysdcode_to_utf8(line) << "\""
+                          << U8C(u8" 键值\"") << encoding::sysdcode_to_utf8(before) << U8C(u8"\"不存在") << std::endl;
+            }
         } else {
             std::cout << _SETTINGS_ << U8C(u8" 中行") << serLine << " : \"" << encoding::sysdcode_to_utf8(line) << "\""
-                      << U8C(u8" 键值\"") << encoding::sysdcode_to_utf8(before) << U8C(u8"\"不存在") << std::endl;
+                      << U8C(u8" 键值值\"") << encoding::sysdcode_to_utf8(before) << U8C(u8"\"设置为空，采用默认路径") << std::endl;
         }
     }
     pause( );

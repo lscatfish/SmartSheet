@@ -56,9 +56,9 @@ bool Init( ) {
     }
 
     // 设置识别字典路径
-    setRecDict(_ppocrDir_.rec_char_dict_path);
+    setRecDict(_ppocrDir_.rec_char_dict_path.c_str());
     // 设置模型目录
-    setModelDir(_ppocrDir_.det_model_dir, _ppocrDir_.rec_model_dir, _ppocrDir_.cls_model_dir, true);
+    setModelDir(_ppocrDir_.det_model_dir.c_str( ), _ppocrDir_.rec_model_dir.c_str( ), _ppocrDir_.cls_model_dir.c_str( ), true);
 }
 
 /*

@@ -8,6 +8,7 @@
  *
  * 作者：lscatfish
  *****************************************************************************/
+
 #include <consoleapi2.h>
 #include <cstdint>
 #include <cstring>
@@ -24,8 +25,7 @@
 #include <WinNls.h>
 #include <winnt.h>    // CONTEXT, PCONTEXT
 
-namespace encoding    // 使用时请用namespace ecoding=ec;
-{
+namespace encoding {
 
 // 系统默认的编码方式
 std::string systemDefaultEncoding = "windows-936";

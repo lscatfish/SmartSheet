@@ -1,4 +1,4 @@
-﻿// Author: lscatfish 
+﻿// Author: lscatfish
 
 #include <algorithm>
 #include <basic.hpp>
@@ -62,7 +62,8 @@ bool DoQingziClass::self_check( ) {
         file::_OUTPUT_APP_DIR_,
         file::_OUTPUT_ATT_DIR_,
         file::_OUTPUT_SIGN_QC_DIR_,
-        file::_OUTPUT_SIGN_QC_PDF_DIR_,
+        file::_OUTPUT_SIGN_QC_UNPDF_DIR_,
+        file::_OUTPUT_SIGN_QC_CMT_DIR_,
         file::_STORAGE_DIR_
     };
     for (const auto &p : ws_pathList) {
@@ -92,7 +93,7 @@ bool DoQingziClass::self_check( ) {
         pause( );
         return false;
     }
-    std::cout << U8C(u8"模型文件检测通过！！！") << std::endl
+    std::cout << U8C(u8"模型文件检测通过...") << std::endl
               << std::endl;
 
     // 检测是否被占用
@@ -103,14 +104,17 @@ bool DoQingziClass::self_check( ) {
     if (ipt.check_occupied_utf8(true).size( ) != 0
         && opt.check_occupied_utf8(true).size( ) != 0
         && stg.check_occupied_utf8(true).size( ) != 0) {
+        std::cout << U8C(u8"工作区文件夹被占用，程序终止！！！") << std::endl;
         return false;
     } else {
-        std::cout << U8C(u8"工作区文件夹未被占用，检测通过！！！") << std::endl;
+        std::cout << U8C(u8"工作区文件夹未被占用，检测通过...") << std::endl;
     }
 
     std::cout << std::endl;
-    file::DefFolder f(file::_OUTPUT_SIGN_QC_PDF_DIR_, false);
+    file::DefFolder f(file::_OUTPUT_SIGN_QC_UNPDF_DIR_, false);
+    file::DefFolder g(file::_OUTPUT_SIGN_QC_CMT_DIR_, false);
     f.delete_with( );
+    g.delete_with( );
 
     std::cout << std::endl
               << U8C(u8"自检完毕...") << std::endl;
@@ -213,7 +217,7 @@ void DoQingziClass::load_personnel_information_list( ) {
     file::get_filepath_from_folder(
         className_,
         filePathAndName_,
-        "./input/all/",
+        file::_INPUT_ALL_DIR_,
         list< std::string >{ ".xlsx" });
 
     // 按文件读取每个青字班的信息表
@@ -275,13 +279,16 @@ void DoQingziClass::attendance( ) {
         std::cout << "###ATTENTION### ";
         std::cout << U8C(u8"以上的人员不在全学员名单中");
         std::cout << " ###ATTENTION###";
+        std::cout << std::endl
+                  << std::endl;
+        std::cout << U8C(u8"请调整报名文件或者学员信息，反复运行本程序，直到没有弹出ATTENTION提示为止") << std::endl;
         std::cout << "\033[0m";
         std::cout << std::endl
                   << std::endl
                   << std::endl;
     }
 
-    std::cout << U8C(u8"已完成签到表输出，请在 output/app_out 中查看！")
+    std::cout << U8C(u8"已完成签到表输出，请在 ") << file::_OUTPUT_APP_DIR_ << U8C(u8" 中查看！")
               << std::endl
               << std::endl;
 
@@ -289,7 +296,7 @@ void DoQingziClass::attendance( ) {
     std::cout << U8C(u8"已完成相关数据的缓存...") << std::endl
               << std::endl;
     save_unknown_person(unknownAppPerson_);
-    std::cout << U8C(u8"未知的人员信息已输出到 output/unknown.xlsx 中")
+    std::cout << U8C(u8"未知的人员信息已输出到 ") << file::_OUTPUT_DIR_ << U8C(u8"unknown.xlsx 中")
               << std::endl
               << std::endl;
 
@@ -354,7 +361,7 @@ void DoQingziClass::stats_applicants( ) {
     file::get_filepath_from_folder(
         app_classname,
         app_filePathAndName,
-        "./input/app/",
+        file::_INPUT_APP_DIR_,
         list< std::string >{ ".xlsx" });
     std::cout << std::endl;
 
@@ -421,7 +428,7 @@ void DoQingziClass::stats_applicants( ) {
 void DoQingziClass::save_attendanceSheet( ) {
     for (auto it_classname = className_.begin( ); it_classname != className_.end( ); it_classname++) {
         std::string sheetTitle = *it_classname + U8C(u8"签到表");
-        std::string sheetPath  = "./output/app_out/" + (*it_classname) + ".xlsx";
+        std::string sheetPath  = file::_OUTPUT_APP_DIR_ + (*it_classname) + ".xlsx";
 
         table< std::string > sheet = {
             { U8C(u8"序号"), U8C(u8"姓名"),
@@ -497,11 +504,11 @@ void DoQingziClass::statistics( ) {
                   << std::endl
                   << std::endl;
     }
-    std::cout << U8C(u8"已完成线下签到汇总表的输出，请在 output/att_out 中查看！")
+    std::cout << U8C(u8"已完成线下签到汇总表的输出，请在 ") << file::_OUTPUT_ATT_DIR_ << U8C(u8" 中查看！")
               << std::endl
               << std::endl;
     save_unknown_person(unknownAttPerson_);
-    std::cout << U8C(u8"未知的人员信息已输出到 output/unknown.xlsx 中")
+    std::cout << U8C(u8"未知的人员信息已输出到 ") << file::_OUTPUT_DIR_ << U8C(u8"unknown.xlsx 中")
               << std::endl
               << std::endl;
     ppocr::Uninit( );
@@ -700,7 +707,7 @@ void DoQingziClass::save_statisticsSheet( ) {
      * ================================================================================= */
     for (auto it_className = className_.begin( ); it_className != className_.end( ); it_className++) {
         std::string sheetTitle    = *it_className + U8C(u8"学员线下签到汇总");
-        std::string sheetSavePath = "./output/att_out/" + *it_className + ".xlsx";
+        std::string sheetSavePath = file::_OUTPUT_ATT_DIR_ + *it_className + ".xlsx";
 
         table< std::string > sheet = {
             { U8C(u8"姓名"), U8C(u8"学号"),
@@ -762,25 +769,26 @@ void DoQingziClass::registration( ) {
     paths = pdfFiles.get_u8filepath_list( );    // 文件路径
     // 解析pdf文件
     if (paths.size( ) != 0) {
-        for (const auto &p : paths) {
-            pdf::DefPdf aPdf(p);
-            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {
+        for (const auto &u8p : paths) {
+            pdf::DefPdf aPdf(u8p);
+            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {    // 报名表
                 DefPerson per = aPdf.get_person( );
                 auto      it  = personStd_.end( );
                 search_person(it, per);
                 if (it != personStd_.end( )) {
-                    it->otherInformation[U8C(u8"文件地址")] += (p + " ; ");
+                    it->otherInformation[U8C(u8"文件地址")] += (u8p + " ; ");
                     it->ifsign       = true;
                     it->signPosition = per.signPosition;
-                    pdfFiles.erase_with(p);
+                    pdfFiles.erase_with(u8p);
                 } else {
                     per.ifsign                              = true;
-                    per.otherInformation[U8C(u8"文件地址")] = p;
+                    per.otherInformation[U8C(u8"文件地址")] = u8p;
                     per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
                     per.otherInformation[U8C(u8"备注")]     = U8C(u8"未找到docx文档");
                     personStd_.push_back(per);
-                    pdfFiles.erase_with(p);
+                    pdfFiles.erase_with(u8p);
                 }
+                file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
             }
         }
     }
@@ -790,11 +798,12 @@ void DoQingziClass::registration( ) {
     // 筛选pdf文件
     std::cout << std::endl
               << U8C(u8"复制了")
-              << pdfFiles.copy_files_to(file::_OUTPUT_SIGN_QC_PDF_DIR_)
-              << U8C(u8"份pdf文件到") << file::_OUTPUT_SIGN_QC_PDF_DIR_ << std::endl;
+              << pdfFiles.copy_files_to(file::_OUTPUT_SIGN_QC_UNPDF_DIR_)
+              << U8C(u8"份pdf文件到") << file::_OUTPUT_SIGN_QC_UNPDF_DIR_ << std::endl;
 
     std::cout << std::endl
-              << U8C(u8"青字班报名表已输出到 ./output/sign_for_QingziClass_out/报名.xlsx 中...")
+              << U8C(u8"青字班报名表已输出到 ")
+              << file::_OUTPUT_SIGN_QC_DIR_ << U8C(u8"报名.xlsx 中...")
               << std::endl;
     delete aFolder;
     aFolder = nullptr;    // 还是不要有野指针
