@@ -3,7 +3,7 @@
  * @file ppocr_API.h
  * 
  * 详细的API接口说明请参考README.md
- * ppocr的API源码文件请参看API中的文件
+ * ppocr的API源码文件请参看API_sourc_code中的文件
  * 
  * 作者：lscatfish、KIMI
  */
