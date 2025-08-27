@@ -38,7 +38,8 @@ extern std::string _OUTPUT_DIR_;
 extern std::string _OUTPUT_APP_DIR_;
 extern std::string _OUTPUT_ATT_DIR_;
 extern std::string _OUTPUT_SIGN_QC_DIR_;
-extern std::string _OUTPUT_SIGN_QC_PDF_DIR_;
+extern std::string _OUTPUT_SIGN_QC_UNPDF_DIR_;
+extern std::string _OUTPUT_SIGN_QC_CMT_DIR_;
 
 extern std::string _STORAGE_DIR_;
 
@@ -166,6 +167,14 @@ public:
     size_t copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) const;
 
     /*
+     * @brief 复制指定的文件到指定的路径
+     * @param _targetDir 指定路径
+     * @param _filePath 指定的文件路径
+     * @return 是否成功
+     */
+    bool copy_files_to(const std::string &_targetDir, const std::string &_filePath) const;
+
+    /*
      * @brief 复制文件到指定的路径
      * @param _targetDir 指定路径
      * @return 复制到的文件的数量
@@ -241,6 +250,13 @@ public:
      * @return 输出被占用的文件路径(sys)
      */
     list< std::string > check_occupied_sys(bool ifp = false) const;
+
+    /*
+     * @brief 检查文件路径是否在此文件夹存在
+     * @param _path 指定的文件路径
+     * @return 是否存在
+     */
+    bool is_filepath_exist(const std::string &_path) const;
 
 private:
     std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)

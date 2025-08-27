@@ -42,7 +42,7 @@ list< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
     }
 
     LineExtractor extractor;
-    page->display(&extractor, 72.0, 72.0, 0, false, false, false);//默认解析的dpi
+    page->display(&extractor, 72.0, 72.0, 0, false, false, false);    // 默认解析的dpi
 
     return extractor.lines;
 }
@@ -98,16 +98,26 @@ bool DefPdf::parse( ) {
         if (ifBreak) break;
     }
 
-    if (lineSegmentList.size( ) == 0) return false;
-    if (textBoxList.size( ) == 0) return false;
-    sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
-    fill_sheet(textBoxList);                          // 填充sheet_
     // 解析
     if (sheetType_ == SheetType::Others) {
         return false;
-    } else {
+    } else if (sheetType_ == SheetType::Committee) {
+        if (lineSegmentList.size( ) == 0) return false;
+        if (textBoxList.size( ) == 0) return false;
+        sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
+        fill_sheet(textBoxList);                          // 填充sheet_
         return true;
+    } else if (sheetType_ == SheetType::Classmate) {
+        if (textBoxList.size( ) == 0) return false;
+        if (lineSegmentList.size( ) == 0) {
+            //其他解析方式
+        } else {
+            sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
+            fill_sheet(textBoxList);                          // 填充sheet_
+            return true;
+        }
     }
+    return false;
 }
 
 /*

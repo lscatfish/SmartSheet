@@ -42,11 +42,12 @@ std::string _INPUT_APP_DIR_         = "./input/app/";
 std::string _INPUT_ATT_IMGS_DIR_    = "./input/att_imgs/";
 std::string _INPUT_SIGN_QC_ALL_DIR_ = "./input/sign_for_QingziClass/all/";
 
-std::string _OUTPUT_DIR_             = "./output/";
-std::string _OUTPUT_APP_DIR_         = "./output/app_out/";
-std::string _OUTPUT_ATT_DIR_         = "./output/att_out/";
-std::string _OUTPUT_SIGN_QC_DIR_     = "./output/sign_for_QingziClass_out/";
-std::string _OUTPUT_SIGN_QC_PDF_DIR_ = "./output/sign_for_QingziClass_out/pdf/";
+std::string _OUTPUT_DIR_               = "./output/";
+std::string _OUTPUT_APP_DIR_           = "./output/app_out/";
+std::string _OUTPUT_ATT_DIR_           = "./output/att_out/";
+std::string _OUTPUT_SIGN_QC_DIR_       = "./output/sign_for_QingziClass_out/";
+std::string _OUTPUT_SIGN_QC_UNPDF_DIR_ = "./output/sign_for_QingziClass_out/unpdf/";
+std::string _OUTPUT_SIGN_QC_CMT_DIR_   = "./output/sign_for_QingziClass_out/cmt/";
 
 std::string _STORAGE_DIR_ = "./storage/";
 
@@ -302,16 +303,36 @@ size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::
 }
 
 /*
+ * @brief 复制指定的文件到指定的路径
+ * @param _targetDir 指定路径
+ * @param _filePath 指定的文件路径
+ * @return 是否成功
+ */
+bool DefFolder::copy_files_to(const std::string &_targetDir, const std::string &_filePath) const {
+    // 采用u8编码
+    std::string u8path = encoding::sysdcode_to_utf8(_filePath);
+    std::string syspath = encoding::utf8_to_sysdcode(_filePath);
+    std::string sysDir  = encoding::utf8_to_sysdcode(_targetDir);
+    if (!is_filepath_exist(u8path)) {
+        return false;
+    }
+    if (copy_file_to_folder(syspath, sysDir)) {
+        return true;
+    }
+    return false;
+}
+
+/*
  * @brief 复制文件到指定的路径
  * @param _targetDir 指定路径
  * @return 复制到的文件的数量
  */
 size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
     list< std::string > speFilePathList = get_filepath_list( );    // 特定的文件
-
+    std::string         sysDir          = encoding::utf8_to_sysdcode(_targetDir);
     size_t sum = 0;
     for (const auto &fp : speFilePathList) {
-        if (copy_file_to_folder(fp, _targetDir)) {
+        if (copy_file_to_folder(fp, sysDir)) {
             sum++;
         }
     }
@@ -480,6 +501,20 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp) const {
         }
     }
     return out;
+}
+
+/*
+ * @brief 检查文件路径是否在此文件夹存在
+ * @param _path 指定的文件路径
+ * @return 是否存在
+ */
+bool DefFolder::is_filepath_exist(const std::string &_path) const {
+    std::string u8p = encoding::sysdcode_to_utf8(_path);
+    for (const auto &p : u8filePathList_) {
+        if (p == u8p)
+            return true;
+    }
+    return false;
 }
 
 /* ========================================================================================================================= */
@@ -926,7 +961,8 @@ void save_storageSheet_to_xlsx(const table< std::string > &_sheet) {
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save("./storage/storage.xlsx");
+    wb.save(_STORAGE_DIR_ + "/storage.xlsx");
+    // wb.save("./storage/storage.xlsx");
 }
 
 /*
@@ -979,7 +1015,7 @@ void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save("./output/unknown.xlsx");
+    wb.save(_OUTPUT_DIR_ + "/unknown.xlsx");
 }
 
 /*
@@ -995,7 +1031,8 @@ void save_registrationSheet_to_xlsx(const table< std::string > &_sheet) {
     for (std::size_t r = 0; r < _sheet.size( ); ++r)
         for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-    wb.save(U8C(u8"./output/sign_for_QingziClass_out/报名.xlsx"));
+    wb.save(_OUTPUT_SIGN_QC_DIR_ + U8C(u8"报名.xlsx"));
+    // wb.save(U8C(u8"./output/sign_for_QingziClass_out/报名.xlsx"));
 }
 
 // 替换字符串中的所有指定字符
@@ -1192,7 +1229,7 @@ bool is_file_inuse(const std::string &file_path) {
             return true;
         } else {
             // 其他错误（如文件不存在、权限不足等）
-            std::cout << "文件未被占用（或其他错误），错误码：" << errno << std::endl;
+            std::cout << U8C(u8"文件未被占用（或其他错误），错误码：") << errno << std::endl;
             return false;
         }
     }

@@ -35,10 +35,10 @@ struct OCRPredictResult {
 
 // 要传入的模型与字典库的地址
 struct DefDirs {
-    const char *rec_char_dict_path;    // 字典库地址
-    const char *det_model_dir;
-    const char *rec_model_dir;
-    const char *cls_model_dir;
+   std::string rec_char_dict_path;    // 字典库地址
+    std::string det_model_dir;
+   std::string rec_model_dir;
+    std::string cls_model_dir;
 };
 
 // 模型地址（采用系统编码）

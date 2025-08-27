@@ -77,6 +77,7 @@ public:
     };
 
     // 以文件地址进行构造
+    // @todo 按理来说这里应该先检测文件是否存在
     DefPdf(std::string _u8path)
         : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
         path_     = _u8path;
@@ -91,10 +92,11 @@ public:
             isOK = false;
             return;
         }
+        std::cout << "Parse PDF file: \"" << _u8path;
         num_pages_ = pdfdoc_.getNumPages( );
         sheetType_ = SheetType::Others;
-        isOK = parse( );    // 解析
-        std::cout << "Opening PDF file: " << _u8path << std::endl;
+        isOK       = parse( );    // 解析
+        std::cout << "\" Over" << std::endl;
     };
 
     ~DefPdf( ) = default;

@@ -42,7 +42,7 @@ int main( ) {
 
 #else
 
-    file::DefFolder a(file::_OUTPUT_SIGN_QC_PDF_DIR_);
+    file::DefFolder a(file::_OUTPUT_SIGN_QC_UNPDF_DIR_);
     a.delete_with( );
     pause( );
 
