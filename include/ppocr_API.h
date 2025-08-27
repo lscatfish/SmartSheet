@@ -34,6 +34,7 @@ struct DefDirs {
     const char *cls_model_dir;
 };
 
+// 模型地址（采用系统编码）
 extern DefDirs _ppocrDir_;
 
 

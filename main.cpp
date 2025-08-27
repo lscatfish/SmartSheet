@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pdf.h>
 #include <QingziClass.h>
+#include <settings.h>
 #include <string>
 
 int main( ) {
@@ -18,6 +19,7 @@ int main( ) {
         pause( );
         return -1;    // 用户选择不继续，程序终止
     }
+    settings::set_path( );
 
 #if true
     clearConsole( );

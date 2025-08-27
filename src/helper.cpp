@@ -70,6 +70,27 @@ std::string trim_whitespace(const std::string &str) {
     return std::string(firstNonSpace, lastNonSpace);
 }
 
+// 分割字符串，获取'='前后的内容
+// 返回值: pair的first是'='前的字符串，second是'='后的字符串
+// 如果没有找到'='，则first为原字符串，second为空
+std::pair< std::string, std::string > split_by_equal(const std::string &str) {
+    // 查找'='的位置
+    size_t equalPos = str.find('=');
+
+    // 如果没有找到'='，返回原字符串和空字符串
+    if (equalPos == std::string::npos) {
+        return { str, "" };
+    }
+
+    // 提取'='前面的子字符串
+    std::string before = str.substr(0, equalPos);
+
+    // 提取'='后面的子字符串
+    std::string after = str.substr(equalPos + 1);
+
+    return { before, after };
+}
+
 // 清空控制台
 void clearConsole( ) {
 #ifdef _WIN32
