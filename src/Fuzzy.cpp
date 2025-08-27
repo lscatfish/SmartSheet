@@ -1,4 +1,5 @@
-﻿#include <algorithm>
+﻿
+#include <algorithm>
 #include <basic.hpp>
 #include <Encoding.h>
 #include <Fuzzy.h>

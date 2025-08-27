@@ -1,4 +1,5 @@
-﻿
+﻿// Author: lscatfish 
+
 #include <algorithm>
 #include <basic.hpp>
 #include <chrono>

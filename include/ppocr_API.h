@@ -1,5 +1,12 @@
 ﻿#pragma once
-
+/*
+ * @file ppocr_API.h
+ * 
+ * 详细的API接口说明请参考README.md
+ * ppocr的API源码文件请参看API中的文件
+ * 
+ * 作者：lscatfish、KIMI
+ */
 #ifndef PPOCR_API_H
 #define PPOCR_API_H
 

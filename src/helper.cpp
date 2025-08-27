@@ -1,4 +1,11 @@
 ﻿
+/*
+ * @brief 一些辅助功能的函数
+ *
+ * 作者：lscatfish
+ * 邮箱：2561925435@qq.com
+ */
+
 #include <algorithm>
 #include <basic.hpp>
 #include <cctype>    // 用于 std::isdigit
