@@ -113,8 +113,12 @@ bool DoQingziClass::self_check( ) {
     std::cout << std::endl;
     file::DefFolder f(file::_OUTPUT_SIGN_QC_UNPDF_DIR_, false);
     file::DefFolder g(file::_OUTPUT_SIGN_QC_CMT_DIR_, false);
+    file::DefFolder h(file::_OUTPUT_APP_DIR_, false);
+    file::DefFolder i(file::_OUTPUT_ATT_DIR_, false);
     f.delete_with( );
     g.delete_with( );
+    h.delete_with( );
+    i.delete_with( );
 
     std::cout << std::endl
               << U8C(u8"自检完毕...") << std::endl;
@@ -155,16 +159,6 @@ void DoQingziClass::load_personnel_information_list( ) {
      */
     auto save_information_std =
         [&](const table< std::string > &sh, std::string cn) -> void {
-#ifdef DO_TEST
-        for (size_t rowIndex = 0; rowIndex < sh.size( ); rowIndex++) {
-            for (size_t colIndex = 0;
-                 colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
-                 colIndex++) {
-                std::cout << sh[rowIndex][colIndex] << "  ";
-            }
-            std::cout << std::endl;
-        }
-#endif    // DO_TEST
         // 这里实际上应该先转成defline，在转成defperson
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefPerson per;
@@ -346,7 +340,16 @@ void DoQingziClass::stats_applicants( ) {
             for (size_t colIndex = 0;
                  colIndex < sh[rowIndex].size( ) && sh[rowIndex][colIndex].size( ) != 0;
                  colIndex++) {
-                per.information[sh[0][colIndex]] = sh[rowIndex][colIndex];
+                if (fuzzy::search_substring(trim_whitespace(sh[0][colIndex]), U8C(u8"姓名")))
+                    per.information[U8C(u8"姓名")] = sh[rowIndex][colIndex];
+                else if (fuzzy::search_substring(trim_whitespace(sh[0][colIndex]), U8C(u8"学号")))
+                    per.information[U8C(u8"学号")] = sh[rowIndex][colIndex];
+                else if (fuzzy::search_substring(trim_whitespace(sh[0][colIndex]), U8C(u8"学院")))
+                    per.information[U8C(u8"学院")] = sh[rowIndex][colIndex];
+                else if (fuzzy::search_substring(trim_whitespace(sh[0][colIndex]), U8C(u8"专业")))
+                    per.information[U8C(u8"专业")] = sh[rowIndex][colIndex];
+                else
+                    per.information[trim_whitespace(sh[0][colIndex])] = sh[rowIndex][colIndex];
             }
             app_person.push_back(per);
         }
