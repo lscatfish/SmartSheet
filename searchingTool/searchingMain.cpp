@@ -11,30 +11,13 @@
 #include <thread>
 
 
-#if false
+#if true
 int main( ) {
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
     encoding::Init( );
     pdf::Init( );    // 初始化poppler
 
-    console::SplitConsole con;
-
-    // 业务线程持续输出
-    std::thread producer([&] {
-        int i = 0;
-        while (true) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
-            con.AppendRuntime("Run step " + std::to_string(++i));
-        }
-    });
-
-    // 主线程负责输入
-    while (true) {
-        auto cmd = con.ReadLine( );
-        con.AppendOther("You typed: " + cmd);
-    }
-
-    producer.join( );
+    SearchingTool s;
 
     return 0;    // 程序正常结束
 }

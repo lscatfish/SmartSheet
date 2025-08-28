@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <word.h>
+#include <xlnt/workbook/workbook.hpp>
 #include <xlnt/xlnt.hpp>
 
 
@@ -77,7 +78,7 @@ struct TextList< xlnt::workbook > {
     list< table< xlsxCELL > > sheetList;        // excel表格的所有工作表
     size_t                    searchNum = 0;    // 搜索到的单元格数量
 
-    TextList( ) = default;
+
     TextList(const std::string &_sysPath, const std::string &_u8Path)
         : sysPath(_sysPath), u8Path(_u8Path) {
         fileType = FileType::XLSX;
@@ -85,15 +86,15 @@ struct TextList< xlnt::workbook > {
         xlnt::workbook wb;
         std::cout << "Parse XLSX file: \"" << u8Path << "\"";
         wb.load(u8Path);
-        for (const auto &ws : wb) {
+        for (auto ws : wb) {
             table< xlsxCELL > sheet;
             std::string       sheetName = ws.title( );
             // 按行遍历
-            for (const auto &row : ws.rows(false)) {
+            for ( auto row : ws.rows(false)) {
                 // 保存当前行所有单元格文本的临时向量
                 list< xlsxCELL > aSingleRow;
                 // 遍历当前行的每个单元格
-                for (const auto &cell : row) {
+                for ( auto cell : row) {
                     // cell.to_string() 把数字、日期、公式等统一转为字符串
                     aSingleRow.push_back(xlsxCELL(sheetName, cell.reference( ).to_string( ), cell.to_string( )));
                     searchNum++;
@@ -179,7 +180,7 @@ struct TextList< docx::DefDocx > : public docx::DefDocx {
 /// 针对pdf的特化版本
 /// </summary>
 template <>
-struct TextList< pdf::DefPdf > : public pdf::DefPdf {
+struct TextList< pdf::DefPdf > {
     std::string sysPath;     // 文件路径（按照系统编码）
     std::string u8Path;      // 文件路径（按照UTF-8编码）
     FileType    fileType;    // 文件类型
@@ -187,12 +188,30 @@ struct TextList< pdf::DefPdf > : public pdf::DefPdf {
     list< list< CELL > > outList;
 
     TextList(const std::string &_sysPath, const std::string &_u8Path)
-        : sysPath(_sysPath), u8Path(_u8Path), pdf::DefPdf(_u8Path, outList) {
+        : sysPath(_sysPath), u8Path(_u8Path) {
+        pdf::DefPdf a(_u8Path, outList);
         fileType = FileType::PDF;
     };
     ~TextList( ) = default;
 
-    bool is_value_exists
+    // 判断是否存在值
+    // out 输出的结果
+    //_target 目标值
+    bool is_value_exists(list< std::string > &_out, const std::string &_target) {
+        bool found = false;
+        for (size_t i = 0; i < outList.size( ); i++) {
+            for (const auto &c : outList[i]) {
+                if (!c.text.empty( )) {
+                    if (fuzzy::search_substring(c.text, _target)) {
+                        _out.push_back("Found \"" + _target + "\" in\n"
+                                       + " -path:     \"" + u8Path + "\"\n"
+                                       + U8C(u8" -page:     页 ") + std::to_string(i + 1) + "\n"
+                                       + " -textual:  \"" + c.text + "\"");
+                    }
+                }
+            }
+        }
+    }
 };
 
 // 自DefFolder创建的搜索工具类
@@ -201,13 +220,29 @@ public:
     // 构造方式
     SearchingTool( )
         : file::DefFolder(file::_INPUT_DIR_, true) {
-
-
-
-          };
+        parse_list(xlsxList_, list< std::string >{ ".xlsx" });
+        parse_list(pdfList_, list< std::string >{ ".pdf", ".PDF" });
+        parse_list(docxList_, list< std::string >{ ".docx", ".DOCX" });
+    };
     ~SearchingTool( ) = default;
 
 private:
+    list< TextList< xlnt::workbook > > xlsxList_;
+    list< TextList< pdf::DefPdf > >    pdfList_;
+    list< TextList< docx::DefDocx > >  docxList_;
+    // 解析list
+    template < typename T >
+    void parse_list(list< T > &_list, const list< std::string > _ex) {
+        list< std::string > u8PathList  = this->get_u8filepath_list(_ex);
+        list< std::string > sysPathList = this->get_filepath_list(_ex);
+
+        for (size_t i = 0; i < sysPathList.size( ); i++) {
+            T afile(sysPathList[i], u8PathList[i]);
+            _list.push_back(afile);
+        }
+    }
+
+
 };
 
 
