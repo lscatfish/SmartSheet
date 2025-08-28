@@ -61,6 +61,7 @@ void mergeHelper(table< std::string > &result) {}
 
 // 清除字符串前后的所有空白字符（包括空格、\t、\n等）
 std::string trim_whitespace(const std::string &str) {
+    if (str.size( ) == 0) return "";
     // 找到第一个非空白字符的位置
     auto firstNonSpace = std::find_if(str.begin( ), str.end( ),
                                       [](unsigned char c) { return !std::isspace(c); });
