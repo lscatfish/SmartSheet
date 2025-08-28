@@ -19,6 +19,7 @@
 #include <thread>
 #include <vector>
 #include <word.h>
+#include<console.h>
 
 
 DoQingziClass::DoQingziClass( ) {
@@ -49,7 +50,7 @@ void DoQingziClass::start( ) {
 
 // 自检程序
 bool DoQingziClass::self_check( ) {
-    clearConsole( );
+    console::clearConsole( );
     std::cout << U8C(u8"启动自检程序......") << std::endl
               << std::endl;
     std::cout << U8C(u8"检测工作区的文件夹：") << std::endl;
@@ -131,7 +132,7 @@ bool DoQingziClass::self_check( ) {
 int DoQingziClass::choose_function( ) {
     int a = 0;
     while (a != 1 && a != 2 && a != 3) {
-        clearConsole( );
+        console::clearConsole( );
         std::cout << U8C(u8"请选择要生成excel表的类型：") << std::endl
                   << U8C(u8"1. 活动签到表") << std::endl;
         std::cout << U8C(u8"2. 出勤记录表") << std::endl;
@@ -205,8 +206,6 @@ void DoQingziClass::load_personnel_information_list( ) {
     std::cout << std::endl
               << U8C(u8"读取全学院名单...") << std::endl
               << std::endl;
-
-
 
     file::get_filepath_from_folder(
         className_,
@@ -306,7 +305,7 @@ void DoQingziClass::stats_applicants( ) {
 
     int a = 0;
     while (a != 1 && a != 2) {
-        clearConsole( );
+        console::clearConsole( );
         std::cout << std::endl
                   << U8C(u8"请选择生成方式：") << std::endl
                   << U8C(u8"1.生成部分人员的签到表") << std::endl

@@ -17,9 +17,6 @@
 #include <vector>
 
 
-// 清理缓冲区
-void clear_input_buffer( );
-
 /*
  * @brief 按回车键继续
  */
@@ -50,6 +47,9 @@ table< std::string > mergeMultipleSheets(Args &&...args) {
     return result;
 }
 
+// 合并两个list<std::string>
+list< std::string > merge_two_string_lists(const list< std::string > &list1, const list< std::string > &list2);
+
 // 清除字符串前后的所有空白字符（包括空格、\t、\n等）
 std::string trim_whitespace(const std::string &str);
 
@@ -57,15 +57,6 @@ std::string trim_whitespace(const std::string &str);
 // 返回值: pair的first是'='前的字符串，second是'='后的字符串
 // 如果没有找到'='，则first为原字符串，second为空
 std::pair< std::string, std::string > split_by_equal(const std::string &str);
-
-// 清空控制台
-void clearConsole( );
-
-/**
- * 设置控制台输入输出编码为UTF-8
- * 支持Windows和Linux/macOS系统
- */
-void set_console_utf8( );
 
 // 开始前警告
 bool start_warning( );

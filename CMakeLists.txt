@@ -44,6 +44,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(THIRD_PARTY_DLL_DIR "${CMAKE_SOURCE_DIR}/third_party/dll/")
 set(THIRD_PARTY_LIB_DIR "${CMAKE_SOURCE_DIR}/third_party/lib/")
 
+# 根据构建类型选择 FTXUI 库路径
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(FTXUI_PATH "${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/Debug")
+else()
+  set(FTXUI_PATH "${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/Release")
+endif()
+
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${CMAKE_SOURCE_DIR}")
 include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
@@ -51,12 +58,14 @@ include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include")
+include_directories("${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/include")
+include_directories(${FTXUI_PATH}/include)
+link_directories(${FTXUI_PATH}/lib)
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/*.c"
                     "test/*.h" "test/*.hpp" "test/*.c"
 )
-
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
@@ -130,11 +139,19 @@ endif()
 
 # 添加执行文件
 add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
-
+add_executable(SearchingTool 
+"./searchingTool/searchingTool.cpp"
+"./searchingTool/searchingTool.hpp"
+${SOURCES}
+"searchingTool/searchingMain.cpp")
 
 # 链接lib
 # 链接到xlnt
 target_link_libraries(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
+)
+target_link_libraries(SearchingTool PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
 )
@@ -143,12 +160,28 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
 )
+target_link_libraries(SearchingTool PRIVATE 
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
+)
 # 链接到zlib
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
 )
+target_link_libraries(SearchingTool PRIVATE 
+    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
+)
 # 链接到icu
+target_link_libraries(SearchingTool PRIVATE 
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
+)
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
@@ -162,6 +195,22 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
+)
+target_link_libraries(SearchingTool PRIVATE 
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
+)
+# 链接到ftxui
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+    ftxui-dom
+    ftxui-component
+    ftxui-screen
+)
+target_link_libraries(SearchingTool PRIVATE 
+    ftxui-dom
+    ftxui-component
+    ftxui-screen
 )
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")

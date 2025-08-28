@@ -279,4 +279,9 @@ DefPerson DefDocx::get_person( ) {
     return per;
 }
 
+// 返回解析出的表格列表
+list< table< TableCell > > DefDocx::get_table_list( ) const {
+    return tableList_;
+}
+
 }    // namespace docx

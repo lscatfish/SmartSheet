@@ -7,10 +7,11 @@
 #include <QingziClass.h>
 #include <settings.h>
 #include <string>
+#include <console.h>
 
 int main( ) {
 
-    set_console_utf8( );    // 设置控制台为UTF-8编码
+    console::set_console_utf8( );    // 设置控制台为UTF-8编码
     encoding::Init( );
     pdf::Init( );    // 初始化poppler
     if (!start_warning( )) {
@@ -22,7 +23,7 @@ int main( ) {
     settings::set_path( );
 
 #if true
-    clearConsole( );
+    console::clearConsole( );
     DoQingziClass *qClass = new DoQingziClass;
     if (!qClass) {
         std::cerr << U8C(u8"青字班模块初始化失败（内存分配失败），程序终止...") << std::endl;
