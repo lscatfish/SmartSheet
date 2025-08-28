@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <basic.hpp>
 #include <basic.hpp>
+#include <console.h>
 #include <cstdlib>
 #include <Fuzzy.h>
 #include <helper.h>
@@ -110,7 +111,7 @@ bool DefPdf::parse( ) {
     } else if (sheetType_ == SheetType::Classmate) {
         if (textBoxList.size( ) == 0) return false;
         if (lineSegmentList.size( ) == 0) {
-            //其他解析方式
+            // 其他解析方式
         } else {
             sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
             fill_sheet(textBoxList);                          // 填充sheet_

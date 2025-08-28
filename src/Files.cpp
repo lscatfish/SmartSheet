@@ -739,7 +739,7 @@ bool get_imgpath_from_folder(
 /*
  * @brief 用于读取表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
- * @param _path 文件的路径
+ * @param _path 文件的路径(u8编码)
  */
 void load_sheet_from_xlsx(table< std::string > &_sheet, std::string _path) {
     xlnt::workbook wb;

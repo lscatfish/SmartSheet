@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <console.h>
 
 
 namespace settings {
@@ -40,7 +41,7 @@ constexpr auto KEY_OCRMODEL_REC  = "rec";
 // 设置路径
 void set_path( ) {
 
-    clearConsole( );
+    console::clearConsole( );
     auto printDirs = []( ) -> void {
         std::cout << U8C(u8"dict=") << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
         std::cout << U8C(u8"cls=") << ppocr::_ppocrDir_.cls_model_dir << std::endl;
@@ -52,13 +53,13 @@ void set_path( ) {
     // 先检测设置文件是否存在
     if (!file::is_file_exists(_SETTINGS_)) {
         // 不存在说明采用默认路径
-        clearConsole( );
+        console::clearConsole( );
         std::cout << U8C(u8"未检测到其他的模型路径，使用默认路径：") << std::endl;
         printDirs( );
         return;
     } else if (file::is_file_inuse(_SETTINGS_)) {
         // 被占用
-        clearConsole( );
+        console::clearConsole( );
         std::cout << U8C(u8"设置文件\"") << _SETTINGS_ << U8C(u8"\"被占用，使用默认路径：") << std::endl;
         printDirs( );
         return;
@@ -67,7 +68,7 @@ void set_path( ) {
     // 读取文件
     std::ifstream fin(_SETTINGS_);
     if (!fin.is_open( )) {
-        clearConsole( );
+        console::clearConsole( );
         std::cout << U8C(u8"设置文件\"") << _SETTINGS_ << U8C(u8"\"因未知原因打开失败，使用默认路径：") << std::endl;
         printDirs( );
         return;
