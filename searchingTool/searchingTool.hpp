@@ -8,6 +8,8 @@
  * @file searchingTool.hpp
  * @brief 定义搜索工具类
  *
+ * @todo 这里的几个模板结构体与模板函数有一点屎山的味道，可以考虑优化一下，使得程序更安全、占用内存更少
+ *
  * 作者：lscatfish
  *
  ******************************************************************************/
@@ -120,7 +122,7 @@ struct TextList< xlnt::workbook > {
                             _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
                                            + " -sheet:    \"" + cell.sheetName + "\"\n"
                                            + " -position: \"" + cell.address + "\"\n"
-                                           + " -textual:  \"" + cell.value + "\"");
+                                           + " -textual:   " + cell.value );
                             found = true;
                         }
                     }
@@ -135,15 +137,19 @@ struct TextList< xlnt::workbook > {
 /// 针对docx的特化版本
 /// </summary>
 template <>
-struct TextList< docx::DefDocx > : public docx::DefDocx {
+struct TextList< docx::DefDocx > {
     std::string sysPath;     // 文件路径（按照系统编码）
     std::string u8Path;      // 文件路径（按照UTF-8编码）
     FileType    fileType;    // 文件类型
     // size_t      searchNum = 0;    // 搜索到的单元格数量
 
+    list< table< docx::TableCell > > tList;    // docx文件中的表格列表
+
     TextList(const std::string &_sysPath, const std::string &_u8Path)
-        : sysPath(_sysPath), u8Path(_u8Path), docx::DefDocx(_sysPath) {    // 构造及解析
+        : sysPath(_sysPath), u8Path(_u8Path) {
         fileType = FileType::DOCX;
+        docx::DefDocx aDocx(sysPath);
+        tList = aDocx.get_table_list( );
     };
     ~TextList( ) = default;
 
@@ -152,7 +158,6 @@ struct TextList< docx::DefDocx > : public docx::DefDocx {
     //_target 目标值
     bool is_value_exists(list< std::string > &_out, const std::string &_target) {
         bool found = false;
-        auto tList = get_table_list( );
         int  page  = 0;
         for (const auto &table : tList) {
             page++;
@@ -162,8 +167,8 @@ struct TextList< docx::DefDocx > : public docx::DefDocx {
                         if (fuzzy::search_substring(cell.content, _target)) {
                             _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
                                            + U8C(u8" -page:     页 ") + std::to_string(page) + "\n"
-                                           + U8C(u8" -position: 行 ") + std::to_string(cell.row) + U8C(u8" 列 ") + std::to_string(cell.col) + "\n"
-                                           + " -textual:  \"" + cell.content + "\"");
+                                           + U8C(u8" -position: 行 ") + std::to_string(cell.row + 1) + U8C(u8" 列 ") + std::to_string(cell.col + 1) + "\n"
+                                           + " -textual:   " + cell.content );
                             found = true;
                         }
                     }
@@ -203,7 +208,7 @@ struct TextList< pdf::DefPdf > {
                     if (fuzzy::search_substring(c.text, _target)) {
                         _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
                                        + U8C(u8" -page:     页 ") + std::to_string(i + 1) + "\n"
-                                       + " -textual:  \"" + c.text + "\"");
+                                       + " -textual:   " + c.text );
                     }
                 }
             }
@@ -243,7 +248,7 @@ private:
     }
     // 搜索
     template < typename T >
-    bool founder(list< std::string > &_out, const std::string &_target,  list< T > &_list) {
+    bool founder(list< std::string > &_out, const std::string &_target, list< T > &_list) {
         bool found = false;
         for (auto &f : _list) {
             if (f.is_value_exists(_out, _target)) {
