@@ -18,6 +18,24 @@ int main( ) {
     pdf::Init( );    // 初始化poppler
 
     SearchingTool s;
+    std::string   inputStr = "";
+    while (true) {
+        console::clearConsole( );
+        my_inputer(inputStr);
+        if (inputStr == "$exit$") {
+            break;
+        }
+        std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl;
+        list< std::string > out;
+        if (s.search_value(out, inputStr)) {
+            for (const auto &line : out) {
+                std::cout << line << std::endl;
+            }
+        } else {
+            std::cout << "Not Found!" << std::endl;
+        }
+        pause( );
+    }
 
     return 0;    // 程序正常结束
 }
