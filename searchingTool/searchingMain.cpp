@@ -1,13 +1,13 @@
 ﻿
 #include <basic.hpp>
+#include <console.h>
 #include <Encoding.h>
 #include <Files.h>
 #include <helper.h>
 #include <iostream>
 #include <pdf.h>
-#include<string>
-#include<searchingTool/searchingTool.hpp>
-#include <console.h>
+#include <searchingTool/searchingTool.hpp>
+#include <string>
 #include <thread>
 
 
