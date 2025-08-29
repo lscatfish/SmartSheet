@@ -8,38 +8,27 @@
 #include <searchingTool/searchingTool.hpp>
 #include <string>
 #include <xlnt/workbook/workbook.hpp>
+#include<console.h>
 
+// 输入器
+void my_inputer(std::string &inputStr) {
+    console::clear_input_buffer( );
+    std::cout << std::endl;
+    std::cout << ">>> ";
+    std::cin >> inputStr;
+}
 
-
-//// 解析xlsx
-//void SearchingTool::parse_xlsx_list( ) {
-//    list< std::string > u8PathList  = this->get_u8filepath_list(list< std::string >{ ".xlsx" });
-//    list< std::string > sysPathList = this->get_filepath_list(list< std::string >{ ".xlsx" });
-//
-//    for (size_t i = 0; i < sysPathList.size( ); i++) {
-//        TextList< xlnt::workbook > afile(sysPathList[i], u8PathList[i]);
-//        xlsxList_.push_back(afile);
-//    }
-//}
-//
-//// 解析pdf
-//void SearchingTool::parse_pdf_list( ) {
-//    list< std::string > u8PathList  = this->get_u8filepath_list(list< std::string >{ ".pdf", ".PDF" });
-//    list< std::string > sysPathList = this->get_filepath_list(list< std::string >{ ".xlsx", ".PDF" });
-//
-//    for (size_t i = 0; i < sysPathList.size( ); i++) {
-//        TextList< pdf::DefPdf > afile(sysPathList[i], u8PathList[i]);
-//        pdfList_.push_back(afile);
-//    }
-//}
-//
-//// 解析docx
-//void SearchingTool::parse_docx_list( ) {
-//    list< std::string > u8PathList  = this->get_u8filepath_list(list< std::string >{ ".pdf", ".PDF" });
-//    list< std::string > sysPathList = this->get_filepath_list(list< std::string >{ ".xlsx", ".PDF" });
-//
-//    for (size_t i = 0; i < sysPathList.size( ); i++) {
-//        TextList< pdf::DefPdf > afile(sysPathList[i], u8PathList[i]);
-//        pdfList_.push_back(afile);
-//    }
-//}
+// 搜索函数实现
+bool SearchingTool::search_value(list< std::string > &_out, const std::string &_target) {
+    bool found = false;
+    if (founder(_out, _target, xlsxList_)) {
+        found = true;
+    }
+    if (founder(_out, _target, pdfList_)) {
+        found = true;
+    }
+    if (founder(_out, _target, docxList_)) {
+        found = true;
+    }
+    return found;
+};
