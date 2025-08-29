@@ -50,6 +50,8 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 else()
   set(FTXUI_PATH "${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/Release")
 endif()
+include_directories(${FTXUI_PATH}/include)
+link_directories(${FTXUI_PATH}/lib)
 
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${CMAKE_SOURCE_DIR}")
@@ -59,8 +61,6 @@ include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/icu/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include")
 include_directories("${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/include")
-include_directories(${FTXUI_PATH}/include)
-link_directories(${FTXUI_PATH}/lib)
 
 # 找到 src 文件夹下所有的 .cpp 文件
 file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/*.c"

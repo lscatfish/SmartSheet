@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <basic.hpp>
 #include <cctype>    // 用于 std::isdigit
+#include <console.h>
 #include <cstdlib>
 #include <Encoding.h>
 #include <helper.h>
@@ -19,7 +20,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include<console.h>
 
 /*
  * @brief 按回车键继续
@@ -53,7 +53,7 @@ void mergeHelper(table< std::string > &result) {}
 
 // 合并两个list<std::string>
 list< std::string > merge_two_string_lists(const list< std::string > &list1, const list< std::string > &list2) {
-    list< std::string > mergedList = list1;    // 复制第一个列表
+    list< std::string > mergedList = list1;                                // 复制第一个列表
     mergedList.insert(mergedList.end( ), list2.begin( ), list2.end( ));    // 插入第二个列表的元素
     return mergedList;
 }
@@ -102,9 +102,6 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
     return { before, after };
 }
 
-
-
-
 // 开始前警告
 bool start_warning( ) {
     console::clearConsole( );
@@ -125,5 +122,57 @@ bool start_warning( ) {
         return false;
     }
     console::clear_input_buffer( );
+    return true;
+}
+
+/*
+ * @brief 对table< string > 进行排序
+ * @param _inTable 待排序的表格
+ * @param _sortColIndex 依据哪一列进行排序（从0开始计数）
+ * @param _ascending 是否升序排序，默认为true（升序）
+ * @param _keepFirstCol 是否保持第一列不变，默认为true
+ * @param _excludeHeader 是否排除表头（第一行）进行排序，默认为true
+ * @return 排序是否成功
+ */
+bool sort_table_string_by(
+    table< std::string > &_inTable,
+    size_t               _sortColIndex,
+    bool                 _ascending,
+    bool                 _keepFirstCol,
+    bool                 _excludeHeader) {
+    if (_inTable.size( ) <= 1) return false;                   // 如果表格行数小于等于1，无需排序
+    if (_sortColIndex >= _inTable[0].size( )) return false;    // 如果排序列索引超出范围，返回false
+
+    /* ==============================lambda===================================== */
+    // 比较两列,是否满足排序条件
+    auto comparator = [_sortColIndex, _ascending](const std::vector< std::string > &a, const std::vector< std::string > &b)->bool {
+        if (_sortColIndex >= a.size( ) || _sortColIndex >= b.size( )) {
+            return false;    // 如果索引超出范围，保持原有顺序
+        }
+        if (_ascending) {
+            return a[_sortColIndex] < b[_sortColIndex];    // 升序
+        } else {
+            return a[_sortColIndex] > b[_sortColIndex];    // 降序
+        }
+    };
+    // 交换两行
+    auto swap_rows = [_keepFirstCol](std::vector< std::string > &a, std::vector< std::string > &b) {
+        std::swap(a, b);
+        if (_keepFirstCol && a.size( ) > 0 && b.size( ) > 0) {
+            std::swap(a[0], b[0]);    // 保持第一列不变
+        }
+    };
+    /* ==============================lambda===================================== */
+
+    size_t startRow = _excludeHeader ? 1 : 0;    // 排除表头则从第二行开始排序
+    // 冒泡排序
+    for (size_t i = startRow; i < _inTable.size( ); i++) {
+        for (size_t j = startRow + 1; j < _inTable.size( ); j++) {
+            if (comparator(_inTable[j - 1], _inTable[j])) {
+                swap_rows(_inTable[j - 1], _inTable[j]);
+                // std::cout << "c";
+            }
+        }
+    }
     return true;
 }

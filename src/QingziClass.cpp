@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <basic.hpp>
 #include <chrono>
+#include <console.h>
 #include <cstdlib>
 #include <Encoding.h>
 #include <Files.h>
@@ -19,7 +20,6 @@
 #include <thread>
 #include <vector>
 #include <word.h>
-#include<console.h>
 
 
 DoQingziClass::DoQingziClass( ) {
@@ -38,12 +38,29 @@ void DoQingziClass::start( ) {
     /* 3.选择生成签到表或出勤表 =========================================================== */
     int outWhichSheet = choose_function( );    // 生成那一张表：1签到表  2出勤记录表
 
+    std::cout << std::endl
+              << std::endl;
+
     /* 4.加载签到表或是出勤记录表 ============================================================= */
     if (outWhichSheet == 1) {
+        file::DefFolder h(file::_OUTPUT_APP_DIR_, false);
+        h.delete_with( );
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        console::clearConsole( );
         attendance( );
     } else if (outWhichSheet == 2) {
+        file::DefFolder i(file::_OUTPUT_ATT_DIR_, false);
+        i.delete_with( );
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        console::clearConsole( );
         statistics( );
     } else if (outWhichSheet == 3) {
+        file::DefFolder f(file::_OUTPUT_SIGN_QC_UNPDF_DIR_, false);
+        file::DefFolder g(file::_OUTPUT_SIGN_QC_CMT_DIR_, false);
+        f.delete_with( );
+        g.delete_with( );
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        console::clearConsole( );
         registration( );
     }
 }
@@ -111,6 +128,7 @@ bool DoQingziClass::self_check( ) {
         std::cout << U8C(u8"工作区文件夹未被占用，检测通过...") << std::endl;
     }
 
+    /*
     std::cout << std::endl;
     file::DefFolder f(file::_OUTPUT_SIGN_QC_UNPDF_DIR_, false);
     file::DefFolder g(file::_OUTPUT_SIGN_QC_CMT_DIR_, false);
@@ -120,6 +138,7 @@ bool DoQingziClass::self_check( ) {
     g.delete_with( );
     h.delete_with( );
     i.delete_with( );
+    */
 
     std::cout << std::endl
               << U8C(u8"自检完毕...") << std::endl;
@@ -225,9 +244,7 @@ void DoQingziClass::load_personnel_information_list( ) {
 }
 
 
-
 /* ======================================================================================================================= */
-
 
 // @brief 控制生成签到表的函数
 void DoQingziClass::attendance( ) {
@@ -448,6 +465,7 @@ void DoQingziClass::save_attendanceSheet( ) {
                 serialNum++;
             }
         }
+        sort_table_string_by(sheet, 2);
         file::save_attSheet_to_xlsx(sheet, sheetPath, sheetTitle);
     }
 }
@@ -742,6 +760,25 @@ void DoQingziClass::save_statisticsSheet( ) {
                 sheet.push_back(line);
             }
         }
+        // sort_table_string_by(sheet, 4, false, true);    // 按照签到情况排序
+
+        sort_table_string_by(
+            sheet, false, true,
+            [](const std::vector< std::string > &a, const std::vector< std::string > &b) -> bool {
+                const size_t firstIndex  = 4;    // 第一排序索引
+                const size_t secondIndex = 2;    // 第二排序索引
+                if (firstIndex >= a.size( ) || firstIndex >= b.size( ) || secondIndex >= a.size( ) || secondIndex >= b.size( )) return false;
+                if (a[firstIndex] < b[firstIndex]) {
+                    return true;
+                } else if (a[firstIndex] == b[firstIndex]) {
+                    if (a[secondIndex] < b[secondIndex])
+                        return true;
+                    else
+                        return false;
+                } else {
+                    return false;
+                }
+            });
         file::save_sttSheet_to_xlsx(sheet, sheetSavePath, sheetTitle);
     }
 }
