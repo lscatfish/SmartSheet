@@ -69,4 +69,5 @@ void DefPerson::optimize( ) {
                 this->classname = U8C(u8"青组班");
         }
     }
+    // 有意思吗？内存堆的
 }

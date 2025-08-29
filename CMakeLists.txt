@@ -321,6 +321,6 @@ endif()
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
     message(FATAL_ERROR "当前配置仅支持Windows系统，Linux系统的配置尚未完成，请根据需要自行修改CMakeLists.txt文件")
 
-# macOS  ?????什么垃圾系统
+# macOS  ?????，我不想写了
 
 endif() # windows下可运行，linux下需要重新写

@@ -40,53 +40,46 @@ int main( ) {
     return 0;    // 程序正常结束
 }
 #else
-#include <stdio.h>                    // for getchar
-#include <ftxui/dom/elements.hpp>     // for operator|, size, Element, text, hcenter, Decorator, Fit, WIDTH, hflow, window, EQUAL, GREATER_THAN, HEIGHT, bold, border, dim, LESS_THAN
-#include <ftxui/screen/screen.hpp>    // for Full, Screen
-#include <string>                     // for allocator, char_traits, operator+, to_string, string
 
-#include "ftxui/dom/node.hpp"        // for Render
-#include "ftxui/screen/color.hpp"    // for ftxui
+
+
+// Copyright 2020 Arthur Sonzogni. All rights reserved.
+// Use of this source code is governed by the MIT license that can be found in
+// the LICENSE file.
+#include <memory>    // for shared_ptr, allocator, __shared_ptr_access
+
+#include "ftxui/component/captured_mouse.hpp"        // for ftxui
+#include "ftxui/component/component.hpp"             // for Renderer, ResizableSplitBottom, ResizableSplitLeft, ResizableSplitRight, ResizableSplitTop
+#include "ftxui/component/component_base.hpp"        // for ComponentBase
+#include "ftxui/component/screen_interactive.hpp"    // for ScreenInteractive
+#include "ftxui/dom/elements.hpp"                    // for Element, operator|, text, center, border
+
+using namespace ftxui;
 
 int main( ) {
-    using namespace ftxui;
-    auto make_box = [](int dimx, int dimy) {
-        std::string title = std::to_string(dimx) + "x" + std::to_string(dimy);
-        return window(text(title) | hcenter | bold,
-                      text("content") | hcenter | dim)
-               | size(WIDTH, EQUAL, dimx) | size(HEIGHT, EQUAL, dimy);
-    };
+    auto screen = ScreenInteractive::Fullscreen( );
 
-    auto style = size(WIDTH, GREATER_THAN, 20) | border | size(HEIGHT, GREATER_THAN, 30) | size(WIDTH, LESS_THAN, 50);
+    auto middle = Renderer([] { return text("middle") | center; });
+    auto left   = Renderer([] { return text("Left") | center; });
+    auto right  = Renderer([] { return text("right") | center; });
+    auto top    = Renderer([] { return text("top") | center; });
+    auto bottom = Renderer([] { return text("bottom") | center; });
 
-    auto document = hflow({
-                        make_box(7, 7),
-                        make_box(7, 5),
-                        make_box(5, 7),
-                        make_box(10, 4),
-                        make_box(10, 4),
-                        make_box(10, 4),
-                        make_box(10, 4),
-                        make_box(11, 4),
-                        make_box(11, 4),
-                        make_box(11, 4),
-                        make_box(11, 4),
-                        make_box(12, 4),
-                        make_box(12, 5),
-                        make_box(12, 4),
-                        make_box(13, 4),
-                        make_box(13, 3),
-                        make_box(13, 3),
-                        make_box(10, 3),
-                    })
-                    | style;
+    int left_size   = 20;
+    int right_size  = 20;
+    int top_size    = 10;
+    int bottom_size = 10;
 
-    auto screen = Screen::Create(Dimension::Full( ), Dimension::Fit(document));
-    Render(screen, document);
-    screen.Print( );
-    getchar( );
+    auto container = middle;
+    container      = ResizableSplitLeft(left, container, &left_size);
+    container      = ResizableSplitRight(right, container, &right_size);
+    container      = ResizableSplitTop(top, container, &top_size);
+    container      = ResizableSplitBottom(bottom, container, &bottom_size);
 
-    return 0;
+    auto renderer =
+        Renderer(container, [&] { return container->Render( ) | border; });
+
+    screen.Loop(renderer);
 }
 
 #endif

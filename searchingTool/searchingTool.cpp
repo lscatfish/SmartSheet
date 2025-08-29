@@ -14,7 +14,7 @@
 void my_inputer(std::string &inputStr) {
     console::clear_input_buffer( );
     std::cout << std::endl;
-    std::cout << ">>> ";
+    std::cout << "Search >>> ";
     std::cin >> inputStr;
 }
 
