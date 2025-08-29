@@ -38,8 +38,8 @@ void test_for_check_and_create_folder( );
 // 测试icu_encoding_handler
 void test_for_icu_encoding_handler( );
 
-// 测试poppler可以使用
-void test_for_poppler_could_use( );
+//测试排序函数
+void test_for_sort_table_by( );
 
 
 #endif    // !TEST_H

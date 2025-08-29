@@ -3,7 +3,7 @@
 /*
  * @file helper.h
  * @brief 一些辅助功能的函数
- * 
+ *
  * 作者：lscatfish
  * 邮箱：2561925435@qq.com
  */
@@ -15,7 +15,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
 
 /*
  * @brief 按回车键继续
@@ -61,5 +60,56 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str);
 // 开始前警告
 bool start_warning( );
 
+/*
+ * @brief 对table< string > 进行排序
+ * @param _inTable 待排序的表格
+ * @param _sortColIndex 依据哪一列进行排序（从0开始计数）
+ * @param _ascending 是否升序排序，默认为true（升序）
+ * @param _keepFirstCol 是否保持第一列不变，默认为true
+ * @param _excludeHeader 是否排除表头（第一行）进行排序，默认为true
+ * @return 排序是否成功
+ */
+bool sort_table_string_by(
+    table< std::string > &_inTable,
+    size_t                _sortColIndex,
+    bool                  _ascending     = true,
+    bool                  _keepFirstCol  = true,
+    bool                  _excludeHeader = true);
+
+/*
+ * @brief 对table< string > 进行排序(自定义排序)
+ * @param _inTable 待排序的表格
+ * @param _keepFirstCol 是否保持第一列不变
+ * @param _excludeHeader 是否排除表头（第一行）进行排序
+ * @param comparator 自定义的排序函数
+ * @return 排序是否成功
+ */
+template < typename Compare >
+bool sort_table_string_by(
+    table< std::string > &_inTable,
+    bool                  _keepFirstCol,
+    bool                  _excludeHeader,
+    Compare               comparator) {
+
+    if (_inTable.size( ) <= 1) return false;    // 如果表格行数小于等于1，无需排序
+    // 交换两行
+    auto swap_rows = [_keepFirstCol](std::vector< std::string > &a, std::vector< std::string > &b) {
+        std::swap(a, b);
+        if (_keepFirstCol && a.size( ) > 0 && b.size( ) > 0) {
+            std::swap(a[0], b[0]);    // 保持第一列不变
+        }
+    };
+    size_t startRow = _excludeHeader ? 1 : 0;    // 排除表头则从第二行开始排序
+    // 冒泡排序
+    for (size_t i = startRow; i < _inTable.size( ); i++) {
+        for (size_t j = startRow + 1; j < _inTable.size( ); j++) {
+            if (comparator(_inTable[j - 1], _inTable[j])) {
+                swap_rows(_inTable[j - 1], _inTable[j]);
+                // std::cout << "c";
+            }
+        }
+    }
+    return true;
+}
 
 #endif    // !HELPER_H

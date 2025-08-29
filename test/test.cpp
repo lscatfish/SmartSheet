@@ -257,3 +257,28 @@ void test_for_icu_encoding_handler( ) {
     }
     std::cout << encoding::sysdcode_to_utf8(anycode);
 }
+
+// 测试排序函数
+void test_for_sort_table_by( ) {
+    table< std::string > sheet = {
+        { U8C(u8"序号"), U8C(u8"姓名"), U8C(u8"学号"), U8C(u8"签到") },
+        { "1", U8C(u8"王二"), "20242246", "" },
+        { "2", U8C(u8"李四"), "20232435", "" },
+        { "3", U8C(u8"张三"), "20224344", "" },
+        { "4", U8C(u8"赵六"), "20254934", "" }
+    };
+    for (const auto &r : sheet) {
+        for (const auto& c : r) {
+            std::cout << c << "\t";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    sort_table_string_by(sheet, 2,false);
+    for (const auto &r : sheet) {
+        for (const auto &c : r) {
+            std::cout << c << "\t";
+        }
+        std::cout << std::endl;
+    }
+}

@@ -106,6 +106,7 @@ void set_path( ) {
         }
     }
     pause( );
+    fin.close( );
     return;
 }
 

@@ -1,5 +1,6 @@
 ﻿
 #include <basic.hpp>
+#include <console.h>
 #include <Encoding.h>
 #include <helper.h>
 #include <iostream>
@@ -7,7 +8,7 @@
 #include <QingziClass.h>
 #include <settings.h>
 #include <string>
-#include <console.h>
+#include <test/test.h>
 
 int main( ) {
 
@@ -40,11 +41,11 @@ int main( ) {
     }
 
     qClass->start( );
+    delete qClass;
 
 #else
 
-    file::DefFolder a(file::_OUTPUT_SIGN_QC_UNPDF_DIR_);
-    a.delete_with( );
+    test_for_sort_table_by( );
     pause( );
 
 #endif    // true
@@ -52,7 +53,6 @@ int main( ) {
     std::cout << std::endl
               << U8C(u8"程序结束...");
     pause( );
-    delete qClass;
 
     return 0;    // 程序正常结束
 }
