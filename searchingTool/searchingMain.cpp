@@ -11,7 +11,7 @@
 #include <thread>
 
 
-#if false
+#if true
 int main( ) {
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
     encoding::Init( );
@@ -110,7 +110,7 @@ int main( ) {
     screen.Loop(renderer);
 }
 
-#elif true
+#elif false
 
 #include <ftxui/component/component.hpp>
 #include <ftxui/component/screen_interactive.hpp>
@@ -122,54 +122,86 @@ int main( ) {
 #include <ftxui/screen/color.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/take_any_args.hpp>
+#include<ftxui/util/autoreset.hpp>
 
 /* =========================================试写ui============================================ */
 
+// 按“显示宽度”折行，保留完整 UTF-8 字符
+// 在 FTXUI 6.1.9 中正确计算显示宽度并折行
+std::vector< std::string > wrap_utf8(const std::string &text, size_t max_width) {
+    // 1. UTF-8 -> UTF-32（std::u32string）
+    auto u32 = ftxui::util::CharsetToUTF32(text);
+
+    std::vector< std::string > lines;
+    std::u32string             cur;
+    size_t                     cur_width = 0;
+
+    for (char32_t ch : u32) {
+        int w = ftxui::util::TextWidth(std::u32string(1, ch));    // 0/1/2
+        if (cur_width + w > max_width) {                          // 到达边界
+            lines.emplace_back(ftxui::util::UTF32ToCharset(cur));
+            cur.clear( );
+            cur_width = 0;
+        }
+        cur += ch;
+        cur_width += w;
+    }
+    if (!cur.empty( ))
+        lines.emplace_back(ftxui::util::UTF32ToCharset(cur));
+
+    return lines;
+}
 int main( ) {
     // 输入
     std::string inStr  = "";
     std::string outStr = "";
+    auto        screen = ftxui::ScreenInteractive::TerminalOutput( );
 
     ftxui::Component input_inStr = ftxui::Input(&inStr, "");    // 输入
 
-    auto component = ftxui::Container::Vertical({ input_inStr });
+    auto renderer = ftxui::Renderer(ftxui::Container::Vertical({ input_inStr }), [&] {
+        // ---------- 2. 先取当前终端宽度 ----------
+        int w = screen.dimx( )-4;    // 留一点边框余量
 
-    auto renderer = ftxui::Renderer(component, [&] {
+        // ---------- 3. 把文字按宽度切成多行 ----------
+        auto lines = wrap_utf8("Your input is " + outStr, w);
+
+        // ---------- 4. 用 vbox 把多行竖着排 ----------
+        ftxui::Elements rows;
+        for (auto &l : lines) rows.push_back(ftxui::text(l));
+
         return ftxui::vbox({ ftxui::hbox(ftxui::text("Input>>>"), input_inStr->Render( )),
                              ftxui::separator( ),
-                             ftxui::hbox(ftxui::paragraph("Your input is " + outStr)) });
+                             vbox(rows) | ftxui::border });
     });
 
-    auto screen = ftxui::ScreenInteractive::TerminalOutput( );
 
-    std::thread background_thread(
-        [&]( ) {
+    /* std::thread background_thread(
+         [&]( ) {
 
-        });
+         });*/
 
     // 添加输入机制
-    auto input_handler = ftxui::CatchEvent(
+    auto handler = ftxui::CatchEvent(
         [&](ftxui::Event event) {
             if (event == ftxui::Event::Return) {
                 screen.Post(
                     [&]( ) {
-                        outStr = inStr;
-                        inStr  = "";
+                        outStr += inStr;
+                        inStr.clear();
                     });
                 return true;
             }
+            if (event == ftxui::Event::Escape) {
+                screen.ExitLoopClosure( )( );    // 退出事件循环
+                screen.Exit( );
+                return true;                     // 表示事件已处理
+            }
             return false;
         });
-    // 为UI添加退出机制（按ESC键退出）
-    auto exit_handler = ftxui::CatchEvent([&](ftxui::Event event) {    // 用 CatchEvent 替代
-        if (event == ftxui::Event::Escape) {
-            screen.ExitLoopClosure( );    // 退出事件循环
-            return true;                  // 表示事件已处理
-        }
-        return false;    // 其他事件继续传递
-    });
-    renderer          = renderer | input_handler | exit_handler;
+    renderer |= handler;
     screen.Loop(renderer);
+    return 0;
 }
 
 
