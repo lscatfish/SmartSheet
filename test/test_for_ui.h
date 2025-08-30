@@ -8,7 +8,7 @@ void test_for_ftxui_input( );
 
 void test_for_ftxui_resizable_split( );
 
-
+void test_for_get_console_width( );
 
 
 

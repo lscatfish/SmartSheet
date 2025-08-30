@@ -46,13 +46,13 @@ void DoQingziClass::start( ) {
         file::DefFolder h(file::_OUTPUT_APP_DIR_, false);
         h.delete_with( );
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        console::clearConsole( );
+        console::clear_console( );
         attendance( );
     } else if (outWhichSheet == 2) {
         file::DefFolder i(file::_OUTPUT_ATT_DIR_, false);
         i.delete_with( );
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        console::clearConsole( );
+        console::clear_console( );
         statistics( );
     } else if (outWhichSheet == 3) {
         file::DefFolder f(file::_OUTPUT_SIGN_QC_UNPDF_DIR_, false);
@@ -60,14 +60,14 @@ void DoQingziClass::start( ) {
         f.delete_with( );
         g.delete_with( );
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        console::clearConsole( );
+        console::clear_console( );
         registration( );
     }
 }
 
 // 自检程序
 bool DoQingziClass::self_check( ) {
-    console::clearConsole( );
+    console::clear_console( );
     std::cout << U8C(u8"启动自检程序......") << std::endl
               << std::endl;
     std::cout << U8C(u8"检测工作区的文件夹：") << std::endl;
@@ -151,7 +151,7 @@ bool DoQingziClass::self_check( ) {
 int DoQingziClass::choose_function( ) {
     int a = 0;
     while (a != 1 && a != 2 && a != 3) {
-        console::clearConsole( );
+        console::clear_console( );
         std::cout << U8C(u8"请选择要生成excel表的类型：") << std::endl
                   << U8C(u8"1. 活动签到表") << std::endl;
         std::cout << U8C(u8"2. 出勤记录表") << std::endl;
@@ -322,7 +322,7 @@ void DoQingziClass::stats_applicants( ) {
 
     int a = 0;
     while (a != 1 && a != 2) {
-        console::clearConsole( );
+        console::clear_console( );
         std::cout << std::endl
                   << U8C(u8"请选择生成方式：") << std::endl
                   << U8C(u8"1.生成部分人员的签到表") << std::endl

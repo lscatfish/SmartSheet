@@ -8,6 +8,7 @@
 #include <QingziClass.h>
 #include <settings.h>
 #include <string>
+#include<test/test_for_ui.h>
 #include <test/test.h>
 
 int main( ) {
@@ -23,8 +24,8 @@ int main( ) {
     }
     settings::set_path( );
 
-#if true
-    console::clearConsole( );
+#if false
+    console::clear_console( );
     DoQingziClass *qClass = new DoQingziClass;
     if (!qClass) {
         std::cerr << U8C(u8"青字班模块初始化失败（内存分配失败），程序终止...") << std::endl;
@@ -45,11 +46,11 @@ int main( ) {
 
 #else
 
-    test_for_sort_table_by( );
+    test_for_get_console_width( );
+    std::cout << "\033[" << int(3) << ";0H";
     pause( );
 
 #endif    // true
-
     std::cout << std::endl
               << U8C(u8"程序结束...");
     pause( );

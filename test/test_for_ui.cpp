@@ -9,6 +9,7 @@
 #include "ftxui/component/screen_interactive.hpp"    // for Component, ScreenInteractive
 #include "ftxui/dom/elements.hpp"                    // for text, hbox, separator, Element, operator|, vbox, border
 #include "ftxui/util/ref.hpp"                        // for Ref
+#include <console.h>
 
 void test_for_ftxui_input( ) {
     using namespace ftxui;
@@ -75,6 +76,7 @@ void test_for_ftxui_input( ) {
 #include "ftxui/component/component_base.hpp"        // for ComponentBase
 #include "ftxui/component/screen_interactive.hpp"    // for ScreenInteractive
 #include "ftxui/dom/elements.hpp"                    // for Element, operator|, text, center, border
+#include <iostream>
 
 using namespace ftxui;
 
@@ -102,4 +104,11 @@ void test_for_ftxui_resizable_split( ) {
         Renderer(container, [&] { return container->Render( ) | border; });
 
     screen.Loop(renderer);
+}
+
+void test_for_get_console_width( ) {
+    int width = console::get_console_width( );
+    std::cout << "Console width: " << width << std::endl;
+    for ( int i=1;i<width;i++ )
+        std::cout << "*";
 }

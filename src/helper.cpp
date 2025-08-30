@@ -104,7 +104,7 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
 
 // 开始前警告
 bool start_warning( ) {
-    console::clearConsole( );
+    console::clear_console( );
     std::cout << U8C(u8"请确保已经关闭工作区（input、output与storage文件夹下所有文件都必须关闭）!!!") << std::endl;
     std::cout << std::endl
               << U8C(u8"-程序运行过程中会在output文件夹内生成结果，请勿删除output文件夹!!!") << std::endl;
