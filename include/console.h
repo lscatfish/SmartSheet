@@ -29,6 +29,12 @@
 // 控制台的空间
 namespace console {
 
+// 定义光标位置结构体，行和列从1开始计数
+struct CursorPosition {
+    int row;       // 行号
+    int column;    // 列号
+};
+
 // 清空控制台
 void clear_console( );
 
@@ -53,10 +59,13 @@ int get_console_width( );
 // 跨平台获取控制台高度（以行为单位）
 int get_console_height( );
 
-/* ========================================================================================================= */
-/* ========================================================================================================= */
-/* ========================================================================================================= */
+// 跨平台获取光标位置
+CursorPosition get_cursor_position( );
 
+/* ========================================================================================================= */
+/* ========================================================================================================= */
+/* ========================================================================================================= */
+#if false
 class ThreadSafeConsole {
 public:
     // 控制台尺寸结构体（宽=列数，高=行数，单位：字符）
@@ -130,6 +139,7 @@ private:
 /* ========================================================================================================= */
 /* ========================================================================================================= */
 
+
 // 重定义一个简单的控制台接口，方便调用
 class DefConsole {
 public:
@@ -155,24 +165,26 @@ public:
     void        println(const std::string &msg);                  // 输出字符串（换行）
     void        println( );                                       // 输出空行
     std::string read(const std::string &prompt = "");             // 读取一行输入
-
     template < typename _T >
     void print(_T __input) {
         std::cout << __input;
         history_.push_back(std::to_string(__input));
     }
-
     template < typename _T >
     void println(_T __input) {
         std::cout << __input;
         history_.push_back(std::to_string(__input) + "\n");
     }
 
-    void cursor(int row, int col);     // 设置光标位置
-    void clear( );                     // 清空控制台
-    void clear_after_line(int row);    // 清除从指定行到末尾的内容
+    /* ============================cursor_position========================================== */
+    void           set_cursor_position(int row, int col);    // 设置光标位置
+    CursorPosition get_cursor_position( );                   // 获取光标位置
 
-    SIZE get_console_size( );    // 获取当前控制台尺寸
+
+    void           clear( );                                 // 清空控制台
+    void           clear_after_line(int row);                // 清除从指定行到末尾的内容
+
+    SIZE get_size( );    // 获取当前控制台尺寸
 
     void std_console( );
 
@@ -188,6 +200,6 @@ private:
 }    // namespace console
 
 #define con console::DefConsole::getInstance( )    // 方便调用
-
+#endif
 
 #endif    // !CONSOLE_H

@@ -141,9 +141,64 @@ int get_console_height( ) {
 #endif
 }
 
+
+// 跨平台获取光标位置
+CursorPosition get_cursor_position( ) {
+#ifdef _
+    // Windows平台实现
+    HANDLE                     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        throw std::runtime_error(U8C(u8"无法获取控制台信息"));
+    }
+
+    // Windows API中坐标从0开始，转换为从1开始
+    return {
+        csbi.dwCursorPosition.Y + 1,    // 行号
+        csbi.dwCursorPosition.X + 1     // 列号
+    };
+#else
+    // Linux/macOS等Unix-like平台实现
+    // 使用ANSI转义序列请求光标位置
+    std::cout << "\033[6n" << std::flush;
+
+    // 解析响应，格式为: \033[行;列R
+    char c;
+    if (std::cin.get(c) && c != '\033') {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    if (std::cin.get(c) && c != '[') {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    CursorPosition pos;
+    if (!(std::cin >> pos.row)) {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    if (std::cin.get(c) && c != ';') {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    if (!(std::cin >> pos.column)) {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    if (std::cin.get(c) && c != 'R') {
+        throw std::runtime_error(U8C(u8"获取光标位置失败"));
+    }
+
+    return pos;
+#endif
+}
+
 /* ================================================================================================================== */
 /* ================================================================================================================== */
 /* ================================================================================================================== */
+
+#if false
 
 // -------------------------- 构造/析构函数 --------------------------
 ThreadSafeConsole::ThreadSafeConsole( )
@@ -321,11 +376,14 @@ ThreadSafeConsole::ConsoleSize ThreadSafeConsole::getSizeFromSystem( ) {
     return size;
 }
 
+
+
 /* ================================================================================================================== */
 /* ================================================================================================================== */
 /* ================================================================================================================== */
 
 DefConsole::DefConsole( ) {
+    update_size( );
     set_console_utf8( );    // 设置控制台为UTF-8编码
 }
 
@@ -372,8 +430,12 @@ std::string DefConsole::read(const std::string &prompt) {
     return in;
 }
 
-void DefConsole::cursor(int row, int col) {
-    set_console_cursor(row, col);
+void DefConsole::set_cursor_position(int row, int col) {
+    console::set_console_cursor(row, col);
+}
+
+CursorPosition DefConsole::get_cursor_position( ) {
+    return console::get_cursor_position( );
 }
 
 void DefConsole::clear( ) {
@@ -386,18 +448,18 @@ void DefConsole::clear_after_line(int row) {
     clear_console_after_line(row);
 }
 
-DefConsole::SIZE DefConsole::get_console_size( ) {
+DefConsole::SIZE DefConsole::get_size( ) {
     update_size( );
     return size_;
 }
 
 void DefConsole::std_console( ) {
     update_size( );
+
     std::cout << std::endl
-              << std::endl
               << std::endl;
-    cursor(0, size_.height - 4);    // 倒数第三行
-    for (int i = 0; i < size_.width - 1; i++)
+    set_cursor_position(0, size_.height - 3);    // 倒数第2行
+    for (int i = 0; i < size_.width; i++)
         std::cout << "-";
     std::cout << std::endl
               << prompt_;
@@ -407,5 +469,7 @@ void DefConsole::update_size( ) {
     size_.width  = get_console_width( );
     size_.height = get_console_height( );
 }
+
+#endif
 
 }    // namespace console
