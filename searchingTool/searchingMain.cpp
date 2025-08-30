@@ -20,7 +20,7 @@ int main( ) {
     SearchingTool s;
     std::string   inputStr = "";
     while (true) {
-        console::clearConsole( );
+        console::clear_console( );
         my_inputer(inputStr);
         if (inputStr == "$exit$") {
             break;

@@ -9,6 +9,8 @@
 #else
 #include <locale>    // Linux/macOS需要的头文件
 #include <csetjmp>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 #include <basic.hpp>
@@ -28,7 +30,11 @@
 #include <string>
 #include <thread>
 #include <mutex>
-#include <third_party/lib/ftxui-6.1.9-win64/Debug/include/ftxui/component/component.hpp>
+#include <ostream>
+#include <cstdint>
+#include <functional>
+#include <limits>
+#include <ios>
 
 // 控制台的空间
 namespace console {
@@ -42,7 +48,7 @@ void clear_input_buffer( ) {
 }
 
 // 清空控制台
-void clearConsole( ) {
+void clear_console( ) {
 #ifdef _WIN32
     // Windows 系统使用 "cls" 命令
     system("cls");
@@ -50,6 +56,20 @@ void clearConsole( ) {
     // Linux/macOS 系统使用 "clear" 命令
     system("clear");
 #endif
+}
+
+// 清空控制台第i行之后的内容(i>=0)
+void clear_console_after_line(int row) {
+    set_console_cursor(row, 0);
+    // 清除从当前位置到屏幕末尾的内容
+    std::cout << "\033[0J" << std::flush;
+}
+
+// 设置控制台光标(i行j列)
+void set_console_cursor(int row, int col) {
+    if (row < 0) row = 0;
+    if (col < 0) col = 0;
+    std::cout << "\033[" << row << ";" << col << "H" << std::flush;
 }
 
 /**
@@ -80,112 +100,312 @@ void set_console_utf8( ) {
 #endif
 }
 
+// 获取控制台宽度
+int get_console_width( ) {
+#ifdef _WIN32
+    HANDLE                     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    }
+    return -1;    // 获取失败时返回-1
+#else
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+        return w.ws_col;
+    }
+    return -1;    // 获取失败时返回-1
+#endif
+}
+
+// 跨平台获取控制台高度（以行为单位）
+int get_console_height( ) {
+#ifdef _WIN32
+    // Windows平台实现
+    HANDLE                     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        // 计算可见窗口的高度（行数）
+        return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+    return -1;    // 获取失败时返回-1
+#else
+    // Linux/macOS等Unix-like平台实现
+    struct winsize w;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) != -1) {
+        return w.ws_row;    // 返回行数
+    }
+    return -1;    // 获取失败时返回-1
+#endif
+}
+
+/* ================================================================================================================== */
+/* ================================================================================================================== */
 /* ================================================================================================================== */
 
-
-// -------------- 构造函数 --------------
-SplitConsole::SplitConsole( ) {
-    using namespace ftxui;    // 仅在函数内使用，保持头文件干净
-
-    /* 输入框组件 */
-    input_box_ = Input(&input_buf_, "type here…");
-
-    /* 根 UI：固定高度布局 */
-    root_ = Renderer([this] { return BuildUI( ); });
-
-    /* 后台 UI 线程 */
-    ui_thread_ = std::thread([this] {
-        auto screen = ftxui::ScreenInteractive::Fullscreen( );
-        screen.Loop(root_);
-    });
+// -------------------------- 构造/析构函数 --------------------------
+ThreadSafeConsole::ThreadSafeConsole( )
+    : isOutputThreadRunning_(true), isMonitorThreadRunning_(false), checkIntervalMs_(500) {
+    // 初始化：启动输出线程，获取初始控制台尺寸
+    outputThread_ = std::thread(&ThreadSafeConsole::outputThreadFunc, this);
+    currentSize_  = getSizeFromSystem( );
 }
 
-// -------------- 析构 --------------
-SplitConsole::~SplitConsole( ) {
-    if (auto *active = ftxui::ScreenInteractive::Active( ))
-        active->Post(ftxui::Event::Custom);
-    if (ui_thread_.joinable( )) ui_thread_.join( );
-}
-
-// -------------- 构造带输入的完整界面 --------------
-ftxui::Element SplitConsole::BuildUI( ) {
-    std::lock_guard< std::mutex > lock(mutex_);
-
-    using namespace ftxui;
-
-    /* 上 3/4 日志（可滚动） */
-    Elements runtime_lines;
-    for (const auto &l : runtime_buf_) runtime_lines.push_back(text(l));
-    auto top = vbox(std::move(runtime_lines)) | yflex;
-
-    /* 下 1/4 日志滚动区 */
-    Elements bottom_lines;
-    for (const auto &l : other_buf_) bottom_lines.push_back(text(l));
-    auto bottom_log = vbox(std::move(bottom_lines)) | yflex;
-
-    /* 输入栏（纯文本占位，固定 1 行） */
-    auto input_line = text(input_buf_) | size(HEIGHT, EQUAL, 1);
-
-    /* 最终布局：上下固定比例 */
-    return vbox({ top | yflex,
-                  separator( ),
-                  bottom_log | yflex,
-                  separator( ),
-                  input_line });
-}
-
-// -------------- 日志接口（线程安全） --------------
-void SplitConsole::AppendRuntime(const std::string &line) {
-    {
-        std::lock_guard< std::mutex > lock(mutex_);
-        runtime_buf_.push_back(line);
+ThreadSafeConsole::~ThreadSafeConsole( ) {
+    // 停止输出线程
+    isOutputThreadRunning_ = false;
+    outputCond_.notify_one( );    // 唤醒输出线程，避免阻塞
+    if (outputThread_.joinable( )) {
+        outputThread_.join( );
     }
-    Refresh( );
-}
-void SplitConsole::AppendOther(const std::string &line) {
-    {
-        std::lock_guard< std::mutex > lock(mutex_);
-        other_buf_.push_back(line);
-    }
-    Refresh( );
-}
-void SplitConsole::ClearRuntime( ) {
-    {
-        std::lock_guard< std::mutex > lock(mutex_);
-        runtime_buf_.clear( );
-    }
-    Refresh( );
-}
-void SplitConsole::ClearOther( ) {
-    {
-        std::lock_guard< std::mutex > lock(mutex_);
-        other_buf_.clear( );
-    }
-    Refresh( );
+
+    // 停止尺寸检测线程
+    stopSizeMonitor( );
 }
 
-// -------------- 阻塞读取一行 --------------
-std::string SplitConsole::ReadLine( ) {
-    new_line_ready_ = false;
-    input_buf_.clear( );
+// -------------------------- 原有IO功能实现 --------------------------
+void ThreadSafeConsole::write(const std::string &msg) {
+    std::lock_guard< std::mutex > lock(outputMutex_);
+    outputQueue_.push(msg);
+    outputCond_.notify_one( );    // 通知输出线程有新数据
+}
 
-    while (true) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+void ThreadSafeConsole::writeln(const std::string &msg) {
+    write(msg + "\n");    // 换行符统一由writeln添加
+}
 
-        std::lock_guard< std::mutex > lock(mutex_);
-        if (new_line_ready_) {
-            new_line_ready_ = false;
-            return last_line_;
+std::string ThreadSafeConsole::readLine(const std::string &prompt) {
+    std::lock_guard< std::mutex > lock(inputMutex_);    // 确保同一时间只有一个输入
+
+    // 先输出提示（用线程安全的write，避免与输出线程冲突）
+    if (!prompt.empty( )) {
+        write(prompt);
+        // 等待提示输出完成（关键：避免提示还在队列中，输入就先执行）
+        std::unique_lock< std::mutex > outputLock(outputMutex_);
+        while (!outputQueue_.empty( )) {
+            outputLock.unlock( );
+            std::this_thread::yield( );    // 让出CPU，等待输出线程处理
+            outputLock.lock( );
         }
     }
+
+    // 读取输入（标准输入，阻塞当前线程）
+    std::string input;
+    std::getline(std::cin, input);
+    return input;
 }
 
-// -------------- 触发 UI 刷新 --------------
-void SplitConsole::Refresh( ) {
-    if (auto *active = ftxui::ScreenInteractive::Active( ))
-        active->Post(ftxui::Event::Custom);
+char ThreadSafeConsole::readChar(const std::string &prompt) {
+    std::lock_guard< std::mutex > lock(inputMutex_);
+
+    if (!prompt.empty( )) {
+        write(prompt);
+        // 等待提示输出完成
+        std::unique_lock< std::mutex > outputLock(outputMutex_);
+        while (!outputQueue_.empty( )) {
+            outputLock.unlock( );
+            std::this_thread::yield( );
+            outputLock.lock( );
+        }
+    }
+
+    // 读取单个字符（忽略换行）
+    char c;
+    std::cin.get(c);
+    // 清除输入缓冲区的换行符（避免后续readLine读取空值）
+    if (c != '\n') {
+        std::cin.ignore(std::numeric_limits< std::streamsize >::max( ), '\n');
+    }
+    return c;
 }
 
+void ThreadSafeConsole::outputThreadFunc( ) {
+    while (isOutputThreadRunning_) {
+        std::unique_lock< std::mutex > lock(outputMutex_);
+        // 等待队列非空或线程停止
+        outputCond_.wait(lock, [this]( ) {
+            return !outputQueue_.empty( ) || !isOutputThreadRunning_;
+        });
 
+        // 消费输出队列
+        while (!outputQueue_.empty( ) && isOutputThreadRunning_) {
+            std::cout << outputQueue_.front( );
+            outputQueue_.pop( );
+        }
+        std::cout.flush( );    // 强制刷新缓冲区，确保即时输出
+    }
+}
+
+// -------------------------- 尺寸检测功能实现 --------------------------
+void ThreadSafeConsole::startSizeMonitor(uint32_t                                   checkIntervalMs,
+                                         std::function< void(const ConsoleSize &) > onSizeChanged) {
+    std::lock_guard< std::mutex > lock(sizeMutex_);
+    if (isMonitorThreadRunning_) {
+        return;    // 已在运行，避免重复启动
+    }
+
+    // 初始化检测参数
+    checkIntervalMs_        = checkIntervalMs;
+    onSizeChanged_          = onSizeChanged;
+    isMonitorThreadRunning_ = true;
+
+    // 启动检测线程
+    sizeMonitorThread_ = std::thread(&ThreadSafeConsole::sizeMonitorThreadFunc, this);
+}
+
+void ThreadSafeConsole::stopSizeMonitor( ) {
+    std::lock_guard< std::mutex > lock(sizeMutex_);
+    if (!isMonitorThreadRunning_) {
+        return;
+    }
+
+    isMonitorThreadRunning_ = false;
+    if (sizeMonitorThread_.joinable( )) {
+        sizeMonitorThread_.join( );
+    }
+}
+
+ThreadSafeConsole::ConsoleSize ThreadSafeConsole::getCurrentSize( ) {
+    std::lock_guard< std::mutex > lock(sizeMutex_);
+    return currentSize_;
+}
+
+void ThreadSafeConsole::sizeMonitorThreadFunc( ) {
+    while (isMonitorThreadRunning_) {
+        // 1. 获取当前系统尺寸
+        ConsoleSize newSize = getSizeFromSystem( );
+
+        // 2. 对比尺寸，若变化则更新并触发回调
+        {
+            std::lock_guard< std::mutex > lock(sizeMutex_);
+            if (newSize != currentSize_) {
+                currentSize_ = newSize;
+                // 触发回调（回调在检测线程中执行，若需主线程处理需自行加同步）
+                if (onSizeChanged_) {
+                    onSizeChanged_(currentSize_);
+                }
+            }
+        }
+
+        // 3. 等待检测间隔（避免CPU占用过高）
+        std::this_thread::sleep_for(std::chrono::milliseconds(checkIntervalMs_));
+    }
+}
+
+// 平台相关：获取控制台尺寸（核心系统API调用）
+ThreadSafeConsole::ConsoleSize ThreadSafeConsole::getSizeFromSystem( ) {
+    ConsoleSize size = { 80, 24 };    // 默认尺寸（兼容性 fallback）
+
+#ifdef _WIN32
+    // Windows：使用GetConsoleScreenBufferInfo获取尺寸
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (hConsole != INVALID_HANDLE_VALUE) {
+        CONSOLE_SCREEN_BUFFER_INFO csbi;
+        if (GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+            // 窗口尺寸 = 右下角坐标 - 左上角坐标 + 1（字符数）
+            size.width  = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+            size.height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+        }
+    }
+#else
+    // Linux/macOS：使用ioctl获取窗口尺寸（TIOCGWINSZ命令）
+    struct winsize ws;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) != -1) {
+        size.width  = ws.ws_col;    // 列数（宽度）
+        size.height = ws.ws_row;    // 行数（高度）
+    }
+#endif
+
+    return size;
+}
+
+/* ================================================================================================================== */
+/* ================================================================================================================== */
+/* ================================================================================================================== */
+
+DefConsole::DefConsole( ) {
+    set_console_utf8( );    // 设置控制台为UTF-8编码
+}
+
+DefConsole::~DefConsole( ) {
+}
+
+void DefConsole::print(const std::string &msg) {
+    if (msg.empty( )) return;
+    history_.push_back(msg);
+    std::cout << msg;
+}
+
+void DefConsole::println(const std::string &msg) {
+    if (msg.empty( )) {
+        println( );
+        return;
+    }
+    history_.push_back(msg + "\n");
+    std::cout << msg << std::endl;
+}
+
+void DefConsole::println( ) {
+    history_.push_back("\n");
+    std::cout << std::endl;
+}
+
+void DefConsole::print(const std::vector< std::string > &msgs) {
+    for (const auto &msg : msgs) {
+        if (msg.empty( )) {
+            println( );
+            continue;
+        }
+        println(msg);
+    }
+}
+
+std::string DefConsole::read(const std::string &prompt) {
+    std::string in;
+    std_console( );
+    if (!prompt.empty( )) {
+        std::cout << prompt;
+    }
+    std::cin >> in;
+    return in;
+}
+
+void DefConsole::cursor(int row, int col) {
+    set_console_cursor(row, col);
+}
+
+void DefConsole::clear( ) {
+    clear_console( );
+    history_.clear( );
+    std_console( );
+}
+
+void DefConsole::clear_after_line(int row) {
+    clear_console_after_line(row);
+}
+
+DefConsole::SIZE DefConsole::get_console_size( ) {
+    update_size( );
+    return size_;
+}
+
+void DefConsole::std_console( ) {
+    update_size( );
+    std::cout << std::endl
+              << std::endl
+              << std::endl;
+    cursor(0, size_.height - 4);    // 倒数第三行
+    for (int i = 0; i < size_.width - 1; i++)
+        std::cout << "-";
+    std::cout << std::endl
+              << prompt_;
+}
+
+void DefConsole::update_size( ) {
+    size_.width  = get_console_width( );
+    size_.height = get_console_height( );
+}
 
 }    // namespace console
