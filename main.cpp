@@ -8,8 +8,8 @@
 #include <QingziClass.h>
 #include <settings.h>
 #include <string>
-#include<test/test_for_ui.h>
 #include <test/test.h>
+#include <test/test_for_ui.h>
 
 int main( ) {
 
@@ -24,7 +24,7 @@ int main( ) {
     }
     settings::set_path( );
 
-#if false
+#if true
     console::clear_console( );
     DoQingziClass *qClass = new DoQingziClass;
     if (!qClass) {
@@ -51,6 +51,7 @@ int main( ) {
     pause( );
 
 #endif    // true
+
     std::cout << std::endl
               << U8C(u8"程序结束...");
     pause( );

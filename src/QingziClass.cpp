@@ -119,9 +119,12 @@ bool DoQingziClass::self_check( ) {
     file::DefFolder ipt(file::_INPUT_DIR_, false);
     file::DefFolder opt(file::_OUTPUT_DIR_, false);
     file::DefFolder stg(file::_STORAGE_DIR_, false);
-    if (ipt.check_occupied_utf8(true).size( ) != 0
-        && opt.check_occupied_utf8(true).size( ) != 0
-        && stg.check_occupied_utf8(true).size( ) != 0) {
+    // 拆分条件，确保每个函数都被调用
+    auto ipt_res = ipt.check_occupied_utf8(false, true);
+    auto opt_res = opt.check_occupied_utf8(false, true);    // 强制调用
+    auto stg_res = stg.check_occupied_utf8(false, true);    // 强制调用
+    //为什么这么写：[@lscatfish]因为编译器会把check_occupied_utf8.size优化掉 （+!_!+）
+    if (ipt_res.size( ) != 0 && opt_res.size( ) != 0 && stg_res.size( ) != 0) {
         std::cout << U8C(u8"工作区文件夹被占用，程序终止！！！") << std::endl;
         return false;
     } else {
@@ -166,6 +169,7 @@ int DoQingziClass::choose_function( ) {
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
+    return 1;
 }
 
 // @brief 加载全学员表的函数

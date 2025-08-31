@@ -19,6 +19,8 @@
 #include <ftxui/dom/elements.hpp>
 #include <ftxui/dom/node.hpp>
 #include <ftxui/screen/screen.hpp>
+#include <iomanip>
+#include <ios>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -38,11 +40,14 @@ struct CursorPosition {
 // 清空控制台
 void clear_console( );
 
-// 清空控制台第i行之后的内容(i>=0)
+// 清空控制台第i行之后的内容(i>0)
 void clear_console_after_line(int row);
 
-// 设置控制台光标(i行j列)
-void set_console_cursor(int row, int col);
+// 设置控制台光标(i行j列)(i=1)
+void set_cursor_position(int row, int col);
+
+// 跨平台获取光标位置
+CursorPosition get_cursor_position( );
 
 /**
  * 设置控制台输入输出编码为UTF-8
@@ -59,12 +64,51 @@ int get_console_width( );
 // 跨平台获取控制台高度（以行为单位）
 int get_console_height( );
 
-// 跨平台获取光标位置
-CursorPosition get_cursor_position( );
+// 设置光标隐藏属性（默认为隐藏）
+void set_cursor_hidden(bool hidden = true);
+
+/*
+ * @brief 通过lambda函数操作，设置进度条
+ * @param maxOpt 总的要进行的操作数
+ * @param allBar 总的进度条长度
+ * @param operate(size_t i) 每一次要进行的操作
+ */
+template < typename Operation >
+void opt_by_progressBar(size_t maxOpt, size_t allBar, Operation operate) {
+    if (maxOpt == 0) return;
+    set_cursor_hidden( );
+    const CursorPosition cursor = get_cursor_position( );
+    set_cursor_position(cursor.row, cursor.column);
+    for (size_t i = 1; i <= maxOpt; i++) {
+        set_cursor_position(cursor.row, cursor.column);
+        double persent = (i * 1.0 / maxOpt);
+        std::cout << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
+        std::cout << "%    [";
+        for (size_t j = 0; j < size_t(persent * allBar); j++)
+            std::cout << "#";
+        for (size_t j = 0; j < allBar - size_t(persent * allBar); j++)
+            std::cout << " ";
+        std::cout << "]";
+        operate(i - 1);
+    }
+    std::cout << "    Done!" << std::endl<<std::flush;
+    set_cursor_hidden(false);
+}
+
+/*
+ * @brief 设置一个进度条
+ * @param maxOpt 总的要进行的操作数(>0)
+ * @param allBar 总的进度条长度
+ * @param nowOpt 现在的操作数(>0)
+ * @param setRow 将进度条设置在第setRow行
+ * @param setCol 将进度条设置在第setCol列
+ */
+void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol);
 
 /* ========================================================================================================= */
 /* ========================================================================================================= */
 /* ========================================================================================================= */
+
 #if false
 class ThreadSafeConsole {
 public:
@@ -134,6 +178,7 @@ private:
     // 底层：调用系统API获取当前尺寸（平台相关）
     ConsoleSize getSizeFromSystem( );
 };
+#define con console::DefConsole::getInstance( )    // 方便调用
 
 /* ========================================================================================================= */
 /* ========================================================================================================= */
@@ -195,11 +240,9 @@ private:
 
     void update_size( );    // 更新当前控制台尺寸
 };
-
+#endif
 
 }    // namespace console
 
-#define con console::DefConsole::getInstance( )    // 方便调用
-#endif
 
 #endif    // !CONSOLE_H
