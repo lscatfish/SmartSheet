@@ -241,6 +241,7 @@ private:
     list< TextList< xlnt::workbook > > xlsxList_;
     list< TextList< pdf::DefPdf > >    pdfList_;
     list< TextList< docx::DefDocx > >  docxList_;
+
     // 解析list
     template < typename T >
     void parse_list(list< T > &_list, const list< std::string > _ex) {
@@ -263,17 +264,30 @@ private:
         // pause( );
         console::clear_console( );
     }
+
     // 搜索
     template < typename T >
     bool founder(list< std::string > &_out, const std::string &_target, list< T > &_list) {
         bool found = false;
-        for (auto &f : _list) {
+        /*for (auto &f : _list) {
             if (f.is_value_exists(_out, _target)) {
+                found = true;
+            }
+        }*/
+        for (size_t i = 0; i < _list.size( ); i++) {
+            if (_list[i].is_value_exists(_out, _target)) {
+                found = true;
+            }
+            if (fuzzy::search_substring(_list[i].u8Path, _target)) {
+                _out.push_back(
+                    "Found \"" + _target + "\" in path: \"" + _list[i].u8Path + "\"\n"
+                    + " -textual_path:   " + _list[i].u8Path);
                 found = true;
             }
         }
         return found;
     }
+
 };
 
 // 输入器

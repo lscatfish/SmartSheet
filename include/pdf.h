@@ -80,15 +80,15 @@ public:
     // @todo 按理来说这里应该先检测文件是否存在
     DefPdf(const std::string &_u8path)
         : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        path_     = _u8path;
-        document_ = poppler::document::load_from_file(path_);
+        u8path_     = _u8path;
+        document_ = poppler::document::load_from_file(u8path_);
         if (!document_) {
-            std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
+            std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
             isOK = false;
             return;
         }
         if (!pdfdoc_.isOk( )) {
-            std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
+            std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
             isOK = false;
             return;
         }
@@ -96,32 +96,34 @@ public:
         num_pages_ = pdfdoc_.getNumPages( );
         sheetType_ = SheetType::Others;
         isOK       = parse( );    // 解析
-        std::cout << " Done! " << std::endl;
+        //判断是否合理
+
+        std::cout << " Done!" << std::endl;
     };
 
     /*
-    * @brief 为searchingTool设计的构造函数
-    * @param _u8path u8地址
-    * @param out 输出的解析结果
-    */
-    DefPdf(const std::string &_u8path, list<list<CELL>>&out)
+     * @brief 为searchingTool设计的构造函数
+     * @param _u8path u8地址
+     * @param out 输出的解析结果
+     */
+    DefPdf(const std::string &_u8path, list< list< CELL > > &out)
         : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        path_     = _u8path;
-        document_ = poppler::document::load_from_file(path_);
+        u8path_     = _u8path;
+        document_ = poppler::document::load_from_file(u8path_);
         std::cout << "Parse PDF file: \"" << _u8path << "\"";
         if (!document_) {
-            std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
+            std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
             isOK = false;
             return;
         }
         if (!pdfdoc_.isOk( )) {
-            std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
+            std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
             isOK = false;
             return;
         }
         sheetType_ = SheetType::Others;
         num_pages_ = pdfdoc_.getNumPages( );
-        list< CELL > aP;//一页
+        list< CELL > aP;    // 一页
         for (int i = 1; i <= num_pages_; i++) {
             aP = extract_textblocks(i);
             out.push_back(aP);
@@ -148,7 +150,7 @@ public:
     void print_sheet( ) const;
 
 private:
-    std::string        path_;    // 文件所在的路径(utf8)
+    std::string        u8path_;    // 文件所在的路径(utf8)
     poppler::document *document_ = nullptr;
     PDFDoc             pdfdoc_;
     table< CELL >      sheet_;        // 提取出的表格
@@ -179,6 +181,20 @@ private:
      * @param _lineSegmentList 解析出的线
      */
     table< CELL > parse_line_to_sheet(const list< LineSegment > &_lineSegmentList);
+
+    /*
+     * @brief 直接按照文本框解析表格
+     * @param _textBoxList 解析出的内容
+     */
+    table< CELL > parse_textbox_to_sheet(const list< CELL > &_textBoxList);
+    /* ===================================为parse_textbox_to_sheet解析============================================== */
+    /*
+     * @brief 按行聚类，聚类条件是从中心开始最小行高的1.5倍内的所有水平中心线
+     * @param _textBoxList 解析出的内容
+     * @return 返回聚类之后的行
+     */
+    table< CELL > cluster_rows(list< CELL > _textBoxList);
+    /* ===================================为parse_textbox_to_sheet解析============================================== */
 
     /*
      * @brief 填充解析出的表格

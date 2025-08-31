@@ -2,9 +2,9 @@
 /* ====================================================================================================== *
  *
  * 考虑到存在头文件的互相调用的问题，这个头文件的设计是不安全的
- * 
+ *
  * 此文件的设计初衷是为了存放一些基本的类型定义和常用的模板函数，以供其他文件调用
- * 
+ *
  * 作者：lscatfish
  *
  * ======================================================================================================= */
@@ -107,6 +107,10 @@ struct GridPoint {
     GridPoint(const GridPoint &p) {
         *this = p;
     };
+
+    bool operator==(const GridPoint &b) const {
+        return this->x == b.x && this->y == b.y;
+    }
 };
 
 // 一个表格的单元格，包含在图片中的四个顶点的坐标
@@ -169,13 +173,25 @@ struct CELL {
     /*
      * @brief 基于poppler::text_box构造
      */
-    CELL(const poppler::text_box &tb, double _h, double deltaH = 0) {
-        GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ) + deltaH);
-        GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )) + deltaH);
+    CELL(const poppler::text_box &tb, double _h) {
+        GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ));
+        GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )));
         *this = CELL(p1, p2);
         for (const auto &c : tb.text( ).to_utf8( )) {
             this->text.push_back(c);
         }
+    }
+
+    /*
+    * @brief 基于CELL构造
+    * @param CELL的引用
+    * @param deltaH 增加的高度
+    */
+    CELL(const CELL& a, double deltaH) {
+        GridPoint p1(a.top_left.x, a.top_left.y + deltaH);
+        GridPoint p2(a.bottom_right.x, a.bottom_right.y + deltaH);
+        *this = CELL(p1, p2);
+        this->text = a.text;
     }
 
     /*
@@ -237,9 +253,44 @@ struct CELL {
     bool is_graphics_coincide_bottom_for_pdf(const CELL &stdcell) const {
         return this->top_left.y >= stdcell.bottom_right.y;
     }
+
+    /* ================================适配STL======================================== */
+    bool operator==(const CELL &b) const {
+        return this->bottom_left == b.bottom_left
+               && this->bottom_right == b.bottom_right
+               && this->corePoint == b.corePoint
+               && this->ifSelect == b.ifSelect
+               && this->text == b.text
+               && this->top_left == b.top_left
+               && this->top_right == b.top_right;
+    }
+
+    // 升序排序y
+    struct CompareByCorePointYAsc {
+        bool operator( )(const CELL &a, const CELL &b) const {
+            return a.corePoint.y < b.corePoint.y;
+        }
+    };
+    // 降序排序y
+    struct CompareByCorePointYDesc {
+        bool operator( )(const CELL &a, const CELL &b) const {
+            return a.corePoint.y > b.corePoint.y;
+        }
+    };
+    // 升序排序y
+    struct CompareByCorePointXAsc {
+        bool operator( )(const CELL &a, const CELL &b) const {
+            return a.corePoint.x < b.corePoint.x;
+        }
+    };
+    // 降序排序y
+    struct CompareByCorePointXDesc {
+        bool operator( )(const CELL &a, const CELL &b) const {
+            return a.corePoint.x > b.corePoint.x;
+        }
+    };
+    /* ================================适配STL======================================== */
 };
-
-
 
 
 #endif    // !BASIC_H
