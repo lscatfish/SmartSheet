@@ -1,5 +1,6 @@
 ﻿
 #include <basic.hpp>
+#include <console.h>
 #include <Encoding.h>
 #include <Files.h>
 #include <helper.h>
@@ -8,7 +9,6 @@
 #include <searchingTool/searchingTool.hpp>
 #include <string>
 #include <xlnt/workbook/workbook.hpp>
-#include<console.h>
 
 // 输入器
 void my_inputer(std::string &inputStr) {
