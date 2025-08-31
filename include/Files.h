@@ -240,16 +240,18 @@ public:
     /*
      * @brief 检测此文件夹下是否有有被占用的文件
      * @param ifp 是否打印被占用的文件
-     * @return 输出被占用的文件路径(utf8)
+     * @param progressBar 是否打开进度条，启用之后ifp不可用
+     * @return _occu8PathList 输出被占用的文件路径(utf8)
      */
-    list< std::string > check_occupied_utf8(bool ifp = false) const;
+    list< std::string > check_occupied_utf8(bool ifp = false, bool progressBar = false) const;
 
     /*
      * @brief 检测此文件夹下是否有有被占用的文件
      * @param ifp 是否打印被占用的文件
+     * @param progressBar 是否打开进度条，启用之后ifp不可用
      * @return 输出被占用的文件路径(sys)
      */
-    list< std::string > check_occupied_sys(bool ifp = false) const;
+    list< std::string > check_occupied_sys(bool ifp = false, bool progressBar = false) const;
 
     /*
      * @brief 检查文件路径是否在此文件夹存在

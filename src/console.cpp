@@ -35,6 +35,7 @@
 #include <functional>
 #include <limits>
 #include <ios>
+#include <iomanip>
 
 // 控制台的空间
 namespace console {
@@ -60,15 +61,15 @@ void clear_console( ) {
 
 // 清空控制台第i行之后的内容(i>=0)
 void clear_console_after_line(int row) {
-    set_console_cursor(row, 0);
+    set_cursor_position(row, 1);
     // 清除从当前位置到屏幕末尾的内容
     std::cout << "\033[0J" << std::flush;
 }
 
 // 设置控制台光标(i行j列)
-void set_console_cursor(int row, int col) {
-    if (row < 0) row = 0;
-    if (col < 0) col = 0;
+void set_cursor_position(int row, int col) {
+    if (row < 1) row = 1;
+    if (col < 1) col = 1;
     std::cout << "\033[" << row << ";" << col << "H" << std::flush;
 }
 
@@ -144,7 +145,7 @@ int get_console_height( ) {
 
 // 跨平台获取光标位置
 CursorPosition get_cursor_position( ) {
-#ifdef _
+#ifdef _WIN32
     // Windows平台实现
     HANDLE                     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -194,9 +195,43 @@ CursorPosition get_cursor_position( ) {
 #endif
 }
 
+// 设置光标隐藏属性（默认为隐藏）
+void set_cursor_hidden(bool hidden) {
+    if (hidden) {
+        std::cout << "\033[?25l" << std::flush;
+    } else {
+        std::cout << "\033[?25h" << std::flush;
+    }
+}
+
+/*
+ * @brief 设置一个进度条
+ * @param maxOpt 总的要进行的操作数(>0)
+ * @param allBar 总的进度条长度
+ * @param nowOpt 现在的操作数(>0)
+ * @param setRow 将进度条设置在第setRow行
+ * @param setCol 将进度条设置在第setCol列
+ */
+void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol) {
+    set_cursor_hidden( );
+    set_cursor_position(setRow, setCol);
+    double persent = nowOpt * 1.0 / maxOpt;
+    std::cout << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
+    std::cout << "%    [";
+    for (size_t j = 0; j < size_t(persent * allBar); j++)
+        std::cout << "#";
+    for (size_t j = 0; j < allBar - size_t(persent * allBar); j++)
+        std::cout << " ";
+    std::cout << "]";
+    if (nowOpt == maxOpt) std::cout << "    Done!" << std::endl;
+    set_cursor_hidden(false);
+}
+
+
 /* ================================================================================================================== */
 /* ================================================================================================================== */
 /* ================================================================================================================== */
+
 
 #if false
 
@@ -431,7 +466,7 @@ std::string DefConsole::read(const std::string &prompt) {
 }
 
 void DefConsole::set_cursor_position(int row, int col) {
-    console::set_console_cursor(row, col);
+    console::set_cursor_position(row, col);
 }
 
 CursorPosition DefConsole::get_cursor_position( ) {

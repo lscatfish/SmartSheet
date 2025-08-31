@@ -5,8 +5,8 @@
  ****************************************************************************/
 #include <algorithm>
 #include <basic.hpp>
+#include <console.h>
 #include <cstdio>
-#include <cstdlib>
 #include <cstdlib>
 #include <Encoding.h>
 #include <errhandlingapi.h>
@@ -310,7 +310,7 @@ size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::
  */
 bool DefFolder::copy_files_to(const std::string &_targetDir, const std::string &_filePath) const {
     // 采用u8编码
-    std::string u8path = encoding::sysdcode_to_utf8(_filePath);
+    std::string u8path  = encoding::sysdcode_to_utf8(_filePath);
     std::string syspath = encoding::utf8_to_sysdcode(_filePath);
     std::string sysDir  = encoding::utf8_to_sysdcode(_targetDir);
     if (!is_filepath_exist(u8path)) {
@@ -330,7 +330,7 @@ bool DefFolder::copy_files_to(const std::string &_targetDir, const std::string &
 size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
     list< std::string > speFilePathList = get_filepath_list( );    // 特定的文件
     std::string         sysDir          = encoding::utf8_to_sysdcode(_targetDir);
-    size_t sum = 0;
+    size_t              sum             = 0;
     for (const auto &fp : speFilePathList) {
         if (copy_file_to_folder(fp, sysDir)) {
             sum++;
@@ -472,10 +472,22 @@ list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_e
 /*
  * @brief 检测此文件夹下是否有有被占用的文件
  * @param ifp 是否打印被占用的文件
- * @param _occu8PathList 输出被占用的文件路径(utf8)
+ * @param progressBar 是否打开进度条，启用之后ifp不可用
+ * @return _occu8PathList 输出被占用的文件路径(utf8)
  */
-list< std::string > DefFolder::check_occupied_utf8(bool ifp) const {
+list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) const {
     list< std::string > out;
+    // 启用之后，ifp不可用
+    if (progressBar) {
+        std::cout << U8C(u8"检测") << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
+        console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
+            if (is_file_inuse(filePathList_[i])) {
+                out.push_back(u8filePathList_[i]);
+            }
+        });
+        std::cout << std::flush;
+        return out;
+    }
     for (size_t i = 0; i < filePathList_.size( ); i++) {
         if (is_file_inuse(filePathList_[i])) {
             if (ifp)
@@ -489,10 +501,22 @@ list< std::string > DefFolder::check_occupied_utf8(bool ifp) const {
 /*
  * @brief 检测此文件夹下是否有有被占用的文件
  * @param ifp 是否打印被占用的文件
+ * @param progressBar 是否打开进度条，启用之后ifp不可用
  * @return 输出被占用的文件路径(sys)
  */
-list< std::string > DefFolder::check_occupied_sys(bool ifp) const {
+list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) const {
     list< std::string > out;
+    // 启用之后，ifp不可用
+    if (progressBar) {
+        std::cout << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
+        console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
+            if (is_file_inuse(filePathList_[i])) {
+                out.push_back(filePathList_[i]);
+            }
+        });
+        std::cout << std::flush;
+        return out;
+    }
     for (size_t i = 0; i < filePathList_.size( ); i++) {
         if (is_file_inuse(filePathList_[i])) {
             if (ifp)
