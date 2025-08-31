@@ -211,7 +211,7 @@ bool file::DefFolder::erase_with(const std::string _path) {
     size_t idx    = 0;
     bool   iffind = false;
     for (; idx < this->u8filePathList_.size( ); idx++) {
-        if (this->u8filePathList_.front( ) == u8) {
+        if (this->u8filePathList_[idx] == u8) {
             iffind = true;
             break;
         }

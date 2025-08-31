@@ -123,7 +123,7 @@ bool DoQingziClass::self_check( ) {
     auto ipt_res = ipt.check_occupied_utf8(false, true);
     auto opt_res = opt.check_occupied_utf8(false, true);    // 强制调用
     auto stg_res = stg.check_occupied_utf8(false, true);    // 强制调用
-    //为什么这么写：[@lscatfish]因为编译器会把check_occupied_utf8.size优化掉（+!_!+）
+    // 为什么这么写：[@lscatfish]因为编译器会把check_occupied_utf8.size优化掉（+!_!+）
     if (ipt_res.size( ) != 0 && opt_res.size( ) != 0 && stg_res.size( ) != 0) {
         std::cout << U8C(u8"工作区文件夹被占用，程序终止！！！") << std::endl;
         return false;
@@ -146,7 +146,6 @@ bool DoQingziClass::self_check( ) {
 
     std::cout << std::endl
               << U8C(u8"自检完毕...") << std::endl;
-    std::this_thread::sleep_for(std::chrono::seconds(1));
     pause( );
     return true;
 }
@@ -815,7 +814,7 @@ void DoQingziClass::registration( ) {
     if (paths.size( ) != 0) {
         for (const auto &u8p : paths) {
             pdf::DefPdf aPdf(u8p);
-            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {    // 报名表
+            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {    // 应聘表
                 DefPerson per = aPdf.get_person( );
                 auto      it  = personStd_.end( );
                 search_person(it, per);
@@ -823,16 +822,25 @@ void DoQingziClass::registration( ) {
                     it->otherInformation[U8C(u8"文件地址")] += (u8p + " ; ");
                     it->ifsign       = true;
                     it->signPosition = per.signPosition;
-                    pdfFiles.erase_with(u8p);
+                    if (!pdfFiles.erase_with(u8p))
+                        pause( );
                 } else {
                     per.ifsign                              = true;
                     per.otherInformation[U8C(u8"文件地址")] = u8p;
                     per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
                     per.otherInformation[U8C(u8"备注")]     = U8C(u8"未找到docx文档");
                     personStd_.push_back(per);
-                    pdfFiles.erase_with(u8p);
+                    if (!pdfFiles.erase_with(u8p))
+                        pause( );
                 }
                 file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
+            } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
+                DefPerson per = aPdf.get_person( );
+               /* aPdf.print_sheet( );
+                pause( );*/
+                per.otherInformation[U8C(u8"文件地址")] = u8p;
+                personStd_.push_back(per);
+                pdfFiles.erase_with(u8p);
             }
         }
     }

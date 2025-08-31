@@ -30,5 +30,6 @@ bool SearchingTool::search_value(list< std::string > &_out, const std::string &_
     if (founder(_out, _target, docxList_)) {
         found = true;
     }
+
     return found;
 };
