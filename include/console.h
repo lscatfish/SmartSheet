@@ -91,7 +91,8 @@ void opt_by_progressBar(size_t maxOpt, size_t allBar, Operation operate) {
         std::cout << "]";
         operate(i - 1);
     }
-    std::cout << "    Done!" << std::endl<<std::flush;
+    std::cout << "    Done!" << std::endl
+              << std::flush;
     set_cursor_hidden(false);
 }
 
@@ -102,8 +103,9 @@ void opt_by_progressBar(size_t maxOpt, size_t allBar, Operation operate) {
  * @param nowOpt 现在的操作数(>0)
  * @param setRow 将进度条设置在第setRow行
  * @param setCol 将进度条设置在第setCol列
+ * @param prompt 提示信息
  */
-void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol);
+void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol, const std::string &prompt = "");
 
 /* ========================================================================================================= */
 /* ========================================================================================================= */

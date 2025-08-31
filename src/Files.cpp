@@ -508,7 +508,7 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) co
     list< std::string > out;
     // 启用之后，ifp不可用
     if (progressBar) {
-        std::cout << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
+        std::cout << U8C(u8"检测") << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
             if (is_file_inuse(filePathList_[i])) {
                 out.push_back(filePathList_[i]);

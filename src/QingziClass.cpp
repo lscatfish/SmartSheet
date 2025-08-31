@@ -123,7 +123,7 @@ bool DoQingziClass::self_check( ) {
     auto ipt_res = ipt.check_occupied_utf8(false, true);
     auto opt_res = opt.check_occupied_utf8(false, true);    // 强制调用
     auto stg_res = stg.check_occupied_utf8(false, true);    // 强制调用
-    //为什么这么写：[@lscatfish]因为编译器会把check_occupied_utf8.size优化掉 （+!_!+）
+    //为什么这么写：[@lscatfish]因为编译器会把check_occupied_utf8.size优化掉（+!_!+）
     if (ipt_res.size( ) != 0 && opt_res.size( ) != 0 && stg_res.size( ) != 0) {
         std::cout << U8C(u8"工作区文件夹被占用，程序终止！！！") << std::endl;
         return false;
@@ -141,6 +141,7 @@ bool DoQingziClass::self_check( ) {
     g.delete_with( );
     h.delete_with( );
     i.delete_with( );
+    优化了删除位置
     */
 
     std::cout << std::endl

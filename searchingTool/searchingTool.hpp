@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 #include <basic.hpp>
+#include <console.h>
 #include <Encoding.h>
 #include <Files.h>
 #include <Fuzzy.h>
@@ -22,6 +23,7 @@
 #include <iostream>
 #include <pdf.h>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <word.h>
 #include <xlnt/workbook/workbook.hpp>
@@ -80,7 +82,6 @@ struct TextList< xlnt::workbook > {
     list< table< xlsxCELL > > sheetList;        // excel表格的所有工作表
     size_t                    searchNum = 0;    // 搜索到的单元格数量
 
-
     TextList(const std::string &_sysPath, const std::string &_u8Path)
         : sysPath(_sysPath), u8Path(_u8Path) {
         fileType = FileType::XLSX;
@@ -119,10 +120,11 @@ struct TextList< xlnt::workbook > {
                 for (const auto &cell : row) {
                     if (!cell.is_empty( )) {
                         if (fuzzy::search_substring(cell.value, _target)) {
-                            _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                                           + " -sheet:    \"" + cell.sheetName + "\"\n"
-                                           + " -position: \"" + cell.address + "\"\n"
-                                           + " -textual:   " + cell.value );
+                            _out.push_back(
+                                "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
+                                + " -sheet:    \"" + cell.sheetName + "\"\n"
+                                + " -position: \"" + cell.address + "\"\n"
+                                + " -textual:   " + cell.value);
                             found = true;
                         }
                     }
@@ -165,10 +167,11 @@ struct TextList< docx::DefDocx > {
                 for (const auto &cell : row) {
                     if (cell.content.size( ) != 0) {
                         if (fuzzy::search_substring(cell.content, _target)) {
-                            _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                                           + U8C(u8" -page:     页 ") + std::to_string(page) + "\n"
-                                           + U8C(u8" -position: 行 ") + std::to_string(cell.row + 1) + U8C(u8" 列 ") + std::to_string(cell.col + 1) + "\n"
-                                           + " -textual:   " + cell.content );
+                            _out.push_back(
+                                "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
+                                + U8C(u8" -page:     页 ") + std::to_string(page) + "\n"
+                                + U8C(u8" -position: 行 ") + std::to_string(cell.row + 1) + U8C(u8" 列 ") + std::to_string(cell.col + 1) + "\n"
+                                + " -textual:   " + cell.content);
                             found = true;
                         }
                     }
@@ -206,13 +209,16 @@ struct TextList< pdf::DefPdf > {
             for (const auto &c : outList[i]) {
                 if (!c.text.empty( )) {
                     if (fuzzy::search_substring(c.text, _target)) {
-                        _out.push_back("Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                                       + U8C(u8" -page:     页 ") + std::to_string(i + 1) + "\n"
-                                       + " -textual:   " + c.text );
+                        _out.push_back(
+                            "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
+                            + U8C(u8" -page:     页 ") + std::to_string(i + 1) + "\n"
+                            + " -textual:   " + c.text);
+                        found = true;
                     }
                 }
             }
         }
+        return found;
     }
 };
 
@@ -221,7 +227,7 @@ class SearchingTool : public file::DefFolder {
 public:
     // 构造方式
     SearchingTool( )
-        : file::DefFolder(file::_INPUT_DIR_, true) {
+        : file::DefFolder(file::_INPUT_DIR_, false) {
         parse_list(xlsxList_, list< std::string >{ ".xlsx" });
         parse_list(pdfList_, list< std::string >{ ".pdf", ".PDF" });
         parse_list(docxList_, list< std::string >{ ".docx", ".DOCX" });
@@ -242,9 +248,20 @@ private:
         list< std::string > sysPathList = this->get_filepath_list(_ex);
 
         for (size_t i = 0; i < sysPathList.size( ); i++) {
+            if constexpr (std::is_same_v< T, TextList< xlnt::workbook > >) {
+                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"xlsx文件解析"));
+            } else if constexpr (std::is_same_v< T, TextList< pdf::DefPdf > >) {
+                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"pdf文件解析"));
+            } else if constexpr (std::is_same_v< T, TextList< docx::DefDocx > >) {
+                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"docx文件解析"));
+            }
+            std::cout << std::endl;
             T afile(sysPathList[i], u8PathList[i]);
+            console::clear_console_after_line(2);
             _list.push_back(afile);
         }
+        // pause( );
+        console::clear_console( );
     }
     // 搜索
     template < typename T >
