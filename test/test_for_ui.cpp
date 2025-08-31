@@ -109,6 +109,6 @@ void test_for_ftxui_resizable_split( ) {
 void test_for_get_console_width( ) {
     int width = console::get_console_width( );
     std::cout << "Console width: " << width << std::endl;
-    for ( int i=1;i<width;i++ )
+    for (int i = 1; i < width; i++)
         std::cout << "*";
 }

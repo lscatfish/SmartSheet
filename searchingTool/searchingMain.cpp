@@ -122,7 +122,7 @@ int main( ) {
 #include <ftxui/screen/color.hpp>
 #include <ftxui/component/component_base.hpp>
 #include <ftxui/dom/take_any_args.hpp>
-#include<ftxui/util/autoreset.hpp>
+#include <ftxui/util/autoreset.hpp>
 
 /* =========================================试写ui============================================ */
 
@@ -161,7 +161,7 @@ int main( ) {
 
     auto renderer = ftxui::Renderer(ftxui::Container::Vertical({ input_inStr }), [&] {
         // ---------- 2. 先取当前终端宽度 ----------
-        int w = screen.dimx( )-4;    // 留一点边框余量
+        int w = screen.dimx( ) - 4;    // 留一点边框余量
 
         // ---------- 3. 把文字按宽度切成多行 ----------
         auto lines = wrap_utf8("Your input is " + outStr, w);
@@ -188,14 +188,14 @@ int main( ) {
                 screen.Post(
                     [&]( ) {
                         outStr += inStr;
-                        inStr.clear();
+                        inStr.clear( );
                     });
                 return true;
             }
             if (event == ftxui::Event::Escape) {
                 screen.ExitLoopClosure( )( );    // 退出事件循环
                 screen.Exit( );
-                return true;                     // 表示事件已处理
+                return true;    // 表示事件已处理
             }
             return false;
         });

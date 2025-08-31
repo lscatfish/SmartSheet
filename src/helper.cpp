@@ -136,16 +136,16 @@ bool start_warning( ) {
  */
 bool sort_table_string_by(
     table< std::string > &_inTable,
-    size_t               _sortColIndex,
-    bool                 _ascending,
-    bool                 _keepFirstCol,
-    bool                 _excludeHeader) {
+    size_t                _sortColIndex,
+    bool                  _ascending,
+    bool                  _keepFirstCol,
+    bool                  _excludeHeader) {
     if (_inTable.size( ) <= 1) return false;                   // 如果表格行数小于等于1，无需排序
     if (_sortColIndex >= _inTable[0].size( )) return false;    // 如果排序列索引超出范围，返回false
 
     /* ==============================lambda===================================== */
     // 比较两列,是否满足排序条件
-    auto comparator = [_sortColIndex, _ascending](const std::vector< std::string > &a, const std::vector< std::string > &b)->bool {
+    auto comparator = [_sortColIndex, _ascending](const std::vector< std::string > &a, const std::vector< std::string > &b) -> bool {
         if (_sortColIndex >= a.size( ) || _sortColIndex >= b.size( )) {
             return false;    // 如果索引超出范围，保持原有顺序
         }
