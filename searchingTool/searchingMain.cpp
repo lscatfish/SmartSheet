@@ -205,12 +205,6 @@ int main( ) {
 }
 
 
-
-
-
-
-
-
 #else
 
 #include <ftxui/component/component.hpp>

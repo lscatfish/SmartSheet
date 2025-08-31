@@ -211,12 +211,13 @@ void set_cursor_hidden(bool hidden) {
  * @param nowOpt 现在的操作数(>0)
  * @param setRow 将进度条设置在第setRow行
  * @param setCol 将进度条设置在第setCol列
+ * @param prompt 提示信息
  */
-void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol) {
+void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol, const std::string &prompt) {
     set_cursor_hidden( );
     set_cursor_position(setRow, setCol);
     double persent = nowOpt * 1.0 / maxOpt;
-    std::cout << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
+    std::cout << prompt << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
     std::cout << "%    [";
     for (size_t j = 0; j < size_t(persent * allBar); j++)
         std::cout << "#";
