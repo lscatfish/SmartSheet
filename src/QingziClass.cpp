@@ -654,7 +654,7 @@ void DoQingziClass::stats_checkinners( ) {
                   << std::endl;
     };
 
-    // ===================================================================================================/
+    // =================================================================================================== /
 
     // 1.拉取文件夹中的所有照片的地址
     list< std::string > u8path;
@@ -688,8 +688,6 @@ void DoQingziClass::stats_checkinners( ) {
         // 打印结果
         sheet_printer(sh);
         extract_attendance_to_vector(sh, it_cfPAN->first);
-        std::cout << "cijisjkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjscn";
-
     }
 
     // 4.解析人员的签到情况到全人员表
@@ -942,7 +940,7 @@ void DoQingziClass::save_registrationSheet( ) {
         sh.push_back(line);
         serial++;
     }
-   // std::cout << "\n\njunmjkmknujk\n";
+    // std::cout << "\n\njunmjkmknujk\n";
     file::save_registrationSheet_to_xlsx(sh);
 }
 
