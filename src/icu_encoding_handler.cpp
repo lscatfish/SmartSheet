@@ -1,22 +1,28 @@
 ﻿/**
  * @file icu_encoding_handler.cpp
  * @brief ICU 77.1编码处理工具实现
- * 
+ *
  * 作者：lscatfish、KIMI
- * 
+ *
  */
 
 #include <basic.hpp>
+#include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <icu_encoding_handler.h>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <unicode/uchar.h>
+#include <unicode/uclean.h>
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 #include <unicode/ucsdet.h>
 #include <unicode/uloc.h>
 #include <unicode/unistr.h>
+#include <unicode/utf8.h>
+#include <unicode/utypes.h>
 #include <vector>
 #include <windows.h>
 
@@ -282,5 +288,68 @@ std::string get_system_default_encoding( ) {
 
     return std::string(defaultEncoding);
 }
+
+// 检测u8序列是否合理
+ValidationResult check_utf8_validity(const std::string &utf8Bytes) {
+    ValidationResult out;
+    UErrorCode       status = U_ZERO_ERROR;
+
+    // 1. 创建 UTF-8 → UTF-16 的转换器
+    UConverter *cnv = ucnv_open("UTF-8", &status);
+    if (U_FAILURE(status))
+        throw std::runtime_error(U8C(u8"ICU: 无法创建转换器"));
+
+    // 2. 设置“替换”回调，用于统计 U+FFFD 的出现次数
+    int32_t subCount = 0;
+    ucnv_setToUCallBack(cnv, UCNV_TO_U_CALLBACK_SUBSTITUTE,
+                        &subCount, nullptr, nullptr, &status);
+    if (U_FAILURE(status)) {
+        ucnv_close(cnv);
+        throw std::runtime_error(U8C(u8"ICU: 设置回调失败"));
+    }
+
+    // 3. 执行转换：UTF-8 → UTF-16
+    const char             *src      = utf8Bytes.data( );
+    const char             *srcLimit = src + utf8Bytes.size( );
+    std::vector< char16_t > u16buf(utf8Bytes.size( ) + 1);    // 空间足够
+    char16_t               *dst      = u16buf.data( );
+    char16_t               *dstLimit = dst + u16buf.size( );
+
+    ucnv_toUnicode(cnv,
+                   &dst, dstLimit,
+                   &src, srcLimit,
+                   nullptr,    // pivot
+                   true,       // flush
+                   &status);
+
+    // 4. 如果有非法字节序列，统计并提取
+    if (subCount > 0) {
+        out.hasError = true;
+
+        // ICU 每次只能取最近一次非法序列，需要循环
+        char   rawBytes[16];    // 手动指定长度，足够容纳最长 UTF-8 序列
+        int8_t rawLen = 0;
+        while (true) {
+            status = U_ZERO_ERROR;
+            ucnv_getInvalidChars(cnv, rawBytes, &rawLen, &status);
+            if (U_FAILURE(status) || rawLen <= 0) break;
+
+            std::string hex;
+            hex.reserve(rawLen * 3);
+            for (int8_t i = 0; i < rawLen; ++i) {
+                char buf[4];
+                snprintf(buf, sizeof(buf), "%02X ", static_cast< uint8_t >(rawBytes[i]));
+                hex += buf;
+            }
+            out.invalidSequences.emplace_back(std::move(hex));
+
+            ucnv_reset(cnv);    // 继续下一段
+        }
+    }
+
+    ucnv_close(cnv);
+    return out;
+}
+
 
 }    // namespace ICUEncodingHandler

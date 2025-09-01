@@ -29,7 +29,7 @@ void Init( );
  * @return 宽字符wstring（win里面实际是utf-16）
  * @note 只能在windows编译
  **/
-std::wstring utf8_to_wstring_win(const std::string u8);
+std::wstring utf8_to_wstring(const std::string u8);
 
 /*
  * @brief 将任意中文（简体）格式转化为utf8
@@ -51,6 +51,27 @@ std::string utf8_to_sysdcode(const std::string &_u8);
  * @return 是utf8返回true，否则返回false
  */
 bool is_utf8(const std::string &_u8);
+
+/*
+ * @brief 检测utf8字符串是否有错误
+ * @param utf8 要检测的utf8字符串
+ * @return 返回是否有效
+ */
+bool check_utf8_validity(const std::string &utf8);
+
+/*
+ * @brief 检测一个table<string>内部是否有非法字符集
+ * @param _sheet 输入的sheet
+ * @return 返回是否有效
+ */
+bool check_sheet_utf8_validity(const table< std::string > &_sheet);
+
+/*
+ * @brief 修复table<string>内部的非法字符集错误
+ * @param _sheet 输入的sheet
+ * @return 返回修复的字符集的错误数量
+ */
+size_t repair_sheet_utf8_invalidity(table< std::string > &_sheet);
 
 }    // namespace encoding
 

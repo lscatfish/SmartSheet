@@ -8,6 +8,7 @@
 #ifndef ICU_ENCODING_HANDLER_H
 #define ICU_ENCODING_HANDLER_H
 
+#include <cstdint>
 #include <string>
 #include <unicode/utypes.h>
 #include <vector>
@@ -25,6 +26,12 @@ struct EncodingDetectionResult {
  * @brief ICU编码处理工具类
  */
 namespace ICUEncodingHandler {
+
+// 用于检测string是否存在非法序列
+struct ValidationResult {
+    bool                       hasError = false;    ///< 是否存在非法字节序列
+    std::vector< std::string > invalidSequences;    ///< 每个非法字节序列的十六进制表示
+};
 
 /**
  * @brief 检测字符串的编码格式
@@ -72,6 +79,8 @@ bool convert_from_utf8(const char *utf8Data, int32_t utf8DataLen,
  */
 std::string get_system_default_encoding( );
 
+// 检测u8序列是否合理
+ValidationResult check_utf8_validity(const std::string &utf8Bytes);
 
 }    // namespace ICUEncodingHandler
 
