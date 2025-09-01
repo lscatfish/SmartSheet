@@ -833,18 +833,23 @@ void DoQingziClass::registration( ) {
                     if (!pdfFiles.erase_with(u8p))
                         pause( );
                 }
+                // std::cout << per.name;
                 file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
             } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
                 DefPerson per = aPdf.get_person( );
-               /* aPdf.print_sheet( );
-                pause( );*/
+
+                aPdf.print_sheet( );
+                pause( );
+
                 per.otherInformation[U8C(u8"文件地址")] = u8p;
                 personStd_.push_back(per);
                 pdfFiles.erase_with(u8p);
             }
         }
     }
-
+    /* std::cout << std::endl
+               << std::endl
+               << "kfjhbgtvjfnkcmld,mvjnhbgnjfk" << std::endl;*/
     save_registrationSheet( );
 
     // 筛选pdf文件

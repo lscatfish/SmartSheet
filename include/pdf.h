@@ -98,6 +98,14 @@ public:
         isOK       = parse( );    // 解析
         //判断是否合理
 
+
+
+
+
+
+
+
+        // 判断是否合理
         std::cout << " Done!" << std::endl;
     };
 
