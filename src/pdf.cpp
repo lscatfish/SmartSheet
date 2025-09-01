@@ -1,7 +1,6 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
-#include <basic.hpp>
 #include <console.h>
 #include <cstdlib>
 #include <Fuzzy.h>
@@ -115,15 +114,29 @@ bool DefPdf::parse( ) {
         if (lineSegmentList.size( ) != 0) {
             sheet_ = parse_line_to_sheet(lineSegmentList);    // 先解析直线sheet
             fill_sheet(textBoxList);                          // 填充sheet_
-            // std::cout << "\nkjnhubdvnj\n";
+            // 填充之后要判断是否正确
+            DefPerson per = get_person( );
+            if (per.name.empty( ) || per.studentID.empty( )) {    // 这是必备的
+                sheet_.clear( );
+                sheet_ = parse_textbox_to_sheet(textBoxList);    // 采用聚类解析表格
+                per    = get_person( );
+                if (per.name.empty( ) || per.studentID.empty( ))
+                    return false;
+                else
+                    return true;
+            }
             return true;
         } else {
             // 其他解析方式
-            sheet_ = parse_textbox_to_sheet(textBoxList);
-            return true;
+            sheet_        = parse_textbox_to_sheet(textBoxList);
+            DefPerson per = get_person( );
+            if (per.name.empty( ) || per.studentID.empty( ))
+                return false;
+            else
+                return true;
         }
     }
-    return false;
+    return false;    // 免得报warning
 }
 
 /*
@@ -261,19 +274,12 @@ table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
  */
 void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
     // 填充之前对位置进行修正
-    double deltaH     = 18000;    // 修正参数
-    bool   ifcontinue = false;
+    double deltaH = 18000;    // 修正参数
     for (const auto &c : _textBoxList) {
         if (c.text == U8C(u8"姓名")) {
-            deltaH     = sheet_[0][0].corePoint.y - c.corePoint.y;
-            ifcontinue = true;
+            deltaH = sheet_[0][0].corePoint.y - c.corePoint.y;
             break;
         }
-    }
-    if (!ifcontinue) {
-        isOK       = false;
-        sheetType_ = SheetType::Others;    // 没办法，只能这样
-        return;
     }
 
     // 重构_textBoxList
