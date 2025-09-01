@@ -80,7 +80,7 @@ public:
     // @todo 按理来说这里应该先检测文件是否存在
     DefPdf(const std::string &_u8path)
         : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        u8path_     = _u8path;
+        u8path_   = _u8path;
         document_ = poppler::document::load_from_file(u8path_);
         if (!document_) {
             std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
@@ -96,16 +96,7 @@ public:
         num_pages_ = pdfdoc_.getNumPages( );
         sheetType_ = SheetType::Others;
         isOK       = parse( );    // 解析
-        //判断是否合理
 
-
-
-
-
-
-
-
-        // 判断是否合理
         std::cout << " Done!" << std::endl;
     };
 
@@ -116,7 +107,7 @@ public:
      */
     DefPdf(const std::string &_u8path, list< list< CELL > > &out)
         : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        u8path_     = _u8path;
+        u8path_   = _u8path;
         document_ = poppler::document::load_from_file(u8path_);
         std::cout << "Parse PDF file: \"" << _u8path << "\"";
         if (!document_) {
