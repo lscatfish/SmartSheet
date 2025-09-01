@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <Encoding.h>
 #include <exception>
+#include <functional>
 #include <helper.h>
 #include <imgs.h>
 #include <iostream>
@@ -46,8 +47,8 @@ public:
 
         // 获取网格线坐标
         // 获取网格线坐标（设置边缘阈值为10像素，可根据实际情况调整）
-        this->horizontalYs_ = get_horizontal_lineYs(horizontal, int(img.rows * 0.005));    // 水平线的y坐标
-        this->verticalXs_   = get_vertical_lineXs(vertical, int(img.cols * 0.005));        // 竖线的x坐标
+        this->horizontalYs_ = get_horizontal_lineYs(horizontal, int(img.rows * 0.01));    // 水平线的y坐标
+        this->verticalXs_   = get_vertical_lineXs(vertical, int(img.cols * 0.01));        // 竖线的x坐标
 
         // 将网格线解析到表格
         parse_grid_to_sheet( );
@@ -70,6 +71,15 @@ public:
     // 可以考虑放在构造函数里面自动解析
     void fill_sheet(const std::vector< CELL > &inCellLists);
 
+    // 返回空列的索引(降序)
+    std::vector< size_t > get_space_column_indices( );
+
+    // 返回空行的索引（降序）
+    std::vector< size_t > get_space_row_indices( );
+
+    // 删除空行空列
+    void remove_space_row_col( );
+
     // 返回构成的sheet
     SHEET get_sheet( );
 
@@ -84,7 +94,6 @@ private:
     // 将网格线解析到表格
     void parse_grid_to_sheet( );
 };
-
 
 // 提取水平网格线
 cv::Mat GridResult::extract_horizontal_lines(cv::Mat &src) {
@@ -223,7 +232,7 @@ void GridResult::parse_grid_to_sheet( ) {
     }
 }
 
-// 填充sheet
+// 填充sheet，填充的时候删除多余的列
 void GridResult::fill_sheet(const std::vector< CELL > &inCellLists) {
     for (const auto &inCell : inCellLists) {
         for (auto &line : this->sheet_) {
@@ -238,6 +247,82 @@ void GridResult::fill_sheet(const std::vector< CELL > &inCellLists) {
             }
         }
     }
+    // 检测并删除空列、空行
+    remove_space_row_col( );
+    // 删多了，最后再加一行
+    if (sheet_.size( ) != 0) {
+        if (sheet_[0].size( ) == 3) {
+            for (auto &r : sheet_) {
+                CELL a;
+                r.push_back(a);
+            }
+        }
+    }
+}
+
+// 返回空列的索引(降序)
+std::vector< size_t > GridResult::get_space_column_indices( ) {
+    std::vector< size_t > indices;
+    for (size_t col = 0; col < sheet_[0].size( ); col++) {
+        bool colSpace = true;    // 此列为空
+        for (size_t row = 0; row < sheet_.size( ); row++) {
+            if (!sheet_[row][col].text.empty( )) {
+                colSpace = false;
+                break;
+            }
+        }
+        if (colSpace) {
+            indices.push_back(col);
+        }
+    }
+    if (indices.empty( )) {
+        return indices;
+    } else {
+        std::sort(indices.begin( ), indices.end( ), std::greater< size_t >( ));
+        return indices;
+    }
+    return indices;
+}
+
+// 返回空行的索引（降序）
+std::vector< size_t > GridResult::get_space_row_indices( ) {
+    std::vector< size_t > indices;
+    for (size_t row = 0; row < sheet_.size( ); row++) {
+        bool rowSpace = true;    // 此行为空
+        for (size_t col = 0; col < sheet_[row].size( ); col++) {
+            if (!sheet_[row][col].text.empty( )) {
+                rowSpace = false;
+                break;
+            }
+        }
+        if (rowSpace) {
+            indices.push_back(row);
+        }
+    }
+    if (indices.empty( )) {
+        return indices;
+    } else {
+        std::sort(indices.begin( ), indices.end( ), std::greater< size_t >( ));
+        return indices;
+    }
+    return indices;
+}
+
+// 删除空行空列
+void GridResult::remove_space_row_col( ) {
+    auto cols = get_space_column_indices( );
+    if (!cols.empty( ))
+        for (auto &aRow : sheet_) {
+            for (const auto &index : cols) {
+                aRow.erase(aRow.begin( ) + index);
+            }
+        }
+
+    auto rows = get_space_row_indices( );
+    if (!rows.empty( ))
+        for (const auto &index : rows) {
+            sheet_.erase(sheet_.begin( ) + index);
+        }
 }
 
 // 返回构成的sheet
