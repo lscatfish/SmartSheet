@@ -44,23 +44,23 @@ public:
 
     // @brief 基本构造函数
     DefPerson( ) {
-        classname.erase( );
-        name.erase( );
-        gender.erase( );
-        grade.erase( );
-        studentID.erase( );
-        politicaloutlook.erase( );
-        academy.erase( );
-        majors.erase( );
-        phonenumber.erase( );
-        qqnumber.erase( );
-        position.erase( );
-        email.erase( );
-        ethnicity.erase( );
-        club.erase( );
-        signPosition.erase( );
-        ifcheck = false;
-        ifsign  = false;
+        classname        = "";
+        name             = "";
+        gender           = "";
+        grade            = "";
+        studentID        = "";
+        politicaloutlook = "";
+        academy          = "";
+        majors           = "";
+        phonenumber      = "";
+        qqnumber         = "";
+        position         = "";
+        email            = "";
+        ethnicity        = "";
+        club             = "";
+        signPosition     = "";
+        ifcheck          = false;
+        ifsign           = false;
     };
 
     /*

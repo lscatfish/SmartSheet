@@ -102,6 +102,12 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
     return { before, after };
 }
 
+// 判断一个字符串是否都是数字
+bool is_all_digits(const std::string &s) {
+    if (s.empty( )) return false;
+    return std::all_of(s.begin( ), s.end( ), [](unsigned char c) { return std::isdigit(c); });
+}
+
 // 开始前警告
 bool start_warning( ) {
     console::clear_console( );

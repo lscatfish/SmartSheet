@@ -688,6 +688,8 @@ void DoQingziClass::stats_checkinners( ) {
         // 打印结果
         sheet_printer(sh);
         extract_attendance_to_vector(sh, it_cfPAN->first);
+        std::cout << "cijisjkjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjscn";
+
     }
 
     // 4.解析人员的签到情况到全人员表
@@ -783,6 +785,7 @@ void DoQingziClass::save_statisticsSheet( ) {
                     return false;
                 }
             });
+
         file::save_sttSheet_to_xlsx(sheet, sheetSavePath, sheetTitle);
     }
 }
@@ -838,8 +841,8 @@ void DoQingziClass::registration( ) {
             } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
                 DefPerson per = aPdf.get_person( );
 
-                aPdf.print_sheet( );
-                pause( );
+                /*aPdf.print_sheet( );
+                pause( );*/
 
                 per.otherInformation[U8C(u8"文件地址")] = u8p;
                 personStd_.push_back(per);
@@ -939,6 +942,7 @@ void DoQingziClass::save_registrationSheet( ) {
         sh.push_back(line);
         serial++;
     }
+   // std::cout << "\n\njunmjkmknujk\n";
     file::save_registrationSheet_to_xlsx(sh);
 }
 

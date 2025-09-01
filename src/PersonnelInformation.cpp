@@ -2,9 +2,9 @@
 #include <basic.hpp>
 #include <Encoding.h>
 #include <Fuzzy.h>
+#include <helper.h>
 #include <PersonnelInformation.h>
 #include <string>
-
 
 /*
  * 这个文件不知道用来干什么
@@ -27,10 +27,13 @@ void DefPerson::optimize( ) {
             this->politicaloutlook = U8C(u8"中共党员");
     }
     if (this->studentID.size( ) >= 4) {
-        if (!this->grade.empty( )) {
-            if (fuzzy::search_substring(this->grade, U8C(u8"研")))
+        // 应当检查（0，4）是否都是数字
+        std::string imp = this->studentID.substr(0, 4);
+        if (!is_all_digits(imp)) {    // 啥都不干
+        } else if (!this->grade.empty( )) {
+            if (fuzzy::search_substring(this->grade, U8C(u8"研"))) {
                 this->grade = U8C(u8"研") + this->studentID.substr(0, 4) + U8C(u8"级");
-            else {
+            } else {
                 this->grade = this->studentID.substr(0, 4) + U8C(u8"级");
             }
         } else {

@@ -115,11 +115,11 @@ bool search(
     }
 
     // 目标wstring
-    std::wstring targrt = encoding::utf8_to_wstring_win(_target);
+    std::wstring targrt = encoding::utf8_to_wstring(_target);
 
     int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
     for (auto &libstr : _searchingLib) {
-        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring_win(libstr)), _matchLevel)) {
+        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring(libstr)), _matchLevel)) {
             s++;
             _outList.push_back(libstr);
         }
@@ -170,9 +170,9 @@ bool search(
     }
 
     // 目标wstring
-    std::wstring targrt = encoding::utf8_to_wstring_win(_target);
+    std::wstring targrt = encoding::utf8_to_wstring(_target);
     for (auto &libstr : _searchingLib) {
-        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring_win(libstr)), _matchLevel)) {
+        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring(libstr)), _matchLevel)) {
             s++;
             return true;
         }
@@ -221,14 +221,14 @@ bool search_for_person(
                 if (!i1.empty( ) && (i1.back( ) == 't' || i1.back( ) == 'T')) i1.pop_back( );
                 if (!i2.empty( ) && (i2.back( ) == 't' || i2.back( ) == 'T')) i2.pop_back( );
                 if (ifmatch_levenshtein(
-                        levenshtein_distance(encoding::utf8_to_wstring_win(i1), encoding::utf8_to_wstring_win(i2)),
+                        levenshtein_distance(encoding::utf8_to_wstring(i1), encoding::utf8_to_wstring(i2)),
                         LEVEL::Low)) {
                     _outList.push_back(it_lib);
                     _likelyRate.push_back(0.6);
                     s++;
                 } else {    // 姓名匹配
                     if (ifmatch_levenshtein(
-                            levenshtein_distance(encoding::utf8_to_wstring_win(it_lib.name), encoding::utf8_to_wstring_win(_target.name)),
+                            levenshtein_distance(encoding::utf8_to_wstring(it_lib.name), encoding::utf8_to_wstring(_target.name)),
                             LEVEL::Medium)) {
                         _outList.push_back(it_lib);
                         _likelyRate.push_back(0.7);

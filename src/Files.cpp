@@ -795,6 +795,8 @@ void save_attSheet_to_xlsx(
     std::string           _path,
     std::string           _titleName) {
 
+    encoding::repair_sheet_utf8_invalidity(_sheet);
+
     // 定义字体
     xlnt::font f;
     f.name(U8C(u8"仿宋_GB2312"));
@@ -886,6 +888,9 @@ void save_sttSheet_to_xlsx(
     const table< std::string > &_sheet,
     std::string                &_path,
     std::string                &_titleName) {
+    table< std::string > sh = _sheet;
+    encoding::repair_sheet_utf8_invalidity(sh);
+
     // 定义字体
     xlnt::font fbody;      // 正文字体
     xlnt::font fheader;    // 表头字体
@@ -922,20 +927,20 @@ void save_sttSheet_to_xlsx(
 
     size_t maxCol = 1;    // sheet中列的数量
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
-        for (std::size_t c = 0; c < _sheet[r].size( ); ++c) {
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    for (std::size_t r = 0; r < sh.size( ); ++r) {
+        for (std::size_t c = 0; c < sh[r].size( ); ++c) {
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(sh[r][c]);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(b);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(fbody);
             ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
             // 注意 xlnt 行列从 1 开始
         }
-        if (maxCol < _sheet[r].size( )) {
-            maxCol = _sheet[r].size( );
+        if (maxCol < sh[r].size( )) {
+            maxCol = sh[r].size( );
         }
     }
     // 修改第一行（表头）的字体
-    for (size_t c = 0; c < _sheet[0].size( ); c++) {
+    for (size_t c = 0; c < sh[0].size( ); c++) {
         ws.cell(xlnt::cell_reference(c + 1, 1)).border(b);
     }
 
@@ -945,7 +950,7 @@ void save_sttSheet_to_xlsx(
         ws.column_properties(i).custom_width = true;
     }
     // 修改行高
-    for (size_t r = 1; r <= _sheet.size( ); r++) {
+    for (size_t r = 1; r <= sh.size( ); r++) {
         ws.row_properties(r).height        = 25;    // 25pt
         ws.row_properties(r).custom_height = true;
     }
@@ -978,13 +983,16 @@ void save_sttSheet_to_xlsx(
  * @param _sheet 表格
  */
 void save_storageSheet_to_xlsx(const table< std::string > &_sheet) {
+    table< std::string > sh = _sheet;
+    encoding::repair_sheet_utf8_invalidity(sh);
+
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _sheet.size( ); ++r)
-        for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    for (std::size_t r = 0; r < sh.size( ); ++r)
+        for (std::size_t c = 0; c < sh[r].size( ); ++c)
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(sh[r][c]);
     wb.save(_STORAGE_DIR_ + "/storage.xlsx");
     // wb.save("./storage/storage.xlsx");
 }
@@ -1032,13 +1040,16 @@ void load_storageSheet_from_xlsx(table< std::string > &_sheet) {
  * @param _sheet 表格
  */
 void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
+    table< std::string > sh = _sheet;
+    encoding::repair_sheet_utf8_invalidity(sh);
+
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _sheet.size( ); ++r)
-        for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    for (std::size_t r = 0; r < sh.size( ); ++r)
+        for (std::size_t c = 0; c < sh[r].size( ); ++c)
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(sh[r][c]);
     wb.save(_OUTPUT_DIR_ + "/unknown.xlsx");
 }
 
@@ -1047,14 +1058,20 @@ void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet) {
  * @param _sheet 表格
  */
 void save_registrationSheet_to_xlsx(const table< std::string > &_sheet) {
+    table< std::string > sh = _sheet;
+    encoding::repair_sheet_utf8_invalidity(sh);
 
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");
     // 逐行逐列写入
-    for (std::size_t r = 0; r < _sheet.size( ); ++r)
-        for (std::size_t c = 0; c < _sheet[r].size( ); ++c)
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    for (std::size_t r = 0; r < sh.size( ); ++r) {
+        for (std::size_t c = 0; c < sh[r].size( ); ++c) {
+            // std::cout << _sheet[r][c] << " ";
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(sh[r][c]);
+        }
+        //  std::cout << "\n";
+    }
     wb.save(_OUTPUT_SIGN_QC_DIR_ + U8C(u8"报名.xlsx"));
     // wb.save(U8C(u8"./output/sign_for_QingziClass_out/报名.xlsx"));
 }

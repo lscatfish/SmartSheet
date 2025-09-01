@@ -203,10 +203,8 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
 table< CELL > DefPdf::parse_textbox_to_sheet(const list< CELL > &_textBoxList) {
     table< CELL > out;                   // 输出
     out = cluster_rows(_textBoxList);    // 聚类
-    // std::cout << "ggggg";
     // 按行排序
     sort_my_list(out, [](const list< CELL > &a, const list< CELL > &b) { return a[0].corePoint.y > b[0].corePoint.y; });
-    // std::cout << "dfg";
     return out;
 }
 
@@ -236,8 +234,12 @@ table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
     double threshold = 100;
     for (size_t i = 0; i < _textBoxList.size( ); i++) {
         threshold = (std::min)(threshold, std::abs(_textBoxList[i].top_right.y - _textBoxList[i].bottom_left.y));
+         if (_textBoxList[i].text == U8C(u8"姓名")) {
+             threshold = std::abs(_textBoxList[i].top_left.y - _textBoxList[i].bottom_left.y);
+             break;
+         }
     }
-    threshold *= 1.4;    // 1.4倍高度
+    // threshold *= 1.4;    // 1.4倍高度，这是之前的一个设想
 
     // 解析
     for (size_t i = 0; i < _textBoxList.size( ); i++) {
