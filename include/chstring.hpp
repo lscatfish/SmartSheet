@@ -25,16 +25,31 @@
 
 class chstring {
 public:
-    chstring(std::string _in_) {
-        this->u8str  = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
-        this->sysstr = encoding::utf8_to_sysdcode(this->u8str);
+    enum class CStype {
+        SYS = 0,    // 系统默认的编码形式
+        UTF8        // utf8编码
+    };
+
+    chstring(const std::string &_in_, CStype _inType = CStype::UTF8) {
+        if (_inType == CStype::UTF8)
+            this->usingStr = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
+        else if (_inType == CStype::SYS)
+            this->usingStr = encoding::utf8_to_sysdcode(_in_);
+        usingType = _inType;
     }
-    chstring(const char *cstr) {
-        this->u8str  = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
-        this->sysstr = encoding::utf8_to_sysdcode(this->u8str);
+    chstring(const char *cstr, CStype _inType = CStype::UTF8) {
+        if (_inType == CStype::UTF8)
+            this->usingStr = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
+        else if (_inType == CStype::SYS)
+            this->usingStr = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
+        usingType = _inType;
     }
     chstring(const chstring &_in_) {
-        *this = _in_;    // 直接复制底层字符串
+        *this = _in_;    // 直接复制底层
+    }
+    chstring(const chstring &_in_, CStype _inType) {
+        *this = _in_;    // 直接复制底层
+        cvtEncode(_inType);
     }
     ~chstring( ) = default;
 
@@ -44,9 +59,13 @@ public:
 
     // 友元函数：输出运算符重载
     friend std::ostream &operator<<(std::ostream &os, const chstring &cs) {
-        os << cs.u8str;
+        std::string u8 = encoding::sysdcode_to_utf8(cs.usingStr);
+        os << u8;
         return os;
     }
+
+    // 转化编码
+    void cvtEncode(CStype _to);
 
     // 比较运算符重载
     bool operator==(const chstring &b) const;
@@ -86,8 +105,8 @@ public:
     std::string get_sysstring( ) const;
 
 private:
-    std::string u8str;     // utf8编码的字符串
-    std::string sysstr;    // 系统编码的字符串
+    std::string usingStr;    // 当前使用的字符串（编码同usingType）
+    CStype      usingType;
 };
 
 

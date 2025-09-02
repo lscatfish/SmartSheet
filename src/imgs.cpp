@@ -345,7 +345,7 @@ cv::Mat DocumentScanner::preprocess(const cv::Mat &_img) {
         }
     }
 
-    return filtered.clone( );    // 避免悬空指针
+    return filtered.clone( );    // 避免悬空指针和空引用
 }
 
 // 获取经过校正之后的图片
