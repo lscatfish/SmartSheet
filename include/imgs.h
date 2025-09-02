@@ -2,6 +2,18 @@
 #ifndef IMGS_H
 #define IMGS_H
 
+#include <ppocr_API.h>
+#include <string>
+#include <utility>
+#include <vector>
+#include <basic.hpp>
+#include <opencv2/opencv.hpp>
+
+// 操作照片的空间
+namespace img {
+
+// 定义由CELL生成的表格
+using SHEET = std::vector< std::vector< CELL > >;
 
 /**********************设计思路*******************************************
  *
@@ -29,24 +41,12 @@
  * @note  转换函数都是由 2561925435@qq.com 独自编写，若出现错误，还请修改
  * (+^-^+)
  *
- * 作者：   刘思成
+ * 作者：   lscatfish
  * 邮箱：   2561925435@qq.com
  *
+ * v0.8.0 开放接口GridResult
+ *
  **********************设计思路******************************************/
-
-
-#include <ppocr_API.h>
-#include <string>
-#include <utility>
-#include <vector>
-#include <basic.hpp>
-#include <opencv2/opencv.hpp>
-
-// 操作照片的空间
-namespace img {
-
-// 定义由CELL生成的表格
-using SHEET = std::vector< std::vector< CELL > >;
 
 // 表格网格线的解析结果
 class GridResult {
@@ -122,12 +122,34 @@ private:
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
+/******************************************设计思路**********************************************
+* 文档扫描的思路
+* 
+* 关键模块：
+* - 图片预处理
+* - 文档提取（最大四边形算法）(霍夫变换)（curve曲线边框）（反向演算）
+* - 透视矫正
+* - 图像增强
+* 
+* 1.图片预处理
+* *二值化* 
+* 
+* 
+*******************************************设计思路**********************************************/
+
+
 // 文档扫描（包含增强）
+// @note 此类启用了opencv的后台并行加速，为此类进行多线程加速请注意线程安全
 class DocumentScanner {
 public:
     DocumentScanner(const cv::Mat &_inImg) {
+        cv::Mat grey;
+        _inImg.convertTo(grey, cv::COLOR_BGR2GRAY);//二值化
     }
     ~DocumentScanner( ) = default;
+
+    //照片预处理
+    cv::Mat preprocess( );
 
     // 获取经过校正之后的图片
     cv::Mat get_scanner_img( );
