@@ -44,7 +44,7 @@ Gitcode国内镜像仓库地址：  [Gitcode](https://gitcode.com/lscatfish/Smar
 - **dll包含**：
 	- PaddleOCR配置API文件后生成的ppocr.dll以及PaddleOCR的附属dll 
 	- ICU的所有dll 
-	- opencv与照片相关的dll 
+	- opencv的所有dll 
 	- xlnt的所有dll 
 	- poppler的所有dll及其依赖的dll 
 	- zlib的所有dll   

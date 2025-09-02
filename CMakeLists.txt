@@ -159,6 +159,7 @@ target_link_libraries(SearchingTool PRIVATE
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
+
 )
 target_link_libraries(SearchingTool PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
@@ -223,9 +224,15 @@ set(XLNT_DLL_PATH
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.dll>
 )
 # opencv的动态链接库地址
-set(OPENCV_DLL_PATH
+set(OPENCVWORLD_DLL_PATH
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100d.dll>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_world4100.dll>
+)
+set(OPENCV_FFMPEG_DLL_PATH
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_videoio_ffmpeg4100_64.dll>
+)
+set(OPENCV_MSMF_DLL_PATH
+    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/bin/opencv_videoio_msmf4100_64.dll>
 )
 # zlib的动态链接库地址
 set(ZLIB_DLL_PATH
@@ -242,7 +249,19 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 )
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCV_DLL_PATH}
+            ${OPENCVWORLD_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying opencv dll to output directory"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${OPENCV_FFMPEG_DLL_PATH}
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMENT "Copying opencv dll to output directory"
+)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${OPENCV_MSMF_DLL_PATH}
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
     COMMENT "Copying opencv dll to output directory"
 )

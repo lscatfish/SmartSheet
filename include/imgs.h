@@ -2,12 +2,12 @@
 #ifndef IMGS_H
 #define IMGS_H
 
+#include <basic.hpp>
+#include <opencv2/opencv.hpp>
 #include <ppocr_API.h>
 #include <string>
 #include <utility>
 #include <vector>
-#include <basic.hpp>
-#include <opencv2/opencv.hpp>
 
 // 操作照片的空间
 namespace img {
@@ -123,19 +123,19 @@ private:
 /* =============================================================================================================== */
 
 /******************************************设计思路**********************************************
-* 文档扫描的思路
-* 
-* 关键模块：
-* - 图片预处理
-* - 文档提取（最大四边形算法）(霍夫变换)（curve曲线边框）（反向演算）
-* - 透视矫正
-* - 图像增强
-* 
-* 1.图片预处理
-* *二值化* 
-* 
-* 
-*******************************************设计思路**********************************************/
+ * 文档扫描的思路
+ *
+ * 关键模块：
+ * - 图片预处理
+ * - 文档提取（最大四边形算法）(霍夫变换)（curve曲线边框）（反向演算）
+ * - 透视矫正
+ * - 图像增强
+ *
+ * 1.图片预处理
+ * *二值化*
+ *
+ *
+ *******************************************设计思路**********************************************/
 
 
 // 文档扫描（包含增强）
@@ -143,19 +143,20 @@ private:
 class DocumentScanner {
 public:
     DocumentScanner(const cv::Mat &_inImg) {
-        cv::Mat grey;
-        _inImg.convertTo(grey, cv::COLOR_BGR2GRAY);//二值化
+        preprocess_= preprocess(_inImg);
     }
     ~DocumentScanner( ) = default;
 
-    //照片预处理
-    cv::Mat preprocess( );
+    // 照片预处理
+    // @return 返回一个二值化的边缘图
+    cv::Mat preprocess(const cv::Mat &_img);
 
     // 获取经过校正之后的图片
     cv::Mat get_scanner_img( );
 
 private:
-    cv::Mat scanner_;    // 经过扫描之后的照片
+    cv::Mat scanner_;       // 经过扫描之后的照片
+    cv::Mat preprocess_;    // 预处理照片
 };
 
 
