@@ -81,7 +81,7 @@ void opt_by_progressBar(size_t maxOpt, size_t allBar, Operation operate) {
     set_cursor_position(cursor.row, cursor.column);
     for (size_t i = 1; i <= maxOpt; i++) {
         set_cursor_position(cursor.row, cursor.column);
-        double persent = (i * 1.0 / maxOpt);
+        double persent = (i * 1.0f / maxOpt);
         std::cout << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
         std::cout << "%    [";
         for (size_t j = 0; j < size_t(persent * allBar); j++)

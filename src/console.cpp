@@ -216,7 +216,7 @@ void set_cursor_hidden(bool hidden) {
 void set_progressBar(size_t maxOpt, size_t allBar, size_t nowOpt, int setRow, int setCol, const std::string &prompt) {
     set_cursor_hidden( );
     set_cursor_position(setRow, setCol);
-    double persent = nowOpt * 1.0 / maxOpt;
+    double persent = nowOpt * 1.0f / maxOpt;
     std::cout << prompt << U8C(u8"进度：") << std::fixed << std::setprecision(2) << std::setw(6) << persent * 100;
     std::cout << "%    [";
     for (size_t j = 0; j < size_t(persent * allBar); j++)
