@@ -298,6 +298,56 @@ static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
+// 照片预处理
+//@return 返回一个二值化的边缘图
+cv::Mat DocumentScanner::preprocess(const cv::Mat &_img) {
+    cv::Mat gray, binary, gauss;
+    cv::GaussianBlur(_img, gauss, cv::Size(5, 5), 0);
+    cv::cvtColor(gauss, gray, cv::COLOR_BGR2GRAY);
+
+    // clahe
+    cv::Mat enhance;
+    auto    clahe = cv::createCLAHE(1.5, cv::Size(8, 8));
+    clahe->apply(gray, enhance);
+
+    // 自适应阈值
+    cv::adaptiveThreshold(enhance, binary, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 31, 5);
+
+    // 形态学操作去除噪点
+    cv::Mat morph;
+    // 先腐蚀去除小点，再膨胀恢复形状
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+    cv::erode(binary, morph, kernel, cv::Point(-1, -1), 1);
+    cv::dilate(morph, morph, kernel, cv::Point(-1, -1), 1);
+
+    // 中值滤波
+    cv::Mat median;
+    cv::medianBlur(morph, median, 3);
+
+    // 反转图像（因为connectedComponentsWithStats默认前景为白色）
+    // 反转后：黑色小点变为白色，背景变为黑色
+    cv::Mat inverted;
+    cv::bitwise_not(median, inverted);
+
+    // 方法3：去除小面积连通区域
+    cv::Mat labels, stats, centroids;
+    int     num_labels = cv::connectedComponentsWithStats(inverted, labels, stats, centroids, 8, CV_32S);
+    // 创建结果图像，初始化为全白（255）
+    cv::Mat filtered = cv::Mat::ones(inverted.size( ), CV_8UC1) * 255;
+
+    // 遍历所有连通区域（黑色区域）
+    for (int i = 1; i < num_labels; i++) {    // i=0是白色背景，跳过
+        int area = stats.at< int >(i, cv::CC_STAT_AREA);
+        // 如果是小面积区域（原黑色小点），保留为白色（不处理）
+        // 大面积黑色区域（需要保留的），在结果中设为黑色
+        if (area > 200) {
+            filtered.setTo(0, labels == i);
+        }
+    }
+
+    return filtered.clone( );    // 避免悬空指针
+}
+
 // 获取经过校正之后的图片
 cv::Mat DocumentScanner::get_scanner_img( ) {
 
