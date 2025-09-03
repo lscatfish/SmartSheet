@@ -17,28 +17,38 @@
 #include <chstring.hpp>
 #include <Encoding.h>
 #include <iostream>
+#include <string>
 
 
 // 转化编码
 void chstring::cvtEncode(CStype _in) {
-    if (_in == usingType)
+    if (_in == usingType_)
         return;
     else if (_in == CStype::SYS) {
-        this->usingStr = encoding::utf8_to_sysdcode(this->usingStr);
+        this->usingStr_ = encoding::utf8_to_sysdcode(this->usingStr_);
     } else if (_in == CStype::UTF8) {
-        this->usingStr = encoding::sysdcode_to_utf8(this->usingStr);
+        this->usingStr_ = encoding::sysdcode_to_utf8(this->usingStr_);
     }
 }
 
 // 比较运算符实现
 bool chstring::operator==(const chstring &b) const {
-    return usingStr == b.usingStr;
+    if (this->usingType_ == b.usingType_)
+        return this->usingStr_ == b.usingStr_;
+    else
+        return false;
 }
 bool chstring::operator>(const chstring &b) const {
-    return usingStr > b.usingStr;
+    if (this->usingType_ == b.usingType_)
+        return this->usingStr_ > b.usingStr_;
+    else
+        return this->usingType_ > b.usingType_;
 }
 bool chstring::operator<(const chstring &b) const {
-    return usingStr < b.usingStr;
+    if (this->usingType_ == b.usingType_)
+        return this->usingStr_ < b.usingStr_;
+    else
+        return this->usingType_ < b.usingType_;
 }
 bool chstring::operator>=(const chstring &b) const {
     return !(*this < b);
@@ -49,57 +59,76 @@ bool chstring::operator<=(const chstring &b) const {
 
 // 访问指定位置的字符
 char &chstring::operator[](size_t pos) {
-    return this->usingStr[pos];
+    return this->usingStr_[pos];
 }
 const char &chstring::operator[](size_t pos) const {
-    return this->usingStr[pos];
+    return this->usingStr_[pos];
 }
 
-// 字符串拼接实现（修正返回类型为chstring）
+// 字符串拼接实现（修正返回类型为chstring）(总是匹配到前一个字符的编码形式)
 chstring chstring::operator+(const chstring &b) const {
-    return chstring(usingStr + b.usingStr);
+    if (this->usingType_ == b.usingType_)
+        return chstring(usingStr_ + b.usingStr_, this->usingType_);
+    else {
+        chstring toFirst(b, this->usingType_);
+        return chstring(usingStr_ + toFirst.usingStr_, this->usingType_);
+    }
 }
 
 // 迭代器相关方法
 chstring::iterator chstring::begin( ) {
-    return this->usingStr.begin( );
+    return this->usingStr_.begin( );
 }    // 返回起始迭代器
 chstring::iterator chstring::end( ) {
-    return this->usingStr.end( );
+    return this->usingStr_.end( );
 }    // 返回结束迭代器
 chstring::const_iterator chstring::begin( ) const {
-    return this->usingStr.begin( );
+    return this->usingStr_.begin( );
 }    // 常量版本起始迭代器
 chstring::const_iterator chstring::end( ) const {
-    return this->usingStr.end( );
+    return this->usingStr_.end( );
 }    // 常量版本结束迭代器
 chstring::const_iterator chstring::cbegin( ) const {
-    return this->usingStr.cbegin( );
+    return this->usingStr_.cbegin( );
 }    // 常量迭代器（C++11）
 chstring::const_iterator chstring::cend( ) const {
-    return this->usingStr.cend( );
+    return this->usingStr_.cend( );
 }    // 常量迭代器（C++11）
 
 // 获取长度
 size_t chstring::length( ) const {
-    return this->usingStr.length( );
+    return this->usingStr_.length( );
 }
 
 // 检查是否为空
 bool chstring::empty( ) const {
-    return this->usingStr.empty( );
+    return this->usingStr_.empty( );
 }
 
 // 获取大小
 size_t chstring::size( ) const {
-    return this->usingStr.size( );
+    return this->usingStr_.size( );
 }
 
 // 获取底层字符串
 std::string chstring::get_u8string( ) const {
-    return this->usingStr;
+    if (usingType_ == CStype::UTF8) {
+        return this->usingStr_;
+    } else if (usingType_ == CStype::SYS) {
+        return encoding::sysdcode_to_utf8(this->usingStr_);
+    }
 }
 
+// 获取底层字符串，按照系统编码返回
 std::string chstring::get_sysstring( ) const {
-    return this->sysstr;
+    if (usingType_ == CStype::UTF8) {
+        return encoding::utf8_to_sysdcode(this->usingStr_);
+    } else if (usingType_ == CStype::SYS) {
+        return this->usingStr_;
+    }
+}
+
+// 获取当前使用的文字的编码类型
+chstring::CStype chstring::get_encoding_type( ) const {
+    return this->usingType_;
 }
