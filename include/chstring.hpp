@@ -51,6 +51,10 @@ public:
         *this = _in_;    // 直接复制底层
         cvtEncode(_inType);
     }
+    chstring( ) {
+        this->usingStr_  = "";
+        this->usingType_ = CStype::UTF8;
+    }
     ~chstring( ) = default;
 
     // 定义迭代器类型，使用std::string的迭代器作为底层实现
@@ -75,16 +79,21 @@ public:
     bool operator>=(const chstring &b) const;
     bool operator<=(const chstring &b) const;
 
-    // 访问指定位置的字符
+// 访问指定位置的字符
+#if false
     char       &operator[](size_t pos);
+#endif
     const char &operator[](size_t pos) const;
 
     // 字符串拼接运算符重载(总是匹配到前一个字符的编码形式)
     chstring operator+(const chstring &b) const;
+    chstring operator+(const std::string &b) const;
 
     // 迭代器相关方法
+#if false
     iterator       begin( );           // 返回起始迭代器
     iterator       end( );             // 返回结束迭代器
+#endif
     const_iterator begin( ) const;     // 常量版本起始迭代器
     const_iterator end( ) const;       // 常量版本结束迭代器
     const_iterator cbegin( ) const;    // 常量迭代器（C++11）
@@ -105,7 +114,7 @@ public:
     // 获取底层字符串，按照系统编码返回
     std::string get_sysstring( ) const;
 
-    //获取当前使用的文字的编码类型
+    // 获取当前使用的文字的编码类型
     CStype get_encoding_type( ) const;
 
 private:

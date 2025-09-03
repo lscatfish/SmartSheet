@@ -24,11 +24,10 @@
 void chstring::cvtEncode(CStype _in) {
     if (_in == usingType_)
         return;
-    else if (_in == CStype::SYS) {
+    else if (_in == CStype::SYS)
         this->usingStr_ = encoding::utf8_to_sysdcode(this->usingStr_);
-    } else if (_in == CStype::UTF8) {
+    else if (_in == CStype::UTF8)
         this->usingStr_ = encoding::sysdcode_to_utf8(this->usingStr_);
-    }
 }
 
 // 比较运算符实现
@@ -68,11 +67,19 @@ const char &chstring::operator[](size_t pos) const {
 // 字符串拼接实现（修正返回类型为chstring）(总是匹配到前一个字符的编码形式)
 chstring chstring::operator+(const chstring &b) const {
     if (this->usingType_ == b.usingType_)
-        return chstring(usingStr_ + b.usingStr_, this->usingType_);
+        return chstring(this->usingStr_ + b.usingStr_, this->usingType_);
     else {
         chstring toFirst(b, this->usingType_);
-        return chstring(usingStr_ + toFirst.usingStr_, this->usingType_);
+        return chstring(this->usingStr_ + toFirst.usingStr_, this->usingType_);
     }
+}
+
+// 字符串拼接实现（修正返回类型为chstring）(总是匹配到前一个字符的编码形式)
+chstring chstring::operator+(const std::string &b) const {
+    if (this->usingType_ == CStype::SYS)
+        return chstring(this->usingStr_ + encoding::utf8_to_sysdcode(b), this->usingType_);
+    else if (this->usingType_ == CStype::UTF8)
+        return chstring(this->usingStr_ + encoding::sysdcode_to_utf8(b), this->usingType_);
 }
 
 // 迭代器相关方法
@@ -112,20 +119,18 @@ size_t chstring::size( ) const {
 
 // 获取底层字符串
 std::string chstring::get_u8string( ) const {
-    if (usingType_ == CStype::UTF8) {
+    if (usingType_ == CStype::UTF8)
         return this->usingStr_;
-    } else if (usingType_ == CStype::SYS) {
+    else if (usingType_ == CStype::SYS)
         return encoding::sysdcode_to_utf8(this->usingStr_);
-    }
 }
 
 // 获取底层字符串，按照系统编码返回
 std::string chstring::get_sysstring( ) const {
-    if (usingType_ == CStype::UTF8) {
+    if (usingType_ == CStype::UTF8)
         return encoding::utf8_to_sysdcode(this->usingStr_);
-    } else if (usingType_ == CStype::SYS) {
+    else if (usingType_ == CStype::SYS)
         return this->usingStr_;
-    }
 }
 
 // 获取当前使用的文字的编码类型
