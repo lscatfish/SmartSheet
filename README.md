@@ -24,6 +24,8 @@ Gitcode国内镜像仓库地址：  [Gitcode](https://gitcode.com/lscatfish/Smar
 	- poppler v25.07.0 &nbsp;&nbsp;&nbsp; 仓库地址：[官方地址](https://poppler.freedesktop.org/)
 	- zlib v1.3.1 &nbsp;&nbsp;&nbsp; 仓库地址：[官方地址](https://zlib.net/)
 	- ftxui v6.1.9 &nbsp;&nbsp;&nbsp; 仓库地址：[Github](https://github.com/ArthurSonzogni/FTXUI.git) *请手动编译到Rlease静态库*
+- **注意事项**：
+	请使用temp分支进行开发，开发前请联系管理员（2561925435@qq.com）
 
 ---
 
