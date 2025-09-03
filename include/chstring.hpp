@@ -149,6 +149,9 @@ public:
     // 分离键与值
     std::pair< chstring, chstring > split_by_equal( ) const;
 
+    //按照char分离
+    std::pair< chstring, chstring > split_by(const char cutter) const;
+
     // 是否都是数字
     bool is_all_digits( ) const;
 

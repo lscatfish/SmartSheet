@@ -241,6 +241,12 @@ std::pair< chstring, chstring > chstring::split_by_equal( ) const {
     return std::pair< chstring, chstring >(chstring(r.first, this->usingType_), chstring(r.second, this->usingType_));
 }
 
+// 按照char分离
+std::pair< chstring, chstring > chstring::split_by(const char cutter) const {
+    auto [first, last] = ::split_by(this->usingStr_, cutter);
+    return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
+}
+
 // 是否都是数字
 bool chstring::is_all_digits( ) const {
     if (this->usingStr_.empty( )) return false;

@@ -81,6 +81,7 @@ std::string trim_whitespace(const std::string &str) {
 // 返回值: pair的first是'='前的字符串，second是'='后的字符串
 // 如果没有找到'='，则first为原字符串，second为空
 std::pair< std::string, std::string > split_by_equal(const std::string &str) {
+    if (str.empty( )) return { "", "" };
     // 查找'='的位置
     size_t equalPos = str.find('=');
 
@@ -94,6 +95,33 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
 
     // 提取'='后面的子字符串
 
+    std::string after;
+    if (equalPos + 1 < str.size( ))
+        after = str.substr(equalPos + 1);
+    else
+        after = "";
+    return { before, after };
+}
+
+/*
+ * @brief 分割字符串，获取一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by(const std::string &str, const char cutter) {
+    if (str.empty( )) return { "", "" };
+    // 查找cutter的位置
+    size_t equalPos = str.find(cutter);
+
+    // 如果没有找到'='，返回原字符串和空字符串
+    if (equalPos == std::string::npos) {
+        return { str, "" };
+    }
+
+    // 提取'='前面的子字符串
+    std::string before = str.substr(0, equalPos);
+
+    // 提取'='后面的子字符串
     std::string after;
     if (equalPos + 1 < str.size( ))
         after = str.substr(equalPos + 1);

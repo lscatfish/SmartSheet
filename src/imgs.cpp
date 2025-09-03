@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <Encoding.h>
 #include <exception>
+#include <Files.h>
 #include <functional>
 #include <helper.h>
 #include <imgs.h>
@@ -21,6 +22,8 @@
 
 // 解析照片的空间
 namespace img {
+
+bool enable_ManualDocPerspectiveCorrector = false;    // 是否启用手动透视校正
 
 // 提取水平网格线
 cv::Mat GridResult::extract_horizontal_lines(cv::Mat &src) {
@@ -563,22 +566,24 @@ static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径(系统编码格式)
  */
-void load_sheet_from_img(
-    table< std::string > &_sheet,
-    const std::string    &_path) {
+void load_sheet_from_img(table< std::string > &_sheet, const std::string &_path) {
 
     // 读取图片
     cv::Mat img;
     if (!_read_img(_path, img)) return;    // 读取失败
+
+    // @todo 这里应该全部裁剪之后再进入，需要重构母函数
+    if (enable_ManualDocPerspectiveCorrector) {
+        ManualDocPerspectiveCorrector perspectiveCorrector(img, file::split_file_from_path(_path));
+        img = perspectiveCorrector.get_corrected_img( );
+    }
 
     // ocr操作
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字块]
     std::cout << U8C(u8"ppocr工作") << std::endl;
     ppocr::ocr(ocrPR, img.clone( ));    // 这里返回的text为utf8编码
     std::cout << std::endl
-              << U8C(u8"图片: ")
-              << encoding::sysdcode_to_utf8(_path)
-              << U8C(u8" 加载结束...") << std::endl
+              << U8C(u8"图片:\"") << encoding::sysdcode_to_utf8(_path) << U8C(u8"\"加载结束...") << std::endl
               << std::endl;
 
     // 解析照片中表格的网格线
