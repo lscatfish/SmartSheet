@@ -141,7 +141,6 @@ std::vector< int > GridResult::get_vertical_lineXs(const cv::Mat &verticalLines,
 // 将网格线解析到表格
 void GridResult::parse_grid_to_sheet( ) {
     // 按照从左上角的点到右下角的点来遍历
-
     // 水平线的y坐标（多个有效的y坐标）
     for (size_t j = 0; j < this->horizontalYs_.size( ) - 1; j++) {
         std::vector< CELL > line;
@@ -544,16 +543,16 @@ cv::Mat DocumentScanner::get_scanner_img( ) {
  * @return 失败返回false
  */
 static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
-    std::cout << U8C(u8"加载图片: ")
+    std::cout << U8C(u8"加载图片\"")
               << encoding::sysdcode_to_utf8(_pathAndName)
-              << U8C(u8" 中") << std::endl;
+              << U8C(u8"\"中") << std::endl;
 
     // 打开图片
     _img = cv::imread(_pathAndName);
     if (_img.empty( )) {
-        std::cout << U8C(u8"图片 ")
+        std::cout << U8C(u8"图片\"")
                   << encoding::sysdcode_to_utf8(_pathAndName)
-                  << U8C(u8" 打开失败") << std::endl;
+                  << U8C(u8"\"打开失败") << std::endl;
         return false;
     }
     return true;

@@ -25,7 +25,7 @@ public:
      * @param _inperLine 一行信息
      * @param _outperStd 标准的人员信息
      */
-    static void trans_line_to_person(const DefLine &_inperLine, DefPerson &_outperStd);
+    static void trans_personline_to_person(const DefLine &_inperLine, DefPerson &_outperStd);
 
     /*
      * @brief 标准人员信息转化为一行信息
@@ -33,7 +33,7 @@ public:
      * @param _outperLine 一行信息
      * @note 这个函数好像没怎么用到
      */
-    static void trans_person_to_line(const DefPerson &_inperStd, DefLine &_outperLine);
+    static void trans_person_to_personline(const DefPerson &_inperStd, DefLine &_outperLine);
 
     /*
      * @brief 比较学号
@@ -73,18 +73,18 @@ private:
     int choose_function(int _chosseAll, const list< std::string > &_outPrint);
 
     // @brief 加载全学员表的函数
-    void load_personnel_information_list( );
+    void load_all_personnel_information_list( );
 
     /* ========================================================================================= */
 
     // @brief 控制生成签到表的函数
-    void attendance( );
+    void applicants( );
 
     // @brief 统计报名人员
     void stats_applicants( );
 
     // @brief 保存签到表
-    void save_attendanceSheet( );
+    void save_applicantsSheet( );
 
     /* ========================================================================================= */
 
@@ -114,7 +114,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    void search_person(list< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
+    bool search_person(list< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
@@ -123,7 +123,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    void search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
+    bool search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
 
     // @brief 缓存全部报名的人员
     void save_storageSheet( );
@@ -136,6 +136,13 @@ private:
      * @param _in_unLists 未搜索到的成员列表
      */
     void save_unknown_person(const list< DefUnknownPerson > &_in_unLists);
+
+    /*
+     * @brief 打赢未知的人员
+     * @param _unknownPersonList 未知人员信息表
+     * @param _prompt 提示词
+     */
+    void print_unknown_person(const list< DefUnknownPerson > &_unknownPersonList, const std ::string &_prompt = "");
 };
 
 

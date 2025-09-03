@@ -267,7 +267,7 @@ DefPerson DefDocx::get_person( ) {
             }
         }
     }
-    DoQingziClass::trans_line_to_person(perLine, per);
+    DoQingziClass::trans_personline_to_person(perLine, per);
     if (fuzzy::search_substring(u8path_, U8C(u8"自主报名")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
     else if (fuzzy::search_substring(u8path_, U8C(u8"重庆大学团校")))
