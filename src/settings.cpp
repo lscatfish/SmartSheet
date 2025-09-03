@@ -112,7 +112,7 @@ void set_path( ) {
                     std::cout << U8C(u8"手动透视校正：禁用") << std::endl;
                     img::enable_ManualDocPerspectiveCorrector = false;
                 } else {
-                    preprint_error(serLine, line, U8C(u8"键值只能是true或是false，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的"));
+                    preprint_error(serLine, line, U8C(u8"键值只能是true或是false，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的，采用默认值false"));
                 }
             } else {
                 preprint_error(serLine, line, U8C(u8"键\"") + encoding::sysdcode_to_utf8(before) + U8C(u8"\"不存在"));
