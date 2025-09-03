@@ -147,19 +147,19 @@ bool DoQingziClass::self_check( ) {
  * @param _outPrint 要打印在控制台上的内容
  */
 int DoQingziClass::choose_function(int _chosseAll, const list< std::string > &_outPrint) {
-    int a = 0;
+    std::string a = "";
     while (true) {
         console::clear_console( );
         for (const auto &line : _outPrint)
             std::cout << line << std::endl;
         std::cout << U8C(u8"请选择（输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键）：");
         std::cin >> a;
-        if (a >= 1 && a <= _chosseAll) {
-            return a;
+        if (is_all_digits(a) && std::stoi(a) >= 1 && std::stoi(a) <= _chosseAll) {
+            return std::stoi(a);
         } else {
             std::cout << U8C(u8"你的输入错误，请输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键")
                       << std::endl;
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
         }
     }
     return 1;
@@ -288,13 +288,10 @@ void DoQingziClass::stats_applicants( ) {
         list< std::string >{ ".xlsx" });
     std::cout << std::endl;
     // 解析保存报名的人员
-    for (auto it_app_filepath = app_filepath.begin( ), it_app_classname = app_classname.begin( );
-         it_app_filepath != app_filepath.end( ) && it_app_classname != app_classname.end( );
-         it_app_filepath++, it_app_classname++) {
-        // 保存读取到的表格
+    for (size_t i = 0; i < app_filepath.size( ) && i < app_classname.size( ); i++) {
         table< std::string > sheet;
-        file::load_sheet_from_xlsx(sheet, *it_app_filepath);
-        extract_application_to_vector(sheet, *it_app_classname);
+        file::load_sheet_from_xlsx(sheet, app_filepath[i]);
+        extract_application_to_vector(sheet, app_classname[i]);
     }
     // 报名，标定人员
     for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
@@ -306,12 +303,9 @@ void DoQingziClass::stats_applicants( ) {
             it_app_person->ifcheck = false;    // 没有搜索到
         }
     }
-
     // 标定没有搜索到的人
-    for (auto it_app_person = app_person.begin( );
-         it_app_person != app_person.end( );
-         it_app_person++) {
-        if (it_app_person->ifcheck == false) {
+    for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
+        if (!it_app_person->ifcheck) {    // 没有被匹配
             if (it_app_person->information[U8C(u8"姓名")].size( ) != 0) {
                 DefUnknownPerson unP;
                 unP.personLine = *it_app_person;
@@ -324,7 +318,6 @@ void DoQingziClass::stats_applicants( ) {
     for (auto &unknownPerson : unknownAppPerson_) {
         fuzzy::search_for_person(unknownPerson.likelyPerson, unknownPerson.likelyRate, unknownPerson.personStd, personStd_);
     }
-
     // 查验相似度
     for (auto itun = unknownAppPerson_.begin( ); itun != unknownAppPerson_.end( );) {
         bool next_it = true;
@@ -424,8 +417,7 @@ void DoQingziClass::stats_checkinners( ) {
      * @param sh 表格信息
      * @param cn 班级名称
      */
-    auto extract_attendance_to_vector =
-        [&att_person](const table< std::string > &sh, const std::string &cn) -> void {
+    auto extract_attendance_to_vector = [&att_person](const table< std::string > &sh, const std::string &cn) -> void {
         std::vector< DefLine > att_person_line;    // 人员行信息
         size_t                 rowHeader = 1;      // 默认表头在第一行
         list< std::string >    headerLine;         // 表头
@@ -499,7 +491,7 @@ void DoQingziClass::stats_checkinners( ) {
     };
 
     /*
-     * @brief 打赢sheet的结果
+     * @brief 打印sheet的结果
      * @param sh 表格
      */
     auto sheet_printer = [](const table< std::string > &sh) -> void {
@@ -535,26 +527,22 @@ void DoQingziClass::stats_checkinners( ) {
     }
 
     // 3.解析每个班的图片
-    for (auto it_cfPAN = classname__filepath.begin( );
-         it_cfPAN != classname__filepath.end( );
-         it_cfPAN++) {
+    for (auto it_cfp = classname__filepath.begin( ); it_cfp != classname__filepath.end( ); it_cfp++) {
         table< std::string > sh;
-        for (size_t i = 0; i < it_cfPAN->second.size( ); i++) {
+        for (size_t i = 0; i < it_cfp->second.size( ); i++) {
             table< std::string > partSh;
-            img::load_sheet_from_img(partSh, it_cfPAN->second[i]);
+            img::load_sheet_from_img(partSh, it_cfp->second[i]);
             sh = mergeMultipleSheets(sh, partSh);
             std::cout << U8C(u8"融合结束") << std::endl;
         }
         // 打印结果
         sheet_printer(sh);
-        extract_attendance_to_vector(sh, it_cfPAN->first);
+        extract_attendance_to_vector(sh, it_cfp->first);
     }
-
     // 4.解析人员的签到情况到全人员表
     for (const auto &attper : att_person) {
         auto it_perstd = personStd_.end( );    // 哨兵值
-        search_person(it_perstd, attper);
-        if (it_perstd != personStd_.end( )) {
+        if (search_person(it_perstd, attper)) {
             it_perstd->ifcheck = attper.ifcheck;
         } else {
             // 尚未匹配到
@@ -627,7 +615,9 @@ void DoQingziClass::save_statisticsSheet( ) {
         // sort_table_string_by(sheet, 4, false, true);    // 按照签到情况排序
 
         sort_table_string_by(
-            sheet, false, true,
+            sheet,
+            false,
+            true,
             [](const std::vector< std::string > &a, const std::vector< std::string > &b) -> bool {
                 const size_t firstIndex  = 4;    // 第一排序索引
                 const size_t secondIndex = 2;    // 第二排序索引
@@ -697,9 +687,6 @@ void DoQingziClass::registration( ) {
                 file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
             } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
                 DefPerson per = aPdf.get_person( );
-
-                /*aPdf.print_sheet( );
-                pause( );*/
 
                 per.otherInformation[U8C(u8"文件地址")] = u8p;
                 personStd_.push_back(per);
