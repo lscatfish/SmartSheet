@@ -63,8 +63,8 @@ include_directories("${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/include")
 include_directories("${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/include")
 
 # 找到 src 文件夹下所有的 .cpp 文件
-file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "test/*.cpp" "src/*.c"
-                    "test/*.h" "test/*.hpp" "test/*.c"
+file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
+                    "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
 )
 
 ########################################Windows下可运行，linux下需要重新写##########################################
