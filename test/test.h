@@ -41,5 +41,7 @@ void test_for_icu_encoding_handler( );
 //测试排序函数
 void test_for_sort_table_by( );
 
+// 测试手动透视矫正类
+void test_for_ManualDocPerspectiveCorrector( );
 
 #endif    // !TEST_H
