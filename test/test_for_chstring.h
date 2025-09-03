@@ -5,9 +5,10 @@
 
 #include<chstring.hpp>
 
+void test_for_chstring_cout( );
 
-
-
+// 测试字符串的相加功能
+void test_for_chstring_plus( );
 
 
 

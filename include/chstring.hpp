@@ -2,7 +2,9 @@
 /* =================================================================================
  * @file    chstring.hpp
  *
- * @brief 用于操作中文编码的文件
+ * 设计初衷：希望可以自动管理中文的编码方式，目前没有集成到
+ *
+ * @brief 用于操作中文编码的string
  * @note 没有从string派生是因为string没有虚析构函数，因此通过基类指针删除派生类对象可能导致未定义行为
  * -------250826----------$$$@note 希望此类可以集成到icu，以达到对中文编码的精确识别$$$--------------------
  * @note [2025.08.26][@lscatfish]已集成icu
@@ -12,7 +14,6 @@
  * 作者：lscatfish
  * 邮箱：2561925435@qq.com
  * ================================================================================= */
-
 #pragma once
 
 #ifndef CHSTRING_HPP
@@ -25,44 +26,49 @@
 #include <string>
 #include <utility>
 
+
 class chstring {
 public:
-    enum class CStype {
+    enum class csType {
         UTF8 = 0,    // utf8编码
         SYS  = 1,    // 系统默认的编码形式
     };
 
-    chstring(const std::string &_in_, CStype _inType = CStype::UTF8) {
-        if (_inType == CStype::UTF8)
+    chstring(const std::string &_in_, csType _inType = csType::UTF8) {
+        if (_inType == csType::UTF8)
             this->usingStr_ = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
-        else if (_inType == CStype::SYS)
+        else if (_inType == csType::SYS)
             this->usingStr_ = encoding::utf8_to_sysdcode(_in_);
         usingType_ = _inType;
     }
-    chstring(const char *cstr, CStype _inType = CStype::UTF8) {
-        if (_inType == CStype::UTF8)
+    chstring(const char *cstr, csType _inType = csType::UTF8) {
+        if (_inType == csType::UTF8)
             this->usingStr_ = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
-        else if (_inType == CStype::SYS)
+        else if (_inType == csType::SYS)
             this->usingStr_ = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
         usingType_ = _inType;
     }
     chstring(const chstring &_in_) {
         *this = _in_;    // 直接复制底层
     }
-    chstring(const chstring &_in_, CStype _inType) {
+    chstring(const chstring &_in_, csType _inType) {
         *this = _in_;    // 直接复制底层
-        cvtEncode(_inType);
+        chstring::cvtEncode_to(_inType);
     }
     chstring( ) {
         this->usingStr_  = "";
-        this->usingType_ = CStype::UTF8;
+        this->usingType_ = csType::UTF8;
+    }
+    chstring(csType _inType) {
+        this->usingStr_  = "";
+        this->usingType_ = _inType;
     }
     ~chstring( ) = default;
 
-    // 定义迭代器类型，使用std::string的迭代器作为底层实现
 #if false
     using iterator       = std::string::iterator;
 #endif
+    // 定义迭代器类型，使用std::string的迭代器作为底层实现
     using const_iterator = std::string::const_iterator;
 
     // 友元函数：输出运算符重载
@@ -87,8 +93,12 @@ public:
     const char &operator[](size_t pos) const;
 
     // 字符串拼接运算符重载(总是匹配到前一个字符的编码形式)
-    chstring operator+(const chstring &b) const;
-    chstring operator+(const std::string &b) const;
+    chstring  operator+(const chstring &b) const;
+    chstring  operator+(const std::string &b) const;
+    chstring  operator+(const char *b) const;
+    chstring &operator+=(const chstring &b);
+    chstring &operator+=(const std::string &b);
+    chstring &operator+=(const char *b);
 
 #if false
     iterator       begin( );           // 返回起始迭代器
@@ -109,20 +119,26 @@ public:
     // 获取大小，不同的编码不同
     size_t size( ) const;
 
+    // 打印文字到控制台
+    void print( ) const;
+
+    // 打赢文字与回车到控制台
+    void println( ) const;
+
     // 获取底层字符串，按照u8编码返回
-    std::string get_u8string( ) const;
+    std::string u8string( ) const;
 
     // 获取底层字符串，按照系统编码返回
-    std::string get_sysstring( ) const;
+    std::string sysstring( ) const;
 
     // 获取宽字符方式
-    std::wstring get_wstring( ) const;
+    std::wstring wstring( ) const;
 
     // 获取当前使用的文字的编码类型
-    CStype get_encoding_type( ) const;
+    csType cstype( ) const;
 
     // 转化编码
-    void cvtEncode_to(CStype _to);
+    void cvtEncode_to(csType _to);
 
     // 清除字符串前后的所有空白字符（包括空格、\t、\n等）
     void trim_whitespace( );
@@ -145,7 +161,7 @@ public:
 
 private:
     std::string usingStr_;    // 当前使用的字符串（编码同usingType）
-    CStype      usingType_;
+    csType      usingType_;
 };
 
 
