@@ -271,30 +271,208 @@ table< std::string > GridResult::get_stringSheet( ) const {
     return sh;
 }
 
-/*
- * @brief 加载图片
- * @param _pathAndName 图片的路径
- * @param _img 加载出来的图片
- * @return 成功返回true
- * @return 失败返回false
- */
-static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
-    std::cout << U8C(u8"加载图片: ")
-              << encoding::sysdcode_to_utf8(_pathAndName)
-              << U8C(u8" 中") << std::endl;
+/* =============================================================================================================== */
+/* =============================================================================================================== */
 
-    // 打开图片
-    _img = cv::imread(_pathAndName);
-    if (_img.empty( )) {
-        std::cout << U8C(u8"图片 ")
-                  << encoding::sysdcode_to_utf8(_pathAndName)
-                  << U8C(u8" 打开失败") << std::endl;
-        return false;
-    }
-    return true;
+/*
+ * @brief 计算两点间距离
+ * @param 两个2D点a和b
+ * @param 两点间的欧氏距离（基于OpenCV的norm函数，简化计算）
+ */
+double ManualDocPerspectiveCorrector::dist(const cv::Point2f &a, const cv::Point2f &b) {
+    return cv::norm(a - b);    // norm函数计算向量（a-b）的L2范数，即欧氏距离
 }
 
-/* =============================================================================================================== */
+/*
+ * @brief 原始图像坐标转显示图像坐标
+ * @param p 原始图像中的点坐标
+ * @param scale 原始图像到显示图像的缩放比例
+ * @param r 显示图像中缩放后原图的矩形区域（img_roi）
+ * @return 该点在显示图像中的对应坐标（考虑按钮栏偏移和缩放）
+ */
+cv::Point2f ManualDocPerspectiveCorrector::src2disp(const cv::Point2f &p, double scale, const cv::Rect &r) {
+    // 计算逻辑：显示x = 缩放后原图的x偏移 + 原始x * 缩放比例
+    //          显示y = 缩放后原图的y偏移 + 原始y * 缩放比例
+    return cv::Point2f((float)(r.x + p.x * scale), (float)(r.y + p.y * scale));
+}
+
+/*
+ * @brief 显示图像坐标转原始图像坐标
+ * @param p 显示图像中的点坐标
+ * @param scale 原始图像到显示图像的缩放比例
+ * @param r 显示图像中缩放后原图的矩形区域（img_roi）
+ * @return 该点在原始图像中的对应坐标（用于矫正计算，确保精度）
+ */
+cv::Point2f ManualDocPerspectiveCorrector::disp2src(const cv::Point2f &p, double scale, const cv::Rect &r) {
+    // 计算逻辑：原始x = (显示x - 缩放后原图的x偏移) / 缩放比例
+    //          原始y = (显示y - 缩放后原图的y偏移) / 缩放比例
+    return cv::Point2f((float)((p.x - r.x) / scale), (float)((p.y - r.y) / scale));
+}
+
+// 获取校正之后的图像
+cv::Mat ManualDocPerspectiveCorrector::get_corrected_img( ) {
+    return corrected_.clone( );
+}
+
+/*
+ * @brief 布局计算函数：动态调整界面元素位置
+ * @param win_size 当前主窗口的尺寸（宽x高）
+ * @return img_roi 缩放后原图在显示图像中的矩形区域
+ * @return scale 原始图像到显示图像的缩放比例（确保原图完整显示且不拉伸）
+ */
+void ManualDocPerspectiveCorrector::layout(const cv::Size &win_size, cv::Rect &img_roi, double &scale) {
+    // 异常处理：窗口尺寸过小（宽<=0或高<=按钮栏高度），无法显示图像
+    if (win_size.width <= 0 || win_size.height <= BAR_H) {
+        img_roi = cv::Rect( );    // 空矩形，表示无有效图像区域
+        scale   = 1.0;            // 默认缩放比例1.0
+        return;
+    }
+
+    // 可用显示区域：窗口总区域减去顶部按钮栏区域
+    int usable_w = win_size.width;             // 可用宽度 = 窗口宽度（按钮栏占满宽度）
+    int usable_h = win_size.height - BAR_H;    // 可用高度 = 窗口高度 - 按钮栏高度
+
+    // 计算缩放比例：取“宽度适配比例”和“高度适配比例”的最小值，避免图像拉伸
+    // 宽度适配比例 = 可用宽度 / 原始图像宽度
+    // 高度适配比例 = 可用高度 / 原始图像高度
+    scale = (std::min)((double)usable_w / src_.cols, (double)usable_h / src_.rows);
+
+    // 计算缩放后原图的实际显示尺寸
+    int drawn_w = (int)(src_.cols * scale);    // 缩放后宽度 = 原始宽度 * 缩放比例
+    int drawn_h = (int)(src_.rows * scale);    // 缩放后高度 = 原始高度 * 缩放比例
+
+    // 计算缩放后原图的显示偏移（使其在可用区域内居中）
+    int off_x = (usable_w - drawn_w) / 2;            // x方向偏移 = (可用宽度 - 缩放后宽度)/2
+    int off_y = BAR_H + (usable_h - drawn_h) / 2;    // y方向偏移 = 按钮栏高度 + (可用高度 - 缩放后高度)/2
+
+    // 确定缩放后原图的矩形区域（img_roi）
+    img_roi = cv::Rect(off_x, off_y, drawn_w, drawn_h);
+
+    // 更新显示图像中的四边形顶点坐标（根据缩放比例和偏移）
+    for (int i = 0; i < 4; ++i)
+        dispPts_[i] = src2disp(srcPts_[i], scale, img_roi);
+
+    // 确定“done”按钮的位置（窗口右上角，右偏移20px，垂直居中于按钮栏）
+    btnOK_ = cv::Rect(
+        win_size.width - BTN_W - 20,    // 按钮x坐标 = 窗口宽度 - 按钮宽度 - 右偏移20px
+        (BAR_H - BTN_H) / 2,            // 按钮y坐标 = (按钮栏高度 - 按钮高度)/2（垂直居中）
+        BTN_W, BTN_H                    // 按钮宽高
+    );
+}
+
+/*
+ * @brief 绘制函数：渲染整个显示界面
+ * @brief 绘制按钮栏、缩放后的原图、可拖拽的四边形顶点和边
+ * @param img_roi 缩放后原图在显示图像中的矩形区域
+ */
+void ManualDocPerspectiveCorrector::redraw(const cv::Rect &img_roi) {
+    // 1. 创建显示画布：尺寸与当前窗口一致，背景色为浅灰色（RGB：240,240,240）
+    cv::Size sz = cv::getWindowImageRect(windowName_).size( );    // 获取当前窗口的实际尺寸
+    displayImg_ = cv::Mat(sz, CV_8UC3, cv::Scalar(240, 240, 240));
+
+    // 2. 绘制“done”按钮：绿色填充，白色文字
+    cv::rectangle(displayImg_, btnOK_, cv::Scalar(50, 180, 50), cv::FILLED);    // 绘制绿色填充矩形
+    cv::putText(displayImg_, "Done",                                            // 绘制按钮文字
+                cv::Point(btnOK_.x + 20, btnOK_.y + BTN_H - 10),                // 文字位置（按钮内居中）
+                cv::FONT_HERSHEY_SIMPLEX, 0.7,                                  // 字体类型、大小
+                cv::Scalar(255, 255, 255), 2);                                  // 文字颜色（白色）、粗细
+
+    // 异常处理：无有效图像区域（窗口过小），仅绘制按钮栏
+    if (img_roi.empty( )) return;
+
+    // 3. 绘制缩放后的原始图像：将原图缩放到img_roi区域
+    cv::Mat roi = displayImg_(img_roi);                          // 获取显示画布中的图像区域
+    cv::resize(src_, roi, roi.size( ), 0, 0, cv::INTER_AREA);    // 缩放原图到roi尺寸，INTER_AREA适合缩小
+
+    // 4. 绘制可拖拽的四边形：红色顶点（填充圆）、绿色边（直线）
+    for (int i = 0; i < 4; ++i) {
+        // 绘制顶点：红色填充圆，半径8px
+        cv::circle(displayImg_, dispPts_[i], 8, cv::Scalar(0, 0, 255), cv::FILLED);
+        // 绘制边：绿色直线，粗细2px，连接当前顶点与下一个顶点（第4个顶点连回第1个）
+        cv::line(displayImg_, dispPts_[i], dispPts_[(i + 1) % 4], cv::Scalar(0, 255, 0), 2);
+    }
+}
+
+/*
+ * @brief 鼠标回调函数：处理用户交互
+ * @brief 响应鼠标点击、拖拽事件，实现顶点调整和矫正触发
+ * @param evt 鼠标事件类型（按下、移动、释放等）
+ * @param x,y 鼠标在窗口中的坐标
+ * @param void* 用户数据（此处未使用）
+ */
+void ManualDocPerspectiveCorrector::onMouse(int evt, int x, int y, int, void *) {
+    // 矫正完成后，不再响应鼠标事件
+    if (done_) return;
+
+    cv::Point pt(x, y);    // 存储当前鼠标坐标
+
+    // 临时变量：存储当前图像布局信息
+    cv::Rect img_roi;
+    double   scale;
+    // 计算当前窗口的布局（图像区域、缩放比例、按钮位置）
+    layout(cv::getWindowImageRect(windowName_).size( ), img_roi, scale);
+
+    // 1. 鼠标左键按下事件：判断是点击顶点还是点击按钮
+    if (evt == cv::EVENT_LBUTTONDOWN) {
+        // 1.1 检查是否点击了四边形顶点（遍历4个顶点）
+        for (int i = 0; i < 4; ++i) {
+            // 鼠标与顶点距离小于12px，视为选中该顶点
+            if (dist(pt, dispPts_[i]) < 12) {
+                isDragging_ = true;    // 标记进入拖拽状态
+                dragIdx_    = i;       // 记录被拖拽的顶点索引
+                return;                // 跳出函数，避免后续按钮判断
+            }
+        }
+
+        // 1.2 检查是否点击了“done”按钮（判断鼠标是否在按钮矩形内）
+        if (btnOK_.contains(pt)) {
+            // 定义A4竖版的目标矩形顶点（顺时针：左上、右上、右下、左下）
+            cv::Point2f dst[4] = { { 0, 0 }, { (float)a4w, 0 }, { (float)a4w, (float)a4h }, { 0, (float)a4h } };
+            // 计算透视变换矩阵：从原始图像的四边形（src_pts）映射到A4矩形（dst）
+            cv::Mat M = getPerspectiveTransform(srcPts_.data( ), dst);
+            // 执行透视矫正：使用高质量插值INTER_LANCZOS4，背景默认黑色
+            warpPerspective(src_, corrected_, M, cv::Size(a4w, a4h), cv::INTER_LANCZOS4);
+            // imshow("矫正结果", corrected);  // 注释：如需实时显示矫正结果，可取消注释
+            done_ = true;    // 标记矫正完成，退出交互循环
+            return;
+        }
+    }
+
+    // 2. 鼠标移动事件：仅在拖拽状态下响应，更新顶点位置
+    if (evt == cv::EVENT_MOUSEMOVE && isDragging_) {
+        // 无有效图像区域，不处理拖拽
+        if (img_roi.empty( )) return;
+
+        // 限制顶点拖拽范围：只能在缩放后的原图区域内（避免拖出图像外）
+        pt.x = (std::max)(img_roi.x, (std::min)(pt.x, img_roi.x + img_roi.width));     // x方向限制在图像左右边界
+        pt.y = (std::max)(img_roi.y, (std::min)(pt.y, img_roi.y + img_roi.height));    // y方向限制在图像上下边界
+
+        // 更新原始图像中的顶点坐标（从显示坐标转回原始坐标，确保矫正精度）
+        srcPts_[dragIdx_] = disp2src(pt, scale, img_roi);
+        // 更新显示图像中的顶点坐标（直接使用限制后的鼠标坐标）
+        dispPts_[dragIdx_] = pt;
+
+        // 重新绘制界面，实时更新顶点位置
+        redraw(img_roi);
+        cv::imshow(windowName_, displayImg_);
+    }
+
+    // 3. 鼠标左键释放事件：结束拖拽状态
+    if (evt == cv::EVENT_LBUTTONUP)
+        isDragging_ = false;    // 重置拖拽标记
+}
+
+//// 静态成员函数：作为 setMouseCallback 的回调（无 this 指针）
+void ManualDocPerspectiveCorrector::staticOnMouse(int event, int x, int y, int flags, void *userdata) {
+    // 将 userdata 转换为类实例指针，再调用非静态 onMouse
+    ManualDocPerspectiveCorrector *instance =
+        static_cast< ManualDocPerspectiveCorrector * >(userdata);
+    if (instance != nullptr) {
+        // 调用实例的非静态 onMouse，传递事件参数
+        instance->onMouse(event, x, y, flags, userdata);
+    }
+}
+
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
@@ -358,6 +536,31 @@ cv::Mat DocumentScanner::get_scanner_img( ) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
+
+
+/*
+ * @brief 加载图片
+ * @param _pathAndName 图片的路径
+ * @param _img 加载出来的图片
+ * @return 成功返回true
+ * @return 失败返回false
+ */
+static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
+    std::cout << U8C(u8"加载图片: ")
+              << encoding::sysdcode_to_utf8(_pathAndName)
+              << U8C(u8" 中") << std::endl;
+
+    // 打开图片
+    _img = cv::imread(_pathAndName);
+    if (_img.empty( )) {
+        std::cout << U8C(u8"图片 ")
+                  << encoding::sysdcode_to_utf8(_pathAndName)
+                  << U8C(u8" 打开失败") << std::endl;
+        return false;
+    }
+    return true;
+}
+
 /*
  * @brief 用于读取图片的表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
@@ -402,5 +605,6 @@ void load_sheet_from_img(
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 }    // namespace img
