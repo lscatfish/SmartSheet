@@ -103,38 +103,13 @@ std::wstring utf8_to_wstring(const std::string u8) {
     return out;
 }
 
-/**
- * @brief 删除字符串中的所有ASCII字符（ASCII码0-127）
- * @param input 输入字符串，可能包含ASCII和非ASCII字符
- * @return 处理后的字符串，仅保留非ASCII字符
- *
- * @todo 这个函数对多字符的字体删除有极大的问题
- *
- */
-static std::string remove_ascii_characters(const std::string &input) {
-    std::string result;
-    // 预留足够空间，避免频繁内存分配
-    result.reserve(input.size( ));
-
-    // 遍历输入字符串的每个字符
-    for (char c : input) {
-        // ASCII字符的范围是0-127
-        if (static_cast< unsigned char >(c) > 127) {
-            // 非ASCII字符，保留
-            result += c;
-        }
-        // ASCII字符会被自动跳过
-    }
-
-    return result;
-}
-
 /*
  * @brief 将系统默认的中文（简体）编码转化为utf8
  * @param _anycode 任意中文（简体）格式的string
  * @return 转化为utf8格式的string
  */
 std::string sysdcode_to_utf8(const std::string &_anycode) {
+    if (_anycode.empty( )) return "";
     std::string out;    // 输出
     std::string e;      // 错误
     if (is_utf8(_anycode))
@@ -155,6 +130,7 @@ std::string sysdcode_to_utf8(const std::string &_anycode) {
  * @return 转化为系统格式格式的string
  */
 std::string utf8_to_sysdcode(const std::string &_u8) {
+    if (_u8.empty( )) return "";
     if (!is_utf8(_u8)) {
         return _u8;
     }
@@ -176,6 +152,7 @@ std::string utf8_to_sysdcode(const std::string &_u8) {
  * @return 是utf8返回true，否则返回false
  */
 bool is_utf8(const std::string &_u8) {
+    if (_u8.empty( )) return false;
     std::string ys = _u8;
     while (ys.size( ) < 100) {
         ys = ys + ys;
@@ -197,6 +174,7 @@ bool is_utf8(const std::string &_u8) {
  * @return 返回是否有效
  */
 bool check_utf8_validity(const std::string &utf8) {
+    if (utf8.empty( )) return true;
     ICUEncodingHandler::ValidationResult result = ICUEncodingHandler::check_utf8_validity(utf8);
     if (result.hasError) {    // 有错误
         return false;         // 不有效
@@ -217,6 +195,7 @@ bool check_sheet_utf8_validity(const table< std::string > &_sheet) {
             }
         }
     }
+    return true;
 }
 
 /*

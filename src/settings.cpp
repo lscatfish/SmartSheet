@@ -8,12 +8,14 @@
  ***********************************************************************************************/
 #include <basic.hpp>
 #include <chrono>
+#include <console.h>
 #include <cstdio>
 #include <cstdlib>
 #include <Encoding.h>
 #include <Files.h>
 #include <fstream>
 #include <helper.h>
+#include <imgs.h>
 #include <iosfwd>
 #include <iostream>
 #include <map>
@@ -26,17 +28,23 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <console.h>
 
 
 namespace settings {
 
 const std::string _SETTINGS_ = "settings.txt";
 
-constexpr auto KEY_OCRMODEL_DICT = "dict";
-constexpr auto KEY_OCRMODEL_CLS  = "cls";
-constexpr auto KEY_OCRMODEL_DET  = "det";
-constexpr auto KEY_OCRMODEL_REC  = "rec";
+constexpr auto KEY_OCRMODEL_DICT                 = "dict";
+constexpr auto KEY_OCRMODEL_CLS                  = "cls";
+constexpr auto KEY_OCRMODEL_DET                  = "det";
+constexpr auto KEY_OCRMODEL_REC                  = "rec";
+constexpr auto KEY_ManualDocPerspectiveCorrector = "ManualDocPerspectiveCorrector";
+
+// 预先输出
+static void preprint_error(size_t serLine, const std::string &line, const std::string &other = "") {
+    std::cout << _SETTINGS_ << U8C(u8" 中行") << serLine
+              << " : \"" << encoding::sysdcode_to_utf8(line) << "\"" << other << std::endl;
+}
 
 // 设置路径
 void set_path( ) {
@@ -79,11 +87,11 @@ void set_path( ) {
         serLine++;
         line = trim_whitespace(line);
         if ((line.size( ) != 0 && line[0] == '#') || line.size( ) == 0) continue;
-
-        auto [before, after] = split_by_equal(line);
-
+        auto [usable, annotation] = split_by(line, '#');    // 分离注释
+        auto [before, after]      = split_by_equal(usable);
+        after                     = trim_whitespace(after);
+        before                    = trim_whitespace(before);
         if (after.size( ) != 0) {
-            after = trim_whitespace(after);
             if (before == KEY_OCRMODEL_CLS) {
                 ppocr::_ppocrDir_.cls_model_dir = after;
                 std::cout << U8C(u8"设置ocr模型cls模型地址： ") << KEY_OCRMODEL_CLS << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
@@ -96,13 +104,21 @@ void set_path( ) {
             } else if (before == KEY_OCRMODEL_REC) {
                 ppocr::_ppocrDir_.rec_model_dir = after;
                 std::cout << U8C(u8"设置ocr模型rec模型地址： ") << KEY_OCRMODEL_REC << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
+            } else if (before == KEY_ManualDocPerspectiveCorrector) {
+                if (after == "true") {
+                    std::cout << U8C(u8"手动透视校正：启用") << std::endl;
+                    img::enable_ManualDocPerspectiveCorrector = true;
+                } else if (after == "false") {
+                    std::cout << U8C(u8"手动透视校正：禁用") << std::endl;
+                    img::enable_ManualDocPerspectiveCorrector = false;
+                } else {
+                    preprint_error(serLine, line, U8C(u8"键值只能是true或是false，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的"));
+                }
             } else {
-                std::cout << _SETTINGS_ << U8C(u8" 中行") << serLine << " : \"" << encoding::sysdcode_to_utf8(line) << "\""
-                          << U8C(u8" 键值\"") << encoding::sysdcode_to_utf8(before) << U8C(u8"\"不存在") << std::endl;
+                preprint_error(serLine, line, U8C(u8"键\"") + encoding::sysdcode_to_utf8(before) + U8C(u8"\"不存在"));
             }
         } else {
-            std::cout << _SETTINGS_ << U8C(u8" 中行") << serLine << " : \"" << encoding::sysdcode_to_utf8(line) << "\""
-                      << U8C(u8" 键值值\"") << encoding::sysdcode_to_utf8(before) << U8C(u8"\"设置为空，采用默认路径") << std::endl;
+            preprint_error(serLine, line, U8C(u8"键\"") + encoding::sysdcode_to_utf8(before) + U8C(u8"\"设置为空，采用默认路径"));
         }
     }
     pause( );

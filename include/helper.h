@@ -56,6 +56,13 @@ std::string trim_whitespace(const std::string &str);
 // 如果没有找到'='，则first为原字符串，second为空
 std::pair< std::string, std::string > split_by_equal(const std::string &str);
 
+/*
+ * @brief 分割字符串，获取一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by(const std::string &str, const char cutter);
+
 // 判断一个字符串是否都是数字
 bool is_all_digits(const std::string &s);
 

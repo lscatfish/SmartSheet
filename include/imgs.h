@@ -14,6 +14,8 @@
 // 操作照片的空间
 namespace img {
 
+extern bool enable_ManualDocPerspectiveCorrector;
+
 // 定义由CELL生成的表格
 using SHEET = std::vector< std::vector< CELL > >;
 
@@ -132,7 +134,7 @@ public:
         windowName_ = "PerspectiveCorrector - " + encoding::utf8_to_sysdcode(_SYSprompt);
 
         // 初始化原始图像中的四边形顶点（默认在原图内偏移10%位置，避免贴边）
-        float margin = ((std::min)(src_.cols, src_.rows)) * 0.1f;     // 偏移量 = 原图宽高的最小值 * 10%
+        float margin = ((std::min)(src_.cols, src_.rows)) * 0.01f;    // 偏移量 = 原图宽高的最小值 * 1%
         srcPts_[0]   = { margin, margin };                            // 顶点0：左上（x=margin, y=margin）
         srcPts_[1]   = { src_.cols - margin, margin };                // 顶点1：右上（x=原图宽-margin, y=margin）
         srcPts_[2]   = { src_.cols - margin, src_.rows - margin };    // 顶点2：右下（x=原图宽-margin, y=原图高-margin）
