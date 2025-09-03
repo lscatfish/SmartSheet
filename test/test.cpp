@@ -268,17 +268,37 @@ void test_for_sort_table_by( ) {
         { "4", U8C(u8"赵六"), "20254934", "" }
     };
     for (const auto &r : sheet) {
-        for (const auto& c : r) {
+        for (const auto &c : r) {
             std::cout << c << "\t";
         }
         std::cout << std::endl;
     }
     std::cout << std::endl;
-    sort_table_string_by(sheet, 2,false);
+    sort_table_string_by(sheet, 2, false);
     for (const auto &r : sheet) {
         for (const auto &c : r) {
             std::cout << c << "\t";
         }
         std::cout << std::endl;
+    }
+}
+
+// 测试手动透视矫正类
+void test_for_ManualDocPerspectiveCorrector( ) {
+
+    file::DefFolder imgFolder(file::_INPUT_ATT_IMGS_DIR_, false);
+    auto            filelist = imgFolder.get_file_list( );
+    auto            pathlist = imgFolder.get_filepath_list( );
+
+    for (size_t i = 0; i < pathlist.size( ); i++) {
+        cv::Mat us;
+        us = cv::imread(pathlist[i]);
+        if (us.empty( )) {
+            std::cout << encoding::sysdcode_to_utf8(pathlist[i]) << U8C(u8"打开失败") << std::endl;
+            return;
+        }
+        img::ManualDocPerspectiveCorrector c(us, filelist[i]);
+        cv::Mat                            out = c.get_corrected_img( );
+        cv::imwrite(filelist[i], out);
     }
 }

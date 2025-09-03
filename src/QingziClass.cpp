@@ -36,7 +36,11 @@ DoQingziClass::~DoQingziClass( ) {
 void DoQingziClass::start( ) {
 
     /* 3.选择生成签到表或出勤表 =========================================================== */
-    int outWhichSheet = choose_function( );    // 生成那一张表：1签到表  2出勤记录表
+    int outWhichSheet = choose_function(3, list< std::string >{
+                                               U8C(u8"请选择要生成excel表的类型："),
+                                               U8C(u8"1. 活动签到表"),
+                                               U8C(u8"2. 出勤记录表"),
+                                               U8C(u8"3. 青字班报名") });    // 生成哪一张表
 
     std::cout << std::endl
               << std::endl;
@@ -106,8 +110,7 @@ bool DoQingziClass::self_check( ) {
         }
     }
     if (!file::is_file_exists(ppocr::_ppocrDir_.rec_char_dict_path)) {
-        std::cout << U8C(u8"模型字典库错误：")
-                  << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
+        std::cout << U8C(u8"模型字典库错误：") << ppocr::_ppocrDir_.rec_char_dict_path << std::endl;
         pause( );
         return false;
     }
@@ -150,23 +153,26 @@ bool DoQingziClass::self_check( ) {
     return true;
 }
 
-// 选择
-int DoQingziClass::choose_function( ) {
+
+/*
+ * @brief 选择函数
+ * @param _chosseAll 总选项数目
+ * @param _outPrint 要打印在控制台上的内容
+ */
+int DoQingziClass::choose_function(int _chosseAll, const list< std::string > &_outPrint) {
     int a = 0;
-    while (a != 1 && a != 2 && a != 3) {
+    while (true) {
         console::clear_console( );
-        std::cout << U8C(u8"请选择要生成excel表的类型：") << std::endl
-                  << U8C(u8"1. 活动签到表") << std::endl;
-        std::cout << U8C(u8"2. 出勤记录表") << std::endl;
-        std::cout << U8C(u8"3. 青字班报名") << std::endl;
-        std::cout << U8C(u8"请选择（ 输入 1 或者 2 或者 3 后按下 Enter键 ）：");
+        for (const auto &line : _outPrint)
+            std::cout << line << std::endl;
+        std::cout << U8C(u8"请选择（输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键）：");
         std::cin >> a;
-        if (a == 1 || a == 2 || a == 3) {
+        if (a >= 1 && a <= _chosseAll) {
             return a;
         } else {
-            std::cout << U8C(u8"你的输入错误，请输入 1 或者 2 或者 3 后按下 Enter键 ")
+            std::cout << U8C(u8"你的输入错误，请输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键")
                       << std::endl;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(2));
         }
     }
     return 1;
@@ -181,8 +187,7 @@ void DoQingziClass::load_personnel_information_list( ) {
      * @param 二维向量用于储存表格信息
      * @param 青字班的名字
      */
-    auto save_information_std =
-        [&](const table< std::string > &sh, std::string cn) -> void {
+    auto save_information_std = [&](const table< std::string > &sh, std::string cn) -> void {
         // 这里实际上应该先转成defline，在转成defperson
         for (size_t rowIndex = 1; rowIndex < sh.size( ); rowIndex++) {
             DefPerson per;
@@ -298,7 +303,6 @@ void DoQingziClass::attendance( ) {
         std::cout << U8C(u8"请调整报名文件或者学员信息，反复运行本程序，直到没有弹出ATTENTION提示为止") << std::endl;
         std::cout << "\033[0m";
         std::cout << std::endl
-                  << std::endl
                   << std::endl;
     }
 
@@ -324,26 +328,16 @@ void DoQingziClass::stats_applicants( ) {
     list< std::string > app_filePathAndName;    // applicationSheet的excel文件的路径
     list< DefLine >     app_person;             // 定义从报名表中获得的人员信息
 
-    int a = 0;
-    while (a != 1 && a != 2) {
-        console::clear_console( );
-        std::cout << std::endl
-                  << U8C(u8"请选择生成方式：") << std::endl
-                  << U8C(u8"1.生成部分人员的签到表") << std::endl
-                  << U8C(u8"2.生成所有人员的签到表") << std::endl;
-        std::cout << U8C(u8"请选择（ 输入 1 或者 2 后按下 Enter键 ）：");
-        std::cin >> a;
-        if (a == 1) {
-            break;
-        } else if (a == 2) {
-            for (auto &per : personStd_) {
-                per.ifsign = true;
-            }
-            return;
-        } else {
-            std::cout << U8C(u8"你的输入错误，请输入 1 或者 2 后按下 Enter键 ") << std::endl;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+    int a = choose_function(2, list< std::string >{
+                                   U8C(u8"请选择生成方式："),
+                                   U8C(u8"1.生成部分人员的签到表"),
+                                   U8C(u8"2.生成所有人员的签到表")
+    });
+    if (a == 2) {
+        for (auto &per : personStd_) {
+            per.ifsign = true;
         }
+        return;
     }
 
     // lambda函数定义========================================================================/
@@ -788,9 +782,8 @@ void DoQingziClass::save_statisticsSheet( ) {
     }
 }
 
-
 /* ======================================================================================================================= */
-
+/* ======================================================================================================================= */
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {

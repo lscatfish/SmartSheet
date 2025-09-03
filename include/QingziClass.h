@@ -65,8 +65,12 @@ private:
 
     /* ========================================================================================= */
 
-    // 选择
-    int choose_function( );
+    /*
+     * @brief 选择函数
+     * @param _chosseAll 总选项数目
+     * @param _outPrint 要打印在控制台上的内容
+     */
+    int choose_function(int _chosseAll, const list< std::string > &_outPrint);
 
     // @brief 加载全学员表的函数
     void load_personnel_information_list( );

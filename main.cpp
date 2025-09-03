@@ -9,12 +9,16 @@
 #include <settings.h>
 #include <string>
 #include <test/test.h>
+#include <test/test_for_chstring.h>
 #include <test/test_for_ui.h>
 
 int main( ) {
 
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
     encoding::Init( );
+
+#if true
+
     pdf::Init( );    // 初始化poppler
     if (!start_warning( )) {
         std::cout << std::endl
@@ -24,7 +28,6 @@ int main( ) {
     }
     settings::set_path( );
 
-#if true
     console::clear_console( );
     DoQingziClass *qClass = new DoQingziClass;
     if (!qClass) {
@@ -46,8 +49,7 @@ int main( ) {
 
 #else
 
-    test_for_get_console_width( );
-    std::cout << "\033[" << int(3) << ";0H";
+    test_for_ManualDocPerspectiveCorrector( );
     pause( );
 
 #endif    // true
