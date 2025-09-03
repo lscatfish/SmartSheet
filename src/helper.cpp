@@ -171,7 +171,7 @@ bool sort_table_string_by(
     /* ==============================lambda===================================== */
 
     size_t startRow = _excludeHeader ? 1 : 0;    // 排除表头则从第二行开始排序
-    // 冒泡排序
+    // 冒泡排序（o2好像可以优化到冒泡）
     for (size_t i = startRow; i < _inTable.size( ); i++) {
         for (size_t j = startRow + 1; j < _inTable.size( ); j++) {
             if (comparator(_inTable[j - 1], _inTable[j])) {
