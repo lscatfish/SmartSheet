@@ -26,23 +26,23 @@
 class chstring {
 public:
     enum class CStype {
-        SYS = 0,    // 系统默认的编码形式
-        UTF8        // utf8编码
+        UTF8 = 0,    // utf8编码
+        SYS  = 1,    // 系统默认的编码形式
     };
 
     chstring(const std::string &_in_, CStype _inType = CStype::UTF8) {
         if (_inType == CStype::UTF8)
-            this->usingStr = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
+            this->usingStr_ = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
         else if (_inType == CStype::SYS)
-            this->usingStr = encoding::utf8_to_sysdcode(_in_);
-        usingType = _inType;
+            this->usingStr_ = encoding::utf8_to_sysdcode(_in_);
+        usingType_ = _inType;
     }
     chstring(const char *cstr, CStype _inType = CStype::UTF8) {
         if (_inType == CStype::UTF8)
-            this->usingStr = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
+            this->usingStr_ = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
         else if (_inType == CStype::SYS)
-            this->usingStr = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
-        usingType = _inType;
+            this->usingStr_ = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
+        usingType_ = _inType;
     }
     chstring(const chstring &_in_) {
         *this = _in_;    // 直接复制底层
@@ -59,7 +59,7 @@ public:
 
     // 友元函数：输出运算符重载
     friend std::ostream &operator<<(std::ostream &os, const chstring &cs) {
-        std::string u8 = encoding::sysdcode_to_utf8(cs.usingStr);
+        std::string u8 = encoding::sysdcode_to_utf8(cs.usingStr_);
         os << u8;
         return os;
     }
@@ -68,6 +68,7 @@ public:
     void cvtEncode(CStype _to);
 
     // 比较运算符重载
+    // 比较，总是将utf8放在sys之前(utf8<sys)
     bool operator==(const chstring &b) const;
     bool operator>(const chstring &b) const;
     bool operator<(const chstring &b) const;
@@ -78,7 +79,7 @@ public:
     char       &operator[](size_t pos);
     const char &operator[](size_t pos) const;
 
-    // 字符串拼接运算符重载
+    // 字符串拼接运算符重载(总是匹配到前一个字符的编码形式)
     chstring operator+(const chstring &b) const;
 
     // 迭代器相关方法
@@ -104,9 +105,12 @@ public:
     // 获取底层字符串，按照系统编码返回
     std::string get_sysstring( ) const;
 
+    //获取当前使用的文字的编码类型
+    CStype get_encoding_type( ) const;
+
 private:
-    std::string usingStr;    // 当前使用的字符串（编码同usingType）
-    CStype      usingType;
+    std::string usingStr_;    // 当前使用的字符串（编码同usingType）
+    CStype      usingType_;
 };
 
 
