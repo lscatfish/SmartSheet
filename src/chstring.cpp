@@ -79,11 +79,50 @@ chstring chstring::operator+(const chstring &b) const {
 
 // 字符串拼接实现（修正返回类型为chstring）(总是匹配到前一个字符的编码形式)
 chstring chstring::operator+(const std::string &b) const {
-    if (this->usingType_ == CStype::SYS)
+    if (this->usingType_ == csType::SYS)
         return chstring(this->usingStr_ + encoding::utf8_to_sysdcode(b), this->usingType_);
-    else if (this->usingType_ == CStype::UTF8)
+    else if (this->usingType_ == csType::UTF8)
         return chstring(this->usingStr_ + encoding::sysdcode_to_utf8(b), this->usingType_);
+    else
+        return chstring( );
 }
+
+// 字符串拼接实现（修正返回类型为chstring）(总是匹配到前一个字符的编码形式)
+chstring chstring::operator+(const char *b) const {
+    if (this->usingType_ == csType::SYS)
+        return chstring(this->usingStr_ + encoding::utf8_to_sysdcode(b), this->usingType_);
+    else if (this->usingType_ == csType::UTF8)
+        return chstring(this->usingStr_ + encoding::sysdcode_to_utf8(b), this->usingType_);
+    else
+        return chstring( );
+}
+
+// 字符串拼接实现（修正返回类型为chstring的引用）(总是匹配到前一个字符的编码形式)
+chstring &chstring::operator+=(const chstring &b) {
+    if (this->usingType_ == b.usingType_) {
+        this->usingStr_ += b.usingStr_;
+    } else {
+        chstring toMain(b, this->usingType_);
+        this->usingStr_ += toMain.usingStr_;
+    }
+    return *this;
+}
+
+// 字符串拼接实现（修正返回类型为chstring的引用）(总是匹配到前一个字符的编码形式)
+chstring &chstring::operator+=(const std::string &b) {
+    if (this->usingType_ == csType::SYS)
+        this->usingStr_ += encoding::utf8_to_sysdcode(b);
+    else if (this->usingType_ == csType::UTF8)
+        this->usingStr_ += encoding::sysdcode_to_utf8(b);
+    return *this;
+}
+
+// 字符串拼接实现（修正返回类型为chstring的引用）(总是匹配到前一个字符的编码形式)
+chstring &chstring::operator+=(const char *b) {
+    *this += std::string(b);
+    return *this;
+}
+
 
 // 迭代器相关方法
 #if false
@@ -123,42 +162,58 @@ size_t chstring::size( ) const {
     return this->usingStr_.size( );
 }
 
+// 打印文字到控制台
+void chstring::print( ) const {
+    std::cout << *this;
+}
+
+// 打赢文字与回车到控制台
+void chstring::println( ) const {
+    std::cout << *this << std::endl;
+}
+
 // 获取底层字符串
-std::string chstring::get_u8string( ) const {
-    if (this->usingType_ == CStype::UTF8)
+std::string chstring::u8string( ) const {
+    if (this->usingType_ == csType::UTF8)
         return this->usingStr_;
-    else if (this->usingType_ == CStype::SYS)
+    else if (this->usingType_ == csType::SYS)
         return encoding::sysdcode_to_utf8(this->usingStr_);
+    else
+        return "";
 }
 
 // 获取底层字符串，按照系统编码返回
-std::string chstring::get_sysstring( ) const {
-    if (this->usingType_ == CStype::UTF8)
+std::string chstring::sysstring( ) const {
+    if (this->usingType_ == csType::UTF8)
         return encoding::utf8_to_sysdcode(this->usingStr_);
-    else if (this->usingType_ == CStype::SYS)
+    else if (this->usingType_ == csType::SYS)
         return this->usingStr_;
+    else
+        return "";
 }
 
 // 获取宽字符方式
-std::wstring chstring::get_wstring( ) const {
-    if (this->usingType_ == CStype::UTF8)
+std::wstring chstring::wstring( ) const {
+    if (this->usingType_ == csType::UTF8)
         return encoding::utf8_to_wstring(this->usingStr_);
-    else if (this->usingType_ == CStype::SYS)
+    else if (this->usingType_ == csType::SYS)
         return encoding::utf8_to_wstring(encoding::sysdcode_to_utf8(this->usingStr_));
+    else
+        return L"";
 }
 
 // 获取当前使用的文字的编码类型
-chstring::CStype chstring::get_encoding_type( ) const {
+chstring::csType chstring::cstype( ) const {
     return this->usingType_;
 }
 
 // 转化编码
-void chstring::cvtEncode_to(CStype _in) {
+void chstring::cvtEncode_to(csType _in) {
     if (_in == this->usingType_)
         return;
-    else if (_in == CStype::SYS)
+    else if (_in == csType::SYS)
         this->usingStr_ = encoding::utf8_to_sysdcode(this->usingStr_);
-    else if (_in == CStype::UTF8)
+    else if (_in == csType::UTF8)
         this->usingStr_ = encoding::sysdcode_to_utf8(this->usingStr_);
 }
 
@@ -166,7 +221,7 @@ void chstring::cvtEncode_to(CStype _in) {
 void chstring::trim_whitespace( ) {
     this->usingStr_ = ::trim_whitespace(this->usingStr_);
     if (this->usingStr_.size( ) == 0) {
-        this->usingType_ = CStype::UTF8;
+        this->usingType_ = csType::UTF8;
         this->usingStr_  = "";
         return;
     } else {
