@@ -67,9 +67,6 @@ std::pair< std::string, std::string > split_by(const std::string &str, const cha
 // 判断一个字符串是否都是数字
 bool is_all_digits(const std::string &s);
 
-// 开始前警告
-bool start_warning( );
-
 /*
  * @brief 对table< string > 进行排序
  * @param _inTable 待排序的表格

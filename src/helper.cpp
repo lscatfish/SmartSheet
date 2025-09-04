@@ -136,29 +136,6 @@ bool is_all_digits(const std::string &s) {
     return std::all_of(s.begin( ), s.end( ), [](unsigned char c) { return std::isdigit(c); });
 }
 
-// 开始前警告
-bool start_warning( ) {
-    console::clear_console( );
-    std::cout << U8C(u8"请确保已经关闭工作区（input、output与storage文件夹下所有文件都必须关闭）!!!") << std::endl;
-    std::cout << std::endl
-              << U8C(u8"-程序运行过程中会在output文件夹内生成结果，请勿删除output文件夹!!!") << std::endl;
-    std::cout << U8C(u8"-如果output文件夹内有旧的结果，程序会自动覆盖，请注意备份重要数据!!!") << std::endl;
-    std::cout << std::endl
-              << U8C(u8"详细的使用教程请参看本程序同目录下的“教程”文件") << std::endl;
-    std::cout << std::endl
-              << U8C(u8"你是否已确认关闭工作区  [Y/n]  （请输入Y以开始程序）:") << std::endl;
-    console::clear_input_buffer( );
-    std::string yn;
-    std::cin >> yn;
-    if (yn != "Y" && yn != "y") {
-        std::cout << U8C(u8"你未输入Y，程序终止...") << std::endl;
-        pause( );
-        return false;
-    }
-    console::clear_input_buffer( );
-    return true;
-}
-
 /*
  * @brief 对table< string > 进行排序
  * @param _inTable 待排序的表格
