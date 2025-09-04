@@ -31,6 +31,27 @@ set(CMAKE_SYSTEM_VERSION "10.0.22621.0" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 优化选项设置代码
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  # 区分编译器类型设置优化选项
+  if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # GCC 或 Clang 使用 -O3
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+  elseif(MSVC)
+    # MSVC 使用 /O2（对应 GCC 的 -O3 级别优化）
+    # /O2：最快速度优化（MSVC 的默认 Release 优化级别）
+    # /Ox：最大化优化（比 /O2 更激进）
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /arch:AVX2")
+  endif()
+  
+  # 启用 LTO（链接时优化）
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ipo_supported)
+  if(ipo_supported)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+  endif()
+endif()
+
 
 # 找包，这是可行的
 # find_package(OpenCV REQUIRED)
