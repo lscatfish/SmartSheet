@@ -14,7 +14,10 @@
 // 操作照片的空间
 namespace img {
 
-extern bool enable_ManualDocPerspectiveCorrector;
+extern bool enable_ManualDocPerspectiveCorrector;    // 是否启用手动透视校正
+extern bool enable_ImageEnhancementRemoveShadow;     // 去除阴影
+extern bool enable_ImageEnhancementLightSharp;       // 轻度锐化
+extern bool enable_ImageEnhancementAuto;             // 自动图像增强
 
 // 定义由CELL生成的表格
 using SHEET = std::vector< std::vector< CELL > >;
@@ -258,16 +261,18 @@ public:
      * @brief 基于 HSV 色彩空间的阴影去除（简单高效，适合彩色图）
      * @brief 阴影会降低图像局部的明度（V 通道），但对色调（H） 和饱和度（S） 影响较小。通过单独增强阴影区域的 V 通道，可快速消除阴影。
      * @param _inImg 输入的图片
+     * @param _light 亮度提升系数
+     * @param _sh 阴影阈值缩放器
      * @return 返回一个深拷贝
      */
-    static cv::Mat remove_shadow_HSV(const cv::Mat &_inImg);
+    static cv::Mat remove_shadow_HSV(const cv::Mat &_inImg, double _light = 1.2, double _sh = 1.1);
 
     /*
      * @brief 基于形态学操作去除阴影（返回一个灰度图）
      * @param _inImg 输入的图片
      * @return 返回一个深拷贝的灰度图
      */
-    static cv::Mat remove_shadow_toGray_mophology(const cv::Mat &_inImg);
+    static cv::Mat remove_shadow_toGray_mophology(const cv::Mat &_inImg);    // 这个效果好，但是只针对灰度图
 
     /*
      * @brief 基于Gamma校正与白平衡去除阴影
@@ -297,19 +302,35 @@ public:
         double         lighten   = 50);
 
     /*
-     * @brief 基于形态学操作调整阴影
+     * @brief 基于像素的线性增益操作调整阴影（灰度阈值+Gamma提亮）
      * @param _inImg 输入的图片
      * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
      * @return 返回一个深拷贝的灰度图
      */
-    static cv::Mat remove_shadow_mophology(const cv::Mat &_inImg, int light = 50);
+    static cv::Mat remove_shadow_pixel_linear(const cv::Mat &_inImg, int light = 50);    // 这是推荐的（参数已调整好）
+
+    /*
+     * @brief 基于形态学思想 + 自适应阈值 + 软阈值 + HSV 色彩保护 去除阴影
+     * 这个方法一坨屎，不推荐
+     * @param _inImg 输入的图片
+     * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
+     * @param alpha Sigmoid斜率，可调
+     */
+    static cv::Mat remove_shadow_pixel_AT(const cv::Mat &_inImg, int light = 50, float alpha = 16);
 
     /*
      *brief 对 8 位 3 通道图做轻量锐化
      * @param _inImg 输入的图片
      * @param strength 锐化强度，默认 1.0（标准核），>1 更锐，<1 更弱
+     * 更锐的值会提升亮度，更弱的值会降低亮度
      */
     static cv::Mat light_sharpen(const cv::Mat &_inImg, double strength = 1.0);
+
+    /*
+     * @brief 推荐的阴影去除函数
+     * @param _inImg 输入的图片
+     */
+    static cv::Mat remove_shandow(const cv::Mat &_inImg);
 
 private:
 };

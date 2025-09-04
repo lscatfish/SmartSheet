@@ -39,6 +39,9 @@ constexpr auto KEY_OCRMODEL_CLS                  = "cls";
 constexpr auto KEY_OCRMODEL_DET                  = "det";
 constexpr auto KEY_OCRMODEL_REC                  = "rec";
 constexpr auto KEY_ManualDocPerspectiveCorrector = "ManualDocPerspectiveCorrector";
+constexpr auto KEY_ImageEnhancement              = "ImageEnhancement";    // 开放一个键
+// constexpr auto KEY_ImageEnhancementLightSharp    = "ImageEnhancement";
+// constexpr auto KEY_ImageEnhancementAuto          = "ImageEnhancement";
 
 // 预先输出
 static void preprint_error(size_t serLine, const std::string &line, const std::string &other = "") {
@@ -105,15 +108,36 @@ void set_path( ) {
                 ppocr::_ppocrDir_.rec_model_dir = after;
                 std::cout << U8C(u8"设置ocr模型rec模型地址： ") << KEY_OCRMODEL_REC << "=" << encoding::sysdcode_to_utf8(after) << std::endl;
             } else if (before == KEY_ManualDocPerspectiveCorrector) {
-                if (after == "true") {
-                    std::cout << U8C(u8"手动透视校正：启用") << std::endl;
-                    img::enable_ManualDocPerspectiveCorrector = true;
-                } else if (after == "false") {
-                    std::cout << U8C(u8"手动透视校正：禁用") << std::endl;
-                    img::enable_ManualDocPerspectiveCorrector = false;
-                } else {
-                    preprint_error(serLine, line, U8C(u8"键值只能是true或是false，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的，采用默认值false"));
+                bool ep = false;    // 是否进行错误打印
+                if (is_alpha_numeric(after)) {
+                    after = lower_alpha_numeric(after);
+                    if (after == "true") {
+                        std::cout << U8C(u8"手动透视校正：启用") << std::endl;
+                        img::enable_ManualDocPerspectiveCorrector = true;
+                    } else if (after == "false") {
+                        std::cout << U8C(u8"手动透视校正：禁用") << std::endl;
+                        img::enable_ManualDocPerspectiveCorrector = false;
+                    } else
+                        ep = true;
                 }
+                if (ep) preprint_error(serLine, line, U8C(u8"键值只能是true或是false，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的，采用默认值false"));
+            } else if (before == KEY_ImageEnhancement) {
+                bool ep = false;    // 是否进行错误打印
+                if (is_alpha_numeric(after)) {
+                    after = lower_alpha_numeric(after);
+                    if (after == "auto") {
+                        std::cout << U8C(u8"自动图片增强：启用") << std::endl;
+                        img::enable_ImageEnhancementAuto = true;
+                    } else if (after == "removeshadow") {
+                        std::cout << U8C(u8"图片阴影去除：启用") << std::endl;
+                        img::enable_ImageEnhancementRemoveShadow = true;
+                    } else if (after == "sharpen") {
+                        std::cout << U8C(u8"图片轻度锐化：启用") << std::endl;
+                        img::enable_ImageEnhancementLightSharp = true;
+                    } else
+                        ep = true;
+                }
+                if (ep) preprint_error(serLine, line, U8C(u8"键值只能是auto、removeshadow、sharpen，你输入键值\"") + encoding::sysdcode_to_utf8(after) + U8C(u8"\"是错误的，采用默认值：不启用此功能"));
             } else {
                 preprint_error(serLine, line, U8C(u8"键\"") + encoding::sysdcode_to_utf8(before) + U8C(u8"\"不存在"));
             }
