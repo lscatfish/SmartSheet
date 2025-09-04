@@ -210,3 +210,33 @@ bool sort_table_string_by(
     }
     return true;
 }
+
+// 检查字符串是否仅包含英文字母和数字
+bool is_alpha_numeric(const std::string &str) {
+    // 空字符串可根据需求返回 true 或 false
+    if (str.empty( )) {
+        return false;    // 此处视为不符合
+    }
+
+    for (char c : str) {
+        // isalnum() 对字母/数字返回非0值，其他返回0
+        if (!std::isalnum(static_cast< unsigned char >(c))) {
+            return false;    // 存在非字母/数字字符
+        }
+    }
+    return true;    // 所有字符均符合条件
+}
+
+// 将字符串中的大写字母转为小写，数字保持不变
+std::string lower_alpha_numeric(const std::string &str) {
+    std::string result;
+    result.reserve(str.size( ));    // 预分配内存，提高效率
+
+    for (char c : str) {
+        // 将字符转换为小写（数字和小写字母会保持不变）
+        // 先转换为 unsigned char 避免处理负数时的未定义行为
+        result += static_cast< char >(std::tolower(static_cast< unsigned char >(c)));
+    }
+
+    return result;
+}

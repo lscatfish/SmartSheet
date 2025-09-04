@@ -24,6 +24,9 @@
 namespace img {
 
 bool enable_ManualDocPerspectiveCorrector = false;    // 是否启用手动透视校正
+bool enable_ImageEnhancementRemoveShadow  = false;    // 去除阴影
+bool enable_ImageEnhancementLightSharp    = false;    // 轻度锐化
+bool enable_ImageEnhancementAuto          = false;    // 自动图像增强
 
 // 提取水平网格线
 cv::Mat GridResult::extract_horizontal_lines(cv::Mat &src) {
@@ -482,9 +485,11 @@ void ManualDocPerspectiveCorrector::staticOnMouse(int event, int x, int y, int f
  * @brief 基于 HSV 色彩空间的阴影去除（简单高效，适合彩色图）
  * @brief 阴影会降低图像局部的明度（V 通道），但对色调（H） 和饱和度（S） 影响较小。通过单独增强阴影区域的 V 通道，可快速消除阴影。
  * @param _inImg 输入的图片
+ * @param _light 亮度提升系数
+ * @param _sh 阴影阈值缩放器
  * @return 返回一个深拷贝
  */
-cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg) {
+cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg, double _light, double _sh) {
 
     cv::Mat hsv;
     cv::cvtColor(_inImg, hsv, cv::COLOR_BGR2HSV);    // BGR转HSV
@@ -496,7 +501,7 @@ cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg) {
 
     // 1. 计算V通道的均值，作为阴影区域的亮度阈值参考
     cv::Scalar meanVal      = mean(V);
-    int        shadowThresh = static_cast< int >(meanVal[0] * 0.7);    // 阴影阈值（可根据图像调整）
+    int        shadowThresh = static_cast< int >(meanVal[0] * _sh);    // 阴影阈值（可根据图像调整）
 
     // 2. 增强阴影区域的亮度（非阴影区域保持不变）
     cv::Mat enhancedV;
@@ -505,8 +510,8 @@ cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg) {
         uchar *pV        = V.ptr< uchar >(i);
         uchar *pEnhanced = enhancedV.ptr< uchar >(i);
         for (int j = 0; j < V.cols; j++) {
-            if (pV[j] < shadowThresh) {                                    // 判定为阴影区域
-                pEnhanced[j] = cv::saturate_cast< uchar >(pV[j] * 1.8);    // 亮度提升（系数可调整）
+            if (pV[j] < shadowThresh) {                                       // 判定为阴影区域
+                pEnhanced[j] = cv::saturate_cast< uchar >(pV[j] * _light);    // 亮度提升（系数可调整）
             }
         }
     }
@@ -516,7 +521,7 @@ cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg) {
     merge(channels, hsv);
     cv::Mat dst;
     cvtColor(hsv, dst, cv::COLOR_HSV2BGR);
-    return dst.clone( );
+    return dst;
 }
 
 /*
@@ -549,7 +554,7 @@ cv::Mat ImageEnhancement::remove_shadow_toGray_mophology(const cv::Mat &_inImg) 
     cv::Mat removeShadowMat;
     cv::normalize(calcMat, removeShadowMat, 0, 200, cv::NORM_MINMAX);
 
-    return removeShadowMat.clone( );
+    return removeShadowMat;
 }
 
 /*
@@ -587,7 +592,7 @@ cv::Mat ImageEnhancement::remove_shadow_Gamma(
     flat.convertTo(result8u, CV_8UC3, 255.0);
     cv::LUT(result8u, lut, result8u);
 
-    return result8u.clone( );
+    return result8u;
 }
 
 /*
@@ -647,16 +652,16 @@ cv::Mat ImageEnhancement::remove_shadow_adaptiveThreshold(
     }
     cv::merge(channels, 3, result8u);
 
-    return result8u.clone( );
+    return result8u;
 }
 
 /*
- * @brief 基于形态学操作调整阴影
+ * @brief 基于像素的线性增益操作调整阴影（灰度阈值+Gamma提亮）
  * @param _inImg 输入的图片
  * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
  * @return 返回一个深拷贝的灰度图
  */
-cv::Mat ImageEnhancement::remove_shadow_mophology(const cv::Mat &_inImg, int light) {
+cv::Mat ImageEnhancement::remove_shadow_pixel_linear(const cv::Mat &_inImg, int light) {
     cv::Mat _inputImg = _inImg.clone( );
     // 生成灰度图
     cv::Mat gray = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
@@ -718,7 +723,77 @@ cv::Mat ImageEnhancement::remove_shadow_mophology(const cv::Mat &_inImg, int lig
             }
         }
     }
-    return result.clone( );
+    return result;
+}
+
+/*
+ * @brief 基于形态学思想 + 自适应阈值 + 软阈值 + HSV 色彩保护 去除阴影
+ * 这个方法一坨屎，不推荐
+ * @param _inImg 输入的图片
+ * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
+ * @param alpha Sigmoid 斜率，可调
+ */
+cv::Mat ImageEnhancement::remove_shadow_pixel_AT(const cv::Mat &_inImg, int light, float alpha) {
+    /* ---------- 1. 深拷贝 + BGR→HSV ---------- */
+    cv::Mat _inputImg = _inImg.clone( );
+    cv::Mat hsv;
+    cv::cvtColor(_inputImg, hsv, cv::COLOR_BGR2HSV);
+    std::vector< cv::Mat > chn;
+    cv::split(hsv, chn);    // chn[0]=H, chn[1]=S, chn[2]=V
+
+    /* ---------- 2. 计算灰度亮度图 (0-1) ---------- */
+    // 直接复用你原来的加权公式
+    cv::Mat gray32f = 0.299f * chn[2] + 0.587f * chn[1] + 0.114f * chn[2];
+    gray32f.convertTo(gray32f, CV_32FC1, 1.0f / 255.0f);
+
+    /* ---------- 3. 阴影概率图 & Otsu 阈值 ---------- */
+    cv::Mat prob = (1.0f - gray32f).mul(1.0f - gray32f);    // (1-gray)^2
+    cv::Mat prob8u;
+    prob.convertTo(prob8u, CV_8UC1, 255.0);
+    cv::Mat temp;
+    double  otsuTh = cv::threshold(prob8u, temp, 0, 255,
+                                   cv::THRESH_BINARY | cv::THRESH_OTSU);
+    otsuTh /= 255.0;    // 归一化到 0-1
+
+    /* ---------- 4. 参数（保持原含义） ---------- */
+    const int   max    = 4;
+    const float bright = light / 100.0f / max;
+    const float mid    = 1.0f + max * bright;
+
+    /* ---------- 5. Sigmoid 软掩膜 ---------- */
+    cv::Mat midrate    = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
+    cv::Mat brightrate = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
+
+    for (int i = 0; i < _inputImg.rows; ++i) {
+        const float *pProb   = prob.ptr< float >(i);
+        float       *pMid    = midrate.ptr< float >(i);
+        float       *pBright = brightrate.ptr< float >(i);
+        for (int j = 0; j < _inputImg.cols; ++j) {
+            float x    = pProb[j] / otsuTh;    // 归一化
+            float s    = 1.0f / (1.0f + std::exp(-alpha * (x - 0.5f)));
+            pMid[j]    = 1.0f + (mid - 1.0f) * s;
+            pBright[j] = bright * s;
+        }
+    }
+
+    /* ---------- 6. 仅对 V 通道做 Gamma 提亮 ---------- */
+    for (int i = 0; i < _inputImg.rows; ++i) {
+        const float *pMid    = midrate.ptr< float >(i);
+        const float *pBright = brightrate.ptr< float >(i);
+        uchar       *pV      = chn[2].ptr< uchar >(i);
+        for (int j = 0; j < _inputImg.cols; ++j) {
+            float v = pV[j] / 255.0f;
+            v       = pow(v, 1.0f / pMid[j]) * (1.0f / (1.0f - pBright[j]));
+            v       = cv::max(0.0f, cv::min(1.0f, v));
+            pV[j]   = cv::saturate_cast< uchar >(v * 255.0f);
+        }
+    }
+
+    /* ---------- 7. 合并通道并转回 BGR ---------- */
+    cv::Mat result;
+    cv::merge(chn, hsv);
+    cv::cvtColor(hsv, result, cv::COLOR_HSV2BGR);
+    return result;
 }
 
 /*
@@ -738,7 +813,16 @@ cv::Mat ImageEnhancement::light_sharpen(const cv::Mat &_inImg, double strength) 
     cv::Mat dst;
     cv::filter2D(_inImg, dst, -1, kernel);
     return dst;
-    return cv::Mat( );
+}
+
+/*
+ * @brief 推荐的阴影去除函数
+ * @param _inImg 输入的图片
+ */
+cv::Mat ImageEnhancement::remove_shandow(const cv::Mat &_inImg) {
+    cv::Mat dis = remove_shadow_pixel_linear(_inImg, 45);
+    dis         = light_sharpen(dis, 0.9);
+    return dis;
 }
 
 
@@ -843,6 +927,15 @@ void load_sheet_from_img(table< std::string > &_sheet, const std::string &_path)
     if (enable_ManualDocPerspectiveCorrector) {
         ManualDocPerspectiveCorrector perspectiveCorrector(img, file::split_file_from_path(_path));
         img = perspectiveCorrector.get_corrected_img( );
+    }
+
+    if (enable_ImageEnhancementAuto)
+        img = ImageEnhancement::remove_shandow(img);
+    else {
+        if (enable_ImageEnhancementRemoveShadow)
+            img = ImageEnhancement::remove_shadow_pixel_linear(img, 45);
+        if (enable_ImageEnhancementLightSharp)
+            img = ImageEnhancement::light_sharpen(img, 1);
     }
 
     // ocr操作

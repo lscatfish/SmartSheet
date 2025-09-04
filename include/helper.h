@@ -3,6 +3,7 @@
 /*
  * @file helper.h
  * @brief 一些辅助功能的函数
+ * 里面的函数功能很杂
  *
  * 作者：lscatfish
  * 邮箱：2561925435@qq.com
@@ -120,5 +121,11 @@ bool sort_table_string_by(
     }
     return true;
 }
+
+// 检查字符串是否仅包含英文字母和数字
+bool is_alpha_numeric(const std::string &str);
+
+// 将字符串中的大写字母转为小写，数字保持不变
+std::string lower_alpha_numeric(const std::string &str);
 
 #endif    // !HELPER_H
