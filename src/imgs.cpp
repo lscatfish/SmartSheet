@@ -478,6 +478,273 @@ void ManualDocPerspectiveCorrector::staticOnMouse(int event, int x, int y, int f
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
+/*
+ * @brief 基于 HSV 色彩空间的阴影去除（简单高效，适合彩色图）
+ * @brief 阴影会降低图像局部的明度（V 通道），但对色调（H） 和饱和度（S） 影响较小。通过单独增强阴影区域的 V 通道，可快速消除阴影。
+ * @param _inImg 输入的图片
+ * @return 返回一个深拷贝
+ */
+cv::Mat ImageEnhancement::remove_shadow_HSV(const cv::Mat &_inImg) {
+
+    cv::Mat hsv;
+    cv::cvtColor(_inImg, hsv, cv::COLOR_BGR2HSV);    // BGR转HSV
+
+    // 分离H、S、V通道
+    std::vector< cv::Mat > channels;
+    split(hsv, channels);
+    cv::Mat V = channels[2];    // 明度通道（阴影区域值较低）
+
+    // 1. 计算V通道的均值，作为阴影区域的亮度阈值参考
+    cv::Scalar meanVal      = mean(V);
+    int        shadowThresh = static_cast< int >(meanVal[0] * 0.7);    // 阴影阈值（可根据图像调整）
+
+    // 2. 增强阴影区域的亮度（非阴影区域保持不变）
+    cv::Mat enhancedV;
+    V.copyTo(enhancedV);
+    for (int i = 0; i < V.rows; i++) {
+        uchar *pV        = V.ptr< uchar >(i);
+        uchar *pEnhanced = enhancedV.ptr< uchar >(i);
+        for (int j = 0; j < V.cols; j++) {
+            if (pV[j] < shadowThresh) {                                    // 判定为阴影区域
+                pEnhanced[j] = cv::saturate_cast< uchar >(pV[j] * 1.8);    // 亮度提升（系数可调整）
+            }
+        }
+    }
+
+    // 3. 合并通道并转回BGR
+    channels[2] = enhancedV;
+    merge(channels, hsv);
+    cv::Mat dst;
+    cvtColor(hsv, dst, cv::COLOR_HSV2BGR);
+    return dst.clone( );
+}
+
+/*
+ * @brief 基于形态学操作去除阴影（返回一个灰度图）
+ * @param _inImg 输入的图片
+ * @return 返回一个深拷贝的灰度图
+ */
+cv::Mat ImageEnhancement::remove_shadow_toGray_mophology(const cv::Mat &_inImg) {
+
+    // 1.将图像转为灰度图
+    cv::Mat gray;
+    cv::cvtColor(_inImg, gray, cv::COLOR_BGR2GRAY);
+
+    // 定义腐蚀和膨胀的结构化元素和迭代次数
+    cv::Mat element   = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+    int     iteration = 9;
+
+    // 2.将灰度图进行膨胀操作
+    cv::Mat dilateMat;
+    cv::morphologyEx(gray, dilateMat, cv::MORPH_DILATE, element, cv::Point(-1, -1), iteration);
+
+    // 3.将膨胀后的图再进行腐蚀
+    cv::Mat erodeMat;
+    cv::morphologyEx(dilateMat, erodeMat, cv::MORPH_ERODE, element, cv::Point(-1, -1), iteration);
+
+    // 4.膨胀再腐蚀后的图减去原灰度图再进行取反操作
+    cv::Mat calcMat = ~(erodeMat - gray);
+
+    // 5.使用规一化将原来背景白色的改了和原来灰度图差不多的灰色
+    cv::Mat removeShadowMat;
+    cv::normalize(calcMat, removeShadowMat, 0, 200, cv::NORM_MINMAX);
+
+    return removeShadowMat.clone( );
+}
+
+/*
+ * @brief 基于Gamma校正与白平衡去除阴影
+ * @param _inImg 输入的图片
+ * @param sigma 背景高斯核大小（越大越平滑）
+ * @param gamma  Gamma 校正系数
+ * @return 返回一个深拷贝的灰度图
+ */
+cv::Mat ImageEnhancement::remove_shadow_Gamma(
+    const cv::Mat &_inImg,
+    double         sigma,
+    double         gamma) {
+    CV_Assert(!_inImg.empty( ) && _inImg.type( ) == CV_8UC3);
+
+    // 1. 转 float，范围 0~1
+    cv::Mat img32f;
+    _inImg.convertTo(img32f, CV_32FC3, 1.0 / 255.0);
+
+    // 2. 估计背景光照：对灰度做超大高斯
+    cv::Mat gray, bg;
+    cv::cvtColor(img32f, gray, cv::COLOR_BGR2GRAY);
+    cv::GaussianBlur(gray, bg, cv::Size(0, 0), sigma);
+    cv::cvtColor(bg, bg, cv::COLOR_GRAY2BGR);
+
+    // 3. 背景除法：抵消阴影
+    cv::Mat flat = img32f / bg;
+
+    // 4. Gamma 校正
+    cv::Mat lut(1, 256, CV_8UC1);
+    for (int i = 0; i < 256; ++i)
+        lut.at< uchar >(i) = cv::saturate_cast< uchar >(255 * pow(i / 255.0, 1.0 / gamma));
+
+    cv::Mat result8u;
+    flat.convertTo(result8u, CV_8UC3, 255.0);
+    cv::LUT(result8u, lut, result8u);
+
+    return result8u.clone( );
+}
+
+/*
+ * @brief 基于自适应阈值 + 背景减除的去阴影
+ * @param _inImg 输入的图片
+ * @param blockSize 自适应阈值邻域大小，必须是奇数
+ * @param C 阈值偏移，越大阴影区越少
+ * @param sigma 背景估计高斯核大小
+ * @param lighten 阴影区加亮的灰度值
+ */
+cv::Mat ImageEnhancement::remove_shadow_adaptiveThreshold(
+    const cv::Mat &_inImg,
+    int            blockSize,
+    double         C,
+    double         sigma,
+    double         lighten) {
+
+    CV_Assert(!_inImg.empty( ) && _inImg.type( ) == CV_8UC3);
+
+    // ---------- 1. 灰度 + 背景估计 ----------
+    cv::Mat gray, bgIllum32f;
+    cv::cvtColor(_inImg, gray, cv::COLOR_BGR2GRAY);
+    cv::GaussianBlur(gray, bgIllum32f, cv::Size(0, 0), sigma);
+
+    // ---------- 2. 自适应阈值：得到阴影掩膜 ----------
+    // thresholdType = THRESH_BINARY_INV 这样暗区(阴影)为 255，亮区为 0
+    cv::Mat shadowMask;
+    cv::adaptiveThreshold(gray, shadowMask, 255,
+                          cv::ADAPTIVE_THRESH_MEAN_C,
+                          cv::THRESH_BINARY_INV,
+                          blockSize, C);
+
+    // 可选：形态学开运算去掉孤立噪点
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3));
+    cv::morphologyEx(shadowMask, shadowMask, cv::MORPH_OPEN, kernel);
+
+    // ---------- 3. 背景减除 ----------
+    // 把光照不均的部分除掉：原图 / 背景光照
+    cv::Mat img32f, bg32f3;
+    _inImg.convertTo(img32f, CV_32FC3, 1.0 / 255.0);
+    cv::cvtColor(bgIllum32f, bg32f3, cv::COLOR_GRAY2BGR);
+    bg32f3.convertTo(bg32f3, CV_32FC3, 1.0 / 255.0);
+
+    cv::Mat flat32f = img32f / bg32f3;
+
+    // ---------- 4. 按掩膜提亮 ----------
+    cv::Mat result8u;
+    flat32f.convertTo(result8u, CV_8UC3, 255.0);
+
+    // 只把阴影区加亮
+    cv::Mat channels[3];
+    cv::split(result8u, channels);
+    for (int c = 0; c < 3; ++c) {
+        channels[c].convertTo(channels[c], CV_32F);
+        channels[c] += shadowMask * (lighten / 255.0);    // shadowMask==1 的地方加亮
+        channels[c].convertTo(channels[c], CV_8U);
+    }
+    cv::merge(channels, 3, result8u);
+
+    return result8u.clone( );
+}
+
+/*
+ * @brief 基于形态学操作调整阴影
+ * @param _inImg 输入的图片
+ * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
+ * @return 返回一个深拷贝的灰度图
+ */
+cv::Mat ImageEnhancement::remove_shadow_mophology(const cv::Mat &_inImg, int light) {
+    cv::Mat _inputImg = _inImg.clone( );
+    // 生成灰度图
+    cv::Mat gray = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
+    cv::Mat f    = _inputImg.clone( );
+    f.convertTo(f, CV_32FC3);
+    std::vector< cv::Mat > pics;
+    split(f, pics);
+    gray = 0.299f * pics[2] + 0.587 * pics[1] + 0.114 * pics[0];
+    gray = gray / 255.f;
+
+    // 确定阴影区
+    cv::Mat thresh = cv::Mat::zeros(gray.size( ), gray.type( ));
+    thresh         = (1.0f - gray).mul(1.0f - gray);
+    // 取平均值作为阈值
+    cv::Scalar t    = cv::mean(thresh);
+    cv::Mat    mask = cv::Mat::zeros(gray.size( ), CV_8UC1);
+    mask.setTo(255, thresh >= t[0]);
+
+    // 参数设置
+    int   max    = 4;
+    float bright = light / 100.0f / max;
+    float mid    = 1.0f + max * bright;
+
+    // 边缘平滑过渡
+    cv::Mat midrate    = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
+    cv::Mat brightrate = cv::Mat::zeros(_inputImg.size( ), CV_32FC1);
+    for (int i = 0; i < _inputImg.rows; ++i) {
+        uchar *m  = mask.ptr< uchar >(i);
+        float *th = thresh.ptr< float >(i);
+        float *mi = midrate.ptr< float >(i);
+        float *br = brightrate.ptr< float >(i);
+        for (int j = 0; j < _inputImg.cols; ++j) {
+            if (m[j] == 255) {
+                mi[j] = mid;
+                br[j] = bright;
+            } else {
+                mi[j] = (mid - 1.0f) / t[0] * th[j] + 1.0f;
+                br[j] = (1.0f / t[0] * th[j]) * bright;
+            }
+        }
+    }
+
+    // 阴影提亮，获取结果图
+    cv::Mat result = cv::Mat::zeros(_inputImg.size( ), _inputImg.type( ));
+    for (int i = 0; i < _inputImg.rows; ++i) {
+        float *mi = midrate.ptr< float >(i);
+        float *br = brightrate.ptr< float >(i);
+        uchar *in = _inputImg.ptr< uchar >(i);
+        uchar *r  = result.ptr< uchar >(i);
+        for (int j = 0; j < _inputImg.cols; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                float temp = pow(float(in[3 * j + k]) / 255.f, 1.0f / mi[j]) * (1.0 / (1 - br[j]));
+                if (temp > 1.0f)
+                    temp = 1.0f;
+                if (temp < 0.0f)
+                    temp = 0.0f;
+                uchar utemp  = uchar(255 * temp);
+                r[3 * j + k] = utemp;
+            }
+        }
+    }
+    return result.clone( );
+}
+
+/*
+ *brief 对 8 位 3 通道图做轻量锐化
+ * @param _inImg 输入的图片
+ * @param strength 锐化强度，默认 1.0（标准核），>1 更锐，<1 更弱
+ */
+cv::Mat ImageEnhancement::light_sharpen(const cv::Mat &_inImg, double strength) {
+    CV_Assert(!_inImg.empty( ) && _inImg.type( ) == CV_8UC3);
+
+    // 标准拉普拉斯锐化核
+    cv::Mat kernel = (cv::Mat_< float >(3, 3) << 0, -1, 0,
+                      -1, 5.0, -1,
+                      0, -1, 0);
+    kernel *= strength;    // 调节强度
+
+    cv::Mat dst;
+    cv::filter2D(_inImg, dst, -1, kernel);
+    return dst;
+    return cv::Mat( );
+}
+
+
+/* =============================================================================================================== */
+/* =============================================================================================================== */
+
 // 照片预处理
 //@return 返回一个二值化的边缘图
 cv::Mat DocumentScanner::preprocess(const cv::Mat &_img) {

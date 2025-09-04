@@ -125,7 +125,8 @@ private:
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-// 手动的透视矫正
+// 透视矫正模块
+//  手动的透视矫正
 class ManualDocPerspectiveCorrector {
 public:
     ManualDocPerspectiveCorrector(const cv::Mat _inImg, const std::string &_SYSprompt)
@@ -243,6 +244,80 @@ private:
     //// 静态成员函数：作为 setMouseCallback 的回调（无 this 指针）
     static void staticOnMouse(int event, int x, int y, int flags, void *userdata);
 };
+
+/* =============================================================================================================== */
+/* =============================================================================================================== */
+
+// 此模块用于管理图像增强
+class ImageEnhancement {
+public:
+    ImageEnhancement( )  = default;
+    ~ImageEnhancement( ) = default;
+
+    /*
+     * @brief 基于 HSV 色彩空间的阴影去除（简单高效，适合彩色图）
+     * @brief 阴影会降低图像局部的明度（V 通道），但对色调（H） 和饱和度（S） 影响较小。通过单独增强阴影区域的 V 通道，可快速消除阴影。
+     * @param _inImg 输入的图片
+     * @return 返回一个深拷贝
+     */
+    static cv::Mat remove_shadow_HSV(const cv::Mat &_inImg);
+
+    /*
+     * @brief 基于形态学操作去除阴影（返回一个灰度图）
+     * @param _inImg 输入的图片
+     * @return 返回一个深拷贝的灰度图
+     */
+    static cv::Mat remove_shadow_toGray_mophology(const cv::Mat &_inImg);
+
+    /*
+     * @brief 基于Gamma校正与白平衡去除阴影
+     * @param _inImg 输入的图片
+     * @param sigma 背景高斯核大小（越大越平滑）
+     * @param gamma  Gamma 校正系数
+     * @return 返回一个深拷贝的灰度图
+     */
+    static cv::Mat remove_shadow_Gamma(
+        const cv::Mat &_inImg,
+        double         sigma = 51.0,
+        double         gamma = 1.0);
+
+    /*
+     * @brief 基于自适应阈值 + 背景减除的去阴影
+     * @param _inImg 输入的图片
+     * @param blockSize 自适应阈值邻域大小，必须是奇数，越大，检测到的“阴影块”越粗；越小，容易把纹理误判成阴影。
+     * @param C 阈值偏移，越大阴影区越少
+     * @param sigma 背景估计高斯核大小，背景光照估计越平滑，阴影边缘越柔和。
+     * @param lighten 阴影区加亮的灰度值，决定阴影区最终提亮的幅度（灰度级）
+     */
+    static cv::Mat remove_shadow_adaptiveThreshold(
+        const cv::Mat &_inImg,
+        int            blockSize = 31,
+        double         C         = 15,
+        double         sigma     = 51.0,
+        double         lighten   = 50);
+
+    /*
+     * @brief 基于形态学操作调整阴影
+     * @param _inImg 输入的图片
+     * @param light 暗部亮度加强度（ >0 亮度加强；<0 亮度减弱 ）
+     * @return 返回一个深拷贝的灰度图
+     */
+    static cv::Mat remove_shadow_mophology(const cv::Mat &_inImg, int light = 50);
+
+    /*
+     *brief 对 8 位 3 通道图做轻量锐化
+     * @param _inImg 输入的图片
+     * @param strength 锐化强度，默认 1.0（标准核），>1 更锐，<1 更弱
+     */
+    static cv::Mat light_sharpen(const cv::Mat &_inImg, double strength = 1.0);
+
+private:
+};
+
+
+
+
+
 
 
 /* =============================================================================================================== */
