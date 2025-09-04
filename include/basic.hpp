@@ -250,9 +250,9 @@ struct CELL {
      * @param stdcell 输入的标准CELL
      * @return 有重合返回true，否则返回false
      */
-    bool is_graphics_coincide_bottom_for_pdf(const CELL &stdcell) const {
+    /*bool is_graphics_coincide_bottom_for_pdf(const CELL &stdcell) const {
         return this->top_left.y >= stdcell.bottom_right.y;
-    }
+    }*/
 
     /* ================================适配STL======================================== */
     bool operator==(const CELL &b) const {
