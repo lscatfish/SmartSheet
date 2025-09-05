@@ -156,4 +156,5 @@ DefLine_erasekey_information(PersonLineHandle, cchptr);
 }
 
 
+
 #endif    // !CPP_PERSONNELINFORMATION_PY_WRAPPER_H

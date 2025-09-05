@@ -2,6 +2,7 @@
 #include <cpp_PersonnelInformation_py_wrapper.h>
 #include <PersonnelInformation.h>
 
+#define OBJPTR_DefPerson CVT_PTR(obj, DefPerson *)
 
 CDECL_TYPE(PersonHandle)
 create_DefPerson_default( ) {
@@ -86,8 +87,8 @@ DefPerson_get_otherInformation(PersonHandle obj, cchptr key) {
             return a->otherInformation[key].c_str( );
         } else {
             return nullptr;
-        }
     }
+}
     return nullptr;
 }
 
@@ -99,8 +100,8 @@ DefPerson_findkey_otherInformation(PersonHandle obj, cchptr key) {
             return true;
         } else {
             return false;
-        }
     }
+}
     return false;
 }
 
@@ -112,9 +113,9 @@ DefPerson_erasekey_otherInformation(PersonHandle obj, cchptr key) {
         if (it != a->otherInformation.end( )) {
             a->otherInformation.erase(it);
             return true;
-        }
-        return false;
     }
+        return false;
+}
     return false;
 }
 
