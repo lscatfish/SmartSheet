@@ -70,3 +70,51 @@ DEF_GETTER_PERSON(cchptr, club)
 DEF_GETTER_PERSON(cchptr, signPosition)
 DEF_GETTER_PERSON(bool, ifcheck)
 DEF_GETTER_PERSON(bool, ifsign)
+
+CDECL_TYPE(void)
+DefPerson_set_otherInformation(PersonHanddle obj, cchptr key, cchptr in) {
+    if (obj) {
+        DefPerson *a             = OBJPTR_DefPerson;
+        a->otherInformation[key] = in;
+    }
+}
+
+CDECL_TYPE(cchptr)
+DefPerson_get_otherInformation(PersonHanddle obj, cchptr key) {
+    if (obj) {
+        DefPerson *a = OBJPTR_DefPerson;
+        if (a->otherInformation.find(key) != a->otherInformation.end( )) {
+            return a->otherInformation[key].c_str( );
+        } else {
+            return nullptr;
+        }
+    }
+    return nullptr;
+}
+
+CDECL_TYPE(bool)
+DefPerson_findkey_otherInformation(PersonHanddle obj, cchptr key) {
+    if (obj) {
+        DefPerson *a = OBJPTR_DefPerson;
+        if (a->otherInformation.find(key) != a->otherInformation.end( )) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    return false;
+}
+
+CDECL_TYPE(bool)
+DefPerson_erasekey_otherInformation(PersonHanddle obj, cchptr key) {
+    if (obj) {
+        DefPerson *a  = OBJPTR_DefPerson;
+        auto       it = a->otherInformation.find(key);
+        if (it != a->otherInformation.end( )) {
+            a->otherInformation.erase(it);
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
