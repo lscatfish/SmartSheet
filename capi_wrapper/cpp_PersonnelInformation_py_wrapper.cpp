@@ -2,18 +2,18 @@
 #include <cpp_PersonnelInformation_py_wrapper.h>
 #include <PersonnelInformation.h>
 
-#define OBJPTR_DefPerson CVT_PTR(obj, DefPerson *)
 
-TCDECL(PersonHanddle)
-DefPerson_createobj_default( ) {
+
+CDECL_TYPE(PersonHanddle)
+DefPerson_create_default( ) {
     DefPerson *a = new (std::nothrow) DefPerson( );
     if (!a)
         return nullptr;
     return static_cast< PersonHanddle >(a);
 }
 
-TCDECL(PersonHanddle)
-DefPerson_createobj_keyinformation(
+CDECL_TYPE(PersonHanddle)
+DefPerson_create_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
@@ -25,7 +25,7 @@ DefPerson_createobj_keyinformation(
     return static_cast< PersonHanddle >(a);
 }
 
-TCDECL(bool)
+CDECL_TYPE(bool)
 DefPerson_destroyobj(PersonHanddle obj) {
     if (obj) {
         DefPerson *a = OBJPTR_DefPerson;
@@ -35,147 +35,38 @@ DefPerson_destroyobj(PersonHanddle obj) {
     return false;
 }
 
-TCDECL(void)
-DefPerson_set_classname(PersonHanddle obj, const char *classname) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->classname = classname;
-    }
-}
+DEF_SETTER_PERSON(void, classname, cchptr)
+DEF_SETTER_PERSON(void, name, cchptr)
+DEF_SETTER_PERSON(void, gender, cchptr)
+DEF_SETTER_PERSON(void, grade, cchptr)
+DEF_SETTER_PERSON(void, studentID, cchptr)
+DEF_SETTER_PERSON(void, politicaloutlook, cchptr)
+DEF_SETTER_PERSON(void, academy, cchptr)
+DEF_SETTER_PERSON(void, majors, cchptr)
+DEF_SETTER_PERSON(void, phonenumber, cchptr)
+DEF_SETTER_PERSON(void, qqnumber, cchptr)
+DEF_SETTER_PERSON(void, position, cchptr)
+DEF_SETTER_PERSON(void, email, cchptr)
+DEF_SETTER_PERSON(void, ethnicity, cchptr)
+DEF_SETTER_PERSON(void, club, cchptr)
+DEF_SETTER_PERSON(void, signPosition, cchptr)
+DEF_SETTER_PERSON(void, ifcheck, bool)
+DEF_SETTER_PERSON(void, ifsign, bool)
 
-TCDECL(void)
-DefPerson_set_name(PersonHanddle obj, const char *name) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->name      = name;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_gender(PersonHanddle obj, const char *gender) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->gender    = gender;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_grade(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->grade     = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_studentID(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->studentID = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_politicaloutlook(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a        = OBJPTR_DefPerson;
-        a->politicaloutlook = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_academy(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->academy   = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_majors(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->majors    = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_phonenumber(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a   = OBJPTR_DefPerson;
-        a->phonenumber = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_qqnumber(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->qqnumber  = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_position(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->position  = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_email(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->email     = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_ethnicity(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->ethnicity = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_club(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->club      = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_signPosition(PersonHanddle obj, const char *cstr) {
-    if (obj) {
-        DefPerson *a    = OBJPTR_DefPerson;
-        a->signPosition = cstr;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_ifcheck(PersonHanddle obj, const bool in) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->ifcheck   = in;
-    }
-}
-
-TCDECL(void)
-DefPerson_set_ifsign(PersonHanddle obj, const bool in) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        a->ifsign    = in;
-    }
-}
-
-TCDECL(const char *)
-DefPerson_get_classname(PersonHanddle obj) {
-    if (obj) {
-        DefPerson *a = OBJPTR_DefPerson;
-        return a->classname.c_str( );
-    }
-    return nullptr
-}
+DEF_GETTER_PERSON(cchptr, classname)
+DEF_GETTER_PERSON(cchptr, name)
+DEF_GETTER_PERSON(cchptr, gender)
+DEF_GETTER_PERSON(cchptr, grade)
+DEF_GETTER_PERSON(cchptr, studentID)
+DEF_GETTER_PERSON(cchptr, politicaloutlook)
+DEF_GETTER_PERSON(cchptr, academy)
+DEF_GETTER_PERSON(cchptr, majors)
+DEF_GETTER_PERSON(cchptr, phonenumber)
+DEF_GETTER_PERSON(cchptr, qqnumber)
+DEF_GETTER_PERSON(cchptr, position)
+DEF_GETTER_PERSON(cchptr, email)
+DEF_GETTER_PERSON(cchptr, ethnicity)
+DEF_GETTER_PERSON(cchptr, club)
+DEF_GETTER_PERSON(cchptr, signPosition)
+DEF_GETTER_PERSON(bool, ifcheck)
+DEF_GETTER_PERSON(bool, ifsign)

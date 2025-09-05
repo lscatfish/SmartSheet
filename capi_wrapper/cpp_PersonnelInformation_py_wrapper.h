@@ -3,81 +3,103 @@
 
 #include <cpp_wrapper_header.h>
 
+#define OBJPTR_DefPerson CVT_PTR(obj, DefPerson *)
+
+// 声明函数
+#define STATE_SETTER_PERSON(def_type, attr, attr_type) \
+    DLL_EXPORT_C(def_type)                             \
+    DefPerson_set_##attr(PersonHanddle, attr_type);
+
+// 定义函数
+#define DEF_SETTER_PERSON(def_type, attr, attr_type)             \
+    CDECL_TYPE(def_type)                                         \
+    DefPerson_set_##attr(PersonHanddle obj, attr_type _##attr) { \
+        if (obj) {                                               \
+            DefPerson *a = OBJPTR_DefPerson;                     \
+            a->attr      = _##attr;                              \
+        }                                                        \
+    }
+
+#define STATE_GETTER_PERSON(def_type, attr) \
+    DLL_EXPORT_C(def_type)                  \
+    DefPerson_get_##attr(PersonHanddle);
+
+#define DEF_GETTER_PERSON(def_type, attr)                   \
+    CDECL_TYPE(def_type)                                    \
+    DefPerson_get_##attr(PersonHanddle obj) {               \
+        if (obj) {                                          \
+            DefPerson *a = OBJPTR_DefPerson;                \
+            if constexpr (is_type< def_type, bool >)        \
+                return a->attr;                             \
+            else if constexpr (is_type< def_type, cchptr >) \
+                return a->attr.c_str( );                    \
+        }                                                   \
+        if constexpr (is_type< def_type, bool >)            \
+            return false;                                   \
+        else if constexpr (is_type< def_type, cchptr >)     \
+            return nullptr;                                 \
+    }
+
 extern "C" {
 
 // 默认构造对象的方式
-__declspec(dllexport) PersonHanddle __cdecl DefPerson_createobj_default( );
+DLL_EXPORT_C(PersonHanddle)
+DefPerson_create_default( );
 
 // 关键信息构造
-__declspec(dllexport) PersonHanddle __cdecl DefPerson_createobj_keyinformation(
+DLL_EXPORT_C(PersonHanddle)
+DefPerson_create_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
     const char *_academy,
     const char *_phonenumber);
 
-__declspec(dllexport) bool __cdecl DefPerson_destroyobj(PersonHanddle);
+DLL_EXPORT_C(bool)
+DefPerson_destroyobj(PersonHanddle);
 
-__declspec(dllexport) void __cdecl DefPerson_set_classname(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_name(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_gender(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_grade(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_studentID(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_politicaloutlook(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_academy(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_majors(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_phonenumber(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_qqnumber(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_position(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_email(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_ethnicity(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_club(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_signPosition(PersonHanddle, const char *);
-__declspec(dllexport) void __cdecl DefPerson_set_ifcheck(PersonHanddle, const bool);
-__declspec(dllexport) void __cdecl DefPerson_set_ifsign(PersonHanddle, const bool);
 
-DLL_EXPORT_C(const char *)
-DefPerson_get_classname(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_name(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_gender(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_grade(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_studentID(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_politicaloutlook(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_academy(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_majors(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_phonenumber(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_qqnumber(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_position(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_email(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_ethnicity(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_club(PersonHanddle);
-DLL_EXPORT_C(const char *)
-DefPerson_get_signPosition(PersonHanddle);
-DLL_EXPORT_C(const bool)
-DefPerson_get_ifcheck(PersonHanddle);
-DLL_EXPORT_C(const bool)
-DefPerson_get_ifsign(PersonHanddle);
+STATE_SETTER_PERSON(void, classname, cchptr)
+STATE_SETTER_PERSON(void, name, cchptr)
+STATE_SETTER_PERSON(void, gender, cchptr)
+STATE_SETTER_PERSON(void, grade, cchptr)
+STATE_SETTER_PERSON(void, studentID, cchptr)
+STATE_SETTER_PERSON(void, politicaloutlook, cchptr)
+STATE_SETTER_PERSON(void, academy, cchptr)
+STATE_SETTER_PERSON(void, majors, cchptr)
+STATE_SETTER_PERSON(void, phonenumber, cchptr)
+STATE_SETTER_PERSON(void, qqnumber, cchptr)
+STATE_SETTER_PERSON(void, position, cchptr)
+STATE_SETTER_PERSON(void, email, cchptr)
+STATE_SETTER_PERSON(void, ethnicity, cchptr)
+STATE_SETTER_PERSON(void, club, cchptr)
+STATE_SETTER_PERSON(void, signPosition, cchptr)
+STATE_SETTER_PERSON(void, ifcheck, bool)
+STATE_SETTER_PERSON(void, ifsign, bool)
 
+STATE_GETTER_PERSON(cchptr, classname)
+STATE_GETTER_PERSON(cchptr, name)
+STATE_GETTER_PERSON(cchptr, gender)
+STATE_GETTER_PERSON(cchptr, grade)
+STATE_GETTER_PERSON(cchptr, studentID)
+STATE_GETTER_PERSON(cchptr, politicaloutlook)
+STATE_GETTER_PERSON(cchptr, academy)
+STATE_GETTER_PERSON(cchptr, majors)
+STATE_GETTER_PERSON(cchptr, phonenumber)
+STATE_GETTER_PERSON(cchptr, qqnumber)
+STATE_GETTER_PERSON(cchptr, position)
+STATE_GETTER_PERSON(cchptr, email)
+STATE_GETTER_PERSON(cchptr, ethnicity)
+STATE_GETTER_PERSON(cchptr, club)
+STATE_GETTER_PERSON(cchptr, signPosition)
+STATE_GETTER_PERSON(bool, ifcheck)
+STATE_GETTER_PERSON(bool, ifsign)
 }
+
 
 extern "C" {
 DLL_EXPORT_C(PersonLineHanddle)
 DefPersonLine_createobj_default( );
-
-
 }
 
 

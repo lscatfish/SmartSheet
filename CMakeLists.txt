@@ -95,6 +95,7 @@ file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
 # windows下可运行，linux下需要重新写
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
 
+
 ##################################OCR的相关文件############################################
 # ppOCR的相关动态链接库
 # 首先检查OCR DLL目录是否存在，然后查找文件
@@ -238,6 +239,7 @@ target_link_libraries(SearchingTool PRIVATE
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
 
+
 # 根据当前配置选择 DLL
 # xlnt的动态链接库地址
 set(XLNT_DLL_PATH
@@ -261,97 +263,106 @@ set(ZLIB_DLL_PATH
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.dll>
 )
 
-# 把 DLL 拷贝到目标可执行文件目录
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${XLNT_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying xlnt dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCVWORLD_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCV_FFMPEG_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCV_MSMF_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${ZLIB_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying zlib dll to output directory"
-)
+# 封装文件复制逻辑为函数：参数为 目标名称（如 SmartSheet 或 SearchingTool）
+function(copy_files_to_target TARGET_NAME)
+    # -------------------------- 1. 复制 xlnt DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${XLNT_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying xlnt dll to ${TARGET_NAME} output directory"
+    )
 
-# 遍历每个 OCR-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(OCR_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${OCR_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No OCR DLL files will be copied - none found")
-endif()
+    # -------------------------- 2. 复制 OpenCV DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCVWORLD_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv world dll to ${TARGET_NAME} output directory"
+    )
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCV_FFMPEG_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv ffmpeg dll to ${TARGET_NAME} output directory"
+    )
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCV_MSMF_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv msmf dll to ${TARGET_NAME} output directory"
+    )
 
-# 复制ocr所需的模型
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    # 1. 如果目标文件夹存在则删除
-    COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
-    # 2. 重新创建目标文件夹
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models  # 确保目标文件夹存在
-    COMMAND ${CMAKE_COMMAND} -E copy_directory                # 复制整个文件夹
-        ${SOURCE_OCR_MODELS}
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
-    COMMENT "Copying ${SOURCE_OCR_MODELS} to executable directory"  # 显示提示信息
-)
+    # -------------------------- 3. 复制 zlib DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${ZLIB_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying zlib dll to ${TARGET_NAME} output directory"
+    )
 
-# 遍历每个 icu-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(ICU_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${ICU_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No ICU DLL files will be copied - none found")
-endif()
+    # -------------------------- 4. 复制 OCR DLL --------------------------
+    if(OCR_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${OCR_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No OCR DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
 
-# 遍历每个 poppler-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(POPPLER_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${POPPLER_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No poppler DLL files will be copied - none found")
-endif()
+    # -------------------------- 5. 复制 OCR 模型 --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${SOURCE_OCR_MODELS}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMENT "Copying OCR models to ${TARGET_NAME} output directory"
+    )
+
+    # -------------------------- 6. 复制 ICU DLL --------------------------
+    if(ICU_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${ICU_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No ICU DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
+
+    # -------------------------- 7. 复制 Poppler DLL --------------------------
+    if(POPPLER_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${POPPLER_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No Poppler DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
+endfunction()
+
+# -------------------------- 关键：为两个目标调用复制函数 --------------------------
+copy_files_to_target(${PROJECT_NAME})   # 为 SmartSheet 复制文件
+copy_files_to_target(SearchingTool)     # 为 SearchingTool 复制文件
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
