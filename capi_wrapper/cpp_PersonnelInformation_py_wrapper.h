@@ -58,7 +58,6 @@ DefPerson_create_keyinformation(
 DLL_EXPORT_C(bool)
 DefPerson_destroyobj(PersonHanddle);
 
-
 STATE_SETTER_PERSON(void, classname, cchptr)
 STATE_SETTER_PERSON(void, name, cchptr)
 STATE_SETTER_PERSON(void, gender, cchptr)
@@ -94,7 +93,22 @@ STATE_GETTER_PERSON(cchptr, club)
 STATE_GETTER_PERSON(cchptr, signPosition)
 STATE_GETTER_PERSON(bool, ifcheck)
 STATE_GETTER_PERSON(bool, ifsign)
+
+DLL_EXPORT_C(void)
+DefPerson_set_otherInformation(PersonHanddle, cchptr, cchptr);
+
+DLL_EXPORT_C(cchptr)
+DefPerson_get_otherInformation(PersonHanddle, cchptr);
+
+DLL_EXPORT_C(bool)
+DefPerson_findkey_otherInformation(PersonHanddle, cchptr);
+
+DLL_EXPORT_C(bool)
+DefPerson_erasekey_otherInformation(PersonHanddle, cchptr);
+
 }
+
+
 
 
 extern "C" {
