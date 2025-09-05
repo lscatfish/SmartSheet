@@ -1,0 +1,28 @@
+﻿
+#ifndef CPP_QINGZICLASS_PY_WRAPPER_H
+#define CPP_QINGZICLASS_PY_WRAPPER_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif    // !CPP_QINGZICLASS_PY_WRAPPER_H
