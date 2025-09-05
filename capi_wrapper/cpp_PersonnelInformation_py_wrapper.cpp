@@ -2,7 +2,6 @@
 #include <cpp_PersonnelInformation_py_wrapper.h>
 #include <PersonnelInformation.h>
 
-#define OBJPTR_DefPerson CVT_PTR(obj, DefPerson *)
 
 CDECL_TYPE(PersonHandle)
 create_DefPerson_default( ) {
