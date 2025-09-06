@@ -32,21 +32,21 @@ namespace pdf {
 
 // 以文件地址进行构造
 // @todo 按理来说这里应该先检测文件是否存在
-DefPdf::DefPdf(const std::string &_u8path)
-    : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-    u8path_   = _u8path;
-    document_ = poppler::document::load_from_file(u8path_);
+DefPdf::DefPdf(const chstring &_path)
+    : pdfdoc_(std::make_unique< GooString >(_path.u8string( ).c_str( ))) {
+    path_     = _path;
+    document_ = poppler::document::load_from_file(path_.u8string( ));
     if (!document_) {
-        std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
+        std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
         isOK = false;
         return;
     }
     if (!pdfdoc_.isOk( )) {
-        std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
+        std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
         isOK = false;
         return;
     }
-    std::cout << "Parse PDF file: \"" << _u8path << "\"";
+    std::cout << "Parse PDF file: \"" << path_ << "\"";
     num_pages_ = pdfdoc_.getNumPages( );
     sheetType_ = SheetType::Others;
     isOK       = parse( );    // 解析
@@ -59,18 +59,18 @@ DefPdf::DefPdf(const std::string &_u8path)
  * @param _u8path u8地址
  * @param out 输出的解析结果
  */
-DefPdf::DefPdf(const std::string &_u8path, list< list< CELL > > &out)
-    : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-    u8path_   = _u8path;
-    document_ = poppler::document::load_from_file(u8path_);
-    std::cout << "Parse PDF file: \"" << _u8path << "\"";
+DefPdf::DefPdf(const chstring &_path, list< list< CELL > > &out)
+    : pdfdoc_(std::make_unique< GooString >(_path.u8string( ).c_str( ))) {
+    path_     = _path;
+    document_ = poppler::document::load_from_file(path_.u8string( ));
+    std::cout << "Parse PDF file: \"" << path_ << "\"";
     if (!document_) {
-        std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
+        std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
         isOK = false;
         return;
     }
     if (!pdfdoc_.isOk( )) {
-        std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
+        std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
         isOK = false;
         return;
     }
@@ -510,13 +510,13 @@ DefPerson DefPdf::get_person( ) const {
             }
         }
         DoQingziClass::trans_personline_to_person(perLine, per);
-        if (fuzzy::search_substring(u8path_, U8C(u8"自主报名")))
+        if (fuzzy::search_substring(path_.u8string( ), U8C(u8"自主报名")))
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
-        else if (fuzzy::search_substring(u8path_, U8C(u8"重庆大学团校")))
+        else if (fuzzy::search_substring(path_.u8string( ), U8C(u8"重庆大学团校")))
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
         else
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-        per.otherInformation[U8C(u8"文件地址")] = u8path_;
+        per.otherInformation[U8C(u8"文件地址")] = path_.u8string( );
         per.optimize( );
         return per;
     }

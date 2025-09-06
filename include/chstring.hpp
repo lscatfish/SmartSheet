@@ -65,11 +65,11 @@ public:
     }
     ~chstring( ) = default;
 
-#if false
-    using iterator       = std::string::iterator;
-#endif
     // 定义迭代器类型，使用std::string的迭代器作为底层实现
-    using const_iterator = std::string::const_iterator;
+    using iterator               = std::string::iterator;
+    using reverse_iterator       = std::string::reverse_iterator;
+    using const_iterator         = std::string::const_iterator;
+    using const_reverse_iterator = std::string::const_reverse_iterator;
 
     // 友元函数：输出运算符重载
     friend std::ostream &operator<<(std::ostream &os, const chstring &cs) {
@@ -86,10 +86,8 @@ public:
     bool operator>=(const chstring &b) const;
     bool operator<=(const chstring &b) const;
 
-#if false
-    char       &operator[](size_t pos);
-#endif
     // 访问指定位置的字符
+    char       &operator[](size_t pos);
     const char &operator[](size_t pos) const;
 
     // 字符串拼接运算符重载(总是匹配到前一个字符的编码形式)
@@ -100,15 +98,15 @@ public:
     chstring &operator+=(const std::string &b);
     chstring &operator+=(const char *b);
 
-#if false
-    iterator       begin( );           // 返回起始迭代器
-    iterator       end( );             // 返回结束迭代器
-#endif
     // 迭代器相关方法
-    const_iterator begin( ) const;     // 常量版本起始迭代器
-    const_iterator end( ) const;       // 常量版本结束迭代器
-    const_iterator cbegin( ) const;    // 常量迭代器（C++11）
-    const_iterator cend( ) const;      // 常量迭代器（C++11）
+    iterator         begin( );    // 返回起始迭代器
+    iterator         end( );      // 返回结束迭代器
+    reverse_iterator rbegin( );
+    reverse_iterator rend( );
+    const_iterator   begin( ) const;     // 常量版本起始迭代器
+    const_iterator   end( ) const;       // 常量版本结束迭代器
+    const_iterator   cbegin( ) const;    // 常量迭代器（C++11）
+    const_iterator   cend( ) const;      // 常量迭代器（C++11）
 
     // 长度，不同的编码不同
     size_t length( ) const;
@@ -118,6 +116,9 @@ public:
 
     // 获取大小，不同的编码不同
     size_t size( ) const;
+
+    //删除最后一位
+    void pop_back( );
 
     // 打印文字到控制台
     void print( ) const;
@@ -149,7 +150,7 @@ public:
     // 分离键与值
     std::pair< chstring, chstring > split_by_equal( ) const;
 
-    //按照char分离
+    // 按照char分离
     std::pair< chstring, chstring > split_by(const char cutter) const;
 
     // 是否都是数字

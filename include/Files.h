@@ -15,6 +15,7 @@
  * 此文件用于操作文件
  */
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <cstdlib>
 #include <Encoding.h>
 #include <filesystem>
@@ -51,7 +52,7 @@ public:
      * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
      * @param ifp 是否打印加载的文件夹和文件
      */
-    DefFolder(std::string _folderDir, bool ifp);
+    DefFolder(chstring _folderDir, bool ifp);
 
     // @brief 按照DefFolder变量来构造
     DefFolder(const DefFolder &other);
@@ -242,7 +243,7 @@ public:
     bool is_filepath_exist(const std::string &_path) const;
 
 private:
-    std::string         folderDir_;         // 文件夹的地址dir(文件夹的名称)
+    chstring         folderDir_;         // 文件夹的地址dir(文件夹的名称)
     list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
     list< std::string > u8filePathList_;    // 文件夹下的文件路径（按照utf8编码）
 };

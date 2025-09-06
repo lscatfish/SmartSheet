@@ -58,11 +58,9 @@ bool chstring::operator<=(const chstring &b) const {
 }
 
 // 访问指定位置的字符
-#if false
 char &chstring::operator[](size_t pos) {
     return this->usingStr_[pos];
 }
-#endif
 const char &chstring::operator[](size_t pos) const {
     return this->usingStr_[pos];
 }
@@ -125,15 +123,18 @@ chstring &chstring::operator+=(const char *b) {
 
 
 // 迭代器相关方法
-#if false
-
 chstring::iterator chstring::begin( ) {
     return this->usingStr_.begin( );
 }    // 返回起始迭代器
 chstring::iterator chstring::end( ) {
     return this->usingStr_.end( );
 }    // 返回结束迭代器
-#endif
+chstring::reverse_iterator chstring::rbegin( ) {
+    return this->usingStr_.rbegin( );
+}
+chstring::reverse_iterator chstring::rend( ) {
+    return this->usingStr_.rend( );
+}
 chstring::const_iterator chstring::begin( ) const {
     return this->usingStr_.begin( );
 }    // 常量版本起始迭代器
@@ -160,6 +161,11 @@ bool chstring::empty( ) const {
 // 获取大小
 size_t chstring::size( ) const {
     return this->usingStr_.size( );
+}
+
+// 删除最后一位
+void chstring::pop_back( ) {
+    this->usingStr_.pop_back( );
 }
 
 // 打印文字到控制台

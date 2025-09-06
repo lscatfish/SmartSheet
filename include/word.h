@@ -37,7 +37,7 @@ public:
      * @param _docx_path 要读取的文件的路径
      * @param _inner_file_path docx解压出来之后要读取的文件
      */
-    static std::vector< char > read_docx_file(const chstring &_docx_path, const std::string &_inner_file_path);
+    static std::vector< char > read_docx_file(const chstring &_docx_path, const chstring &_inner_file_path);
 
     /*
      * @brief 解析表格并记录单元格位置
