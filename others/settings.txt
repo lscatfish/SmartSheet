@@ -1,0 +1,25 @@
+#删除掉“#”取消注释
+
+#文字识别模型的文件夹路径
+#rec=./models/ch_PP-OCRv4_rec_server_infer 		#大型识别库，识别更精准
+
+#文字识别模型的文件夹路径
+#cls=
+
+#文字识别模型的文件夹路径
+#det= 
+
+#字典库地址
+#dict=
+
+#是否开启手动裁剪图片，进行透视矫正
+ ManualDocPerspectiveCorrector=true 			#只有两个值：true启用  false禁用
+
+#是否启用图片增强功能
+#共有三个键值：
+#auto     				自动，将自动对图片进行增强（此功能启用后其他ImageEnhancement功能将失效）
+#removeshadow		去除阴影，将对照片的阴影去除，同时做白平衡
+#sharpen			轻度锐化，对照片锐化，如果图片的有效内容占图片面积过小，有可能识别不到文字和网格线
+#ImageEnhancement=auto
+#ImageEnhancement=removeshadow
+#ImageEnhancement=sharpen
