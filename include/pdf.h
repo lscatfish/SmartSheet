@@ -78,60 +78,18 @@ public:
 
     // 以文件地址进行构造
     // @todo 按理来说这里应该先检测文件是否存在
-    DefPdf(const std::string &_u8path)
-        : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        u8path_   = _u8path;
-        document_ = poppler::document::load_from_file(u8path_);
-        if (!document_) {
-            std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
-            isOK = false;
-            return;
-        }
-        if (!pdfdoc_.isOk( )) {
-            std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
-            isOK = false;
-            return;
-        }
-        std::cout << "Parse PDF file: \"" << _u8path << "\"";
-        num_pages_ = pdfdoc_.getNumPages( );
-        sheetType_ = SheetType::Others;
-        isOK       = parse( );    // 解析
-
-        std::cout << " Done!" << std::endl;
-    };
+    DefPdf(const std::string &_u8path);
 
     /*
      * @brief 为searchingTool设计的构造函数
      * @param _u8path u8地址
      * @param out 输出的解析结果
      */
-    DefPdf(const std::string &_u8path, list< list< CELL > > &out)
-        : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
-        u8path_   = _u8path;
-        document_ = poppler::document::load_from_file(u8path_);
-        std::cout << "Parse PDF file: \"" << _u8path << "\"";
-        if (!document_) {
-            std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
-            isOK = false;
-            return;
-        }
-        if (!pdfdoc_.isOk( )) {
-            std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
-            isOK = false;
-            return;
-        }
-        sheetType_ = SheetType::Others;
-        num_pages_ = pdfdoc_.getNumPages( );
-        list< CELL > aP;    // 一页
-        for (int i = 1; i <= num_pages_; i++) {
-            aP = extract_textblocks(i);
-            out.push_back(aP);
-        }
-        std::cout << " Done! " << std::endl;
-    };
+    DefPdf(const std::string &_u8path, list< list< CELL > > &out);
 
     /// 析构 DefPdf 对象，释放其占用的资源（如有）。
     ~DefPdf( ) = default;
+
 
     // 返回解析出的表格
     table< std::string > get_sheet( );

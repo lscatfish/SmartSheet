@@ -30,6 +30,60 @@
 // pdf标准坐标系是左下角为原点，y轴向上
 namespace pdf {
 
+// 以文件地址进行构造
+// @todo 按理来说这里应该先检测文件是否存在
+DefPdf::DefPdf(const std::string &_u8path)
+    : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
+    u8path_   = _u8path;
+    document_ = poppler::document::load_from_file(u8path_);
+    if (!document_) {
+        std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
+        isOK = false;
+        return;
+    }
+    if (!pdfdoc_.isOk( )) {
+        std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
+        isOK = false;
+        return;
+    }
+    std::cout << "Parse PDF file: \"" << _u8path << "\"";
+    num_pages_ = pdfdoc_.getNumPages( );
+    sheetType_ = SheetType::Others;
+    isOK       = parse( );    // 解析
+
+    std::cout << " Done!" << std::endl;
+}
+
+/*
+ * @brief 为searchingTool设计的构造函数
+ * @param _u8path u8地址
+ * @param out 输出的解析结果
+ */
+DefPdf::DefPdf(const std::string &_u8path, list< list< CELL > > &out)
+    : pdfdoc_(std::make_unique< GooString >(_u8path.c_str( ))) {
+    u8path_   = _u8path;
+    document_ = poppler::document::load_from_file(u8path_);
+    std::cout << "Parse PDF file: \"" << _u8path << "\"";
+    if (!document_) {
+        std::cout << "Error: Could not open PDF file: " << u8path_ << std::endl;
+        isOK = false;
+        return;
+    }
+    if (!pdfdoc_.isOk( )) {
+        std::cout << "Error: PDFDoc is not OK for file: " << u8path_ << std::endl;
+        isOK = false;
+        return;
+    }
+    sheetType_ = SheetType::Others;
+    num_pages_ = pdfdoc_.getNumPages( );
+    list< CELL > aP;    // 一页
+    for (int i = 1; i <= num_pages_; i++) {
+        aP = extract_textblocks(i);
+        out.push_back(aP);
+    }
+    std::cout << " Done! " << std::endl;
+};
+
 /**
  * 提取 PDF 页面中的所有线段（直线）
  * @param pageNum_  页码（从 1 开始）
@@ -234,10 +288,10 @@ table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
     double threshold = 100;
     for (size_t i = 0; i < _textBoxList.size( ); i++) {
         threshold = (std::min)(threshold, std::abs(_textBoxList[i].top_right.y - _textBoxList[i].bottom_left.y));
-         if (_textBoxList[i].text == U8C(u8"姓名")) {
-             threshold = std::abs(_textBoxList[i].top_left.y - _textBoxList[i].bottom_left.y);
-             break;
-         }
+        if (_textBoxList[i].text == U8C(u8"姓名")) {
+            threshold = std::abs(_textBoxList[i].top_left.y - _textBoxList[i].bottom_left.y);
+            break;
+        }
     }
     // threshold *= 1.4;    // 1.4倍高度，这是之前的一个设想
 
@@ -559,5 +613,7 @@ bool is_linesegments_intersect(const LineSegment &a, const LineSegment &b) {
     // 其他情况：不相交
     return false;
 }
+
+
 
 }    // namespace pdf
