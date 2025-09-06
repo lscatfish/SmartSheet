@@ -2,7 +2,7 @@
 ###	仓库地址：
 GitHub标准仓库地址： [GitHub](https://github.com/lscatfish/SmartSheet.git)  
 Gitee国内镜像仓库地址： [Gitee](https://gitee.com/sicheng-liu/SmartSheet.git)    
-Gitcode国内镜像仓库地址：  [Gitcode](https://gitcode.com/lscatfish/SmartSheet.git)
+Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： [Gitcode](https://gitcode.com/lscatfish/SmartSheet.git)
 
 ---
 
