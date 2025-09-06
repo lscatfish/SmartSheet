@@ -188,65 +188,25 @@ target_include_directories(SM
         ${CMAKE_CURRENT_SOURCE_DIR}/src      # 私有源文件目录（可选）
 )
 
+function(project_link_libraries TARGET_NAME)
 # 链接lib
 # 链接到xlnt
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
-)
-target_link_libraries(SearchingTool PRIVATE
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
-)
-target_link_libraries(SM PRIVATE
+target_link_libraries(${TARGET_NAME} PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
 )
 # 链接到opencv
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
-
-)
-target_link_libraries(SearchingTool PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
-)
-target_link_libraries(SM PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
 )
 # 链接到zlib
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
-)
-target_link_libraries(SearchingTool PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
-)
-target_link_libraries(SM PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
 )
 # 链接到icu
-target_link_libraries(SearchingTool PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
-)
-target_link_libraries(SM PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
@@ -255,37 +215,22 @@ target_link_libraries(SM PRIVATE
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
 )
 # 链接到poppler
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
-)
-target_link_libraries(SearchingTool PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
-)
-target_link_libraries(SM PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
 )
 # 链接到ftxui
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     ftxui-dom
     ftxui-component
     ftxui-screen
 )
-target_link_libraries(SearchingTool PRIVATE 
-    ftxui-dom
-    ftxui-component
-    ftxui-screen
-)
-target_link_libraries(SM PRIVATE 
-    ftxui-dom
-    ftxui-component
-    ftxui-screen
-)
+endfunction()
+
+project_link_libraries(${PROJECT_NAME})
+project_link_libraries(SearchingTool)
+project_link_libraries(SM)
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
@@ -414,6 +359,7 @@ endfunction()
 # -------------------------- 关键：为两个目标调用复制函数 --------------------------
 copy_files_to_target(${PROJECT_NAME})   # 为 SmartSheet 复制文件
 copy_files_to_target(SearchingTool)     # 为 SearchingTool 复制文件
+copy_files_to_target(SM)     # 为 SM 复制文件
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################

@@ -4,7 +4,7 @@
 
 
 CDECL_TYPE(PersonHandle)
-DefPerson_create_default( ) {
+create_DefPerson_default( ) {
     DefPerson *a = new (std::nothrow) DefPerson( );
     if (!a)
         return nullptr;
@@ -12,7 +12,7 @@ DefPerson_create_default( ) {
 }
 
 CDECL_TYPE(PersonHandle)
-DefPerson_create_keyinformation(
+create_DefPerson_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
@@ -25,7 +25,7 @@ DefPerson_create_keyinformation(
 }
 
 CDECL_TYPE(bool)
-DefPerson_destroy(PersonHandle obj) {
+destroy_DefPerson(PersonHandle obj) {
     if (obj) {
         DefPerson *a = OBJPTR_DefPerson;
         delete a;
@@ -118,14 +118,19 @@ DefPerson_erasekey_otherInformation(PersonHandle obj, cchptr key) {
     return false;
 }
 
+CDECL_TYPE(void)
+DefPerson_optimize(PersonHandle obj) {
+    if (obj) {
+        DefPerson *a = OBJPTR_DefPerson;
+        a->optimize( );
+    }
+}
 
-
-
-
-
+/* ================================================================================================== */
+/* ================================================================================================== */
 
 CDECL_TYPE(PersonLineHandle)
-DefLine_create_default( ) {
+create_DefLine_default( ) {
     DefLine *obj = new (std::nothrow) DefLine( );
     if (obj) {
         PersonLineHandle a = CVT_PTR(obj, PersonLineHandle);
@@ -135,7 +140,7 @@ DefLine_create_default( ) {
 }
 
 CDECL_TYPE(PersonLineHandle)
-DefLine_create_keyinformation(
+create_DefLine_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
@@ -146,6 +151,16 @@ DefLine_create_keyinformation(
         return CVT_PTR(obj, PersonLineHandle);
     }
     return nullptr;
+}
+
+CDECL_TYPE(bool)
+destroy_DefLine(PersonLineHandle obj) {
+    if (obj) {
+        DefLine *a = OBJPTR_DefLine;
+        delete a;
+        return true;
+    }
+    return false;
 }
 
 CDECL_TYPE(void)
