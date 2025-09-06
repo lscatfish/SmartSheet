@@ -1,5 +1,6 @@
 ﻿
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
 #include <Fuzzy.h>
 #include <helper.h>
@@ -28,11 +29,9 @@ TableCell::TableCell( ) {
  * @brief 标准构造函数，输入一个docx文件的路径（按照系统编码）
  * @param _path docx文件的路径
  */
-DefDocx::DefDocx(const std::string &_path) {
-    path_   = encoding::utf8_to_sysdcode(_path);
-    u8path_ = encoding::sysdcode_to_utf8(_path);
-
-    std::cout << "Parse DOCX file: \"" << u8path_ << "\"";
+DefDocx::DefDocx(const chstring &_path) {
+    path_ = _path;
+    std::cout << "Parse DOCX file: \"" << _path << "\"";
 
     std::vector< char > xml_data = read_docx_file(path_, "word/document.xml");
     if (xml_data.empty( )) {
@@ -58,9 +57,9 @@ DefDocx::DefDocx(const std::string &_path) {
  * @param _docx_path 要读取的文件的路径
  * @param _inner_file_path docx解压出来之后要读取的文件
  */
-std::vector< char > DefDocx::read_docx_file(const std::string &_docx_path, const std::string &_inner_file_path) {
+std::vector< char > DefDocx::read_docx_file(const chstring &_docx_path, const std::string &_inner_file_path) {
 
-    unzFile zip_file = unzOpen(_docx_path.c_str( ));
+    unzFile zip_file = unzOpen(_docx_path.sysstring( ).c_str( ));
 
     if (!zip_file) {
         std::cerr << U8C(u8"无法打开DOCX文件: ") << _docx_path << std::endl;
@@ -156,7 +155,7 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
 // 打印带位置信息的表格
 void DefDocx::print_tables_with_position( ) {
     std::cout << U8C(u8"docx文件 ")
-              << u8path_ << U8C(u8" 共发现 ")
+              << path_ << U8C(u8" 共发现 ")
               << tableList_.size( ) << U8C(u8" 个表格") << std::endl;
     std::cout << "----------------------------------------" << std::endl;
 
@@ -305,13 +304,13 @@ DefPerson DefDocx::get_person( ) {
         }
     }
     DoQingziClass::trans_personline_to_person(perLine, per);
-    if (fuzzy::search_substring(u8path_, U8C(u8"自主报名")))
+    if (fuzzy::search_substring(path_.u8string( ), U8C(u8"自主报名")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
-    else if (fuzzy::search_substring(u8path_, U8C(u8"重庆大学团校")))
+    else if (fuzzy::search_substring(path_.u8string( ), U8C(u8"重庆大学团校")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
     else
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-    per.otherInformation[U8C(u8"文件地址")] = u8path_;
+    per.otherInformation[U8C(u8"文件地址")] = path_.u8string( );
     per.optimize( );
     return per;
 }
