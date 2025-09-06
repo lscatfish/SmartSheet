@@ -9,6 +9,7 @@
 #define PDF_H
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -78,14 +79,14 @@ public:
 
     // 以文件地址进行构造
     // @todo 按理来说这里应该先检测文件是否存在
-    DefPdf(const std::string &_u8path);
+    DefPdf(const chstring &_path);
 
     /*
      * @brief 为searchingTool设计的构造函数
      * @param _u8path u8地址
      * @param out 输出的解析结果
      */
-    DefPdf(const std::string &_u8path, list< list< CELL > > &out);
+    DefPdf(const chstring &_path, list< list< CELL > > &out);
 
     /// 析构 DefPdf 对象，释放其占用的资源（如有）。
     ~DefPdf( ) = default;
@@ -107,7 +108,7 @@ public:
     void print_sheet( ) const;
 
 private:
-    std::string        u8path_;    // 文件所在的路径(utf8)
+    chstring           path_;    // 文件所在的路径
     poppler::document *document_ = nullptr;
     PDFDoc             pdfdoc_;
     table< CELL >      sheet_;        // 提取出的表格

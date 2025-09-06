@@ -61,17 +61,17 @@ std::string _STORAGE_DIR_ = "./storage/";
  * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
  * @param ifp 是否打印加载的文件夹和文件
  */
-DefFolder::DefFolder(std::string _folderDir, bool ifp) {
-    if (*_folderDir.rbegin( ) == '\\' || *_folderDir.rbegin( ) == '/' && _folderDir.size( ) != 0)
+DefFolder::DefFolder(chstring _folderDir, bool ifp) {
+    if (*_folderDir.rbegin( ) == '\\' || *_folderDir.sysstring( ).rbegin( ) == '/' && _folderDir.size( ) != 0)
         _folderDir.pop_back( );
 
-    traverse_folder(_folderDir, this->filePathList_);
+    traverse_folder(_folderDir.sysstring( ), this->filePathList_);
     // 输出u8的文件夹地址，用于在控制台输出
     for (const auto &fP : this->filePathList_) {
         u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
     }
     if (ifp)
-        std::cout << U8C(u8"已加载文件夹：") << encoding::sysdcode_to_utf8(_folderDir) << std::endl;
+        std::cout << U8C(u8"已加载文件夹：") << _folderDir << std::endl;
     folderDir_ = _folderDir;
 }
 
@@ -318,7 +318,7 @@ size_t DefFolder::delete_with( ) {
     u8filePathList_.clear( );
     filePathList_.shrink_to_fit( );
     u8filePathList_.shrink_to_fit( );
-    std::cout << U8C(u8"已清空文件夹 ") << encoding::sysdcode_to_utf8(folderDir_) << std::endl;
+    std::cout << U8C(u8"已清空文件夹 ") << folderDir_ << std::endl;
     return sum;
 }
 
@@ -517,7 +517,7 @@ list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) c
     list< std::string > out;
     // 启用之后，ifp不可用
     if (progressBar) {
-        std::cout << U8C(u8"检测") << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
+        std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
             if (is_file_inuse(filePathList_[i])) {
                 out.push_back(u8filePathList_[i]);
@@ -546,7 +546,7 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) co
     list< std::string > out;
     // 启用之后，ifp不可用
     if (progressBar) {
-        std::cout << U8C(u8"检测") << "\"" << encoding::sysdcode_to_utf8(this->folderDir_) << "\"";
+        std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
             if (is_file_inuse(filePathList_[i])) {
                 out.push_back(filePathList_[i]);

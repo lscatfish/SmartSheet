@@ -57,7 +57,7 @@ DefDocx::DefDocx(const chstring &_path) {
  * @param _docx_path 要读取的文件的路径
  * @param _inner_file_path docx解压出来之后要读取的文件
  */
-std::vector< char > DefDocx::read_docx_file(const chstring &_docx_path, const std::string &_inner_file_path) {
+std::vector< char > DefDocx::read_docx_file(const chstring &_docx_path, const chstring &_inner_file_path) {
 
     unzFile zip_file = unzOpen(_docx_path.sysstring( ).c_str( ));
 
@@ -66,7 +66,7 @@ std::vector< char > DefDocx::read_docx_file(const chstring &_docx_path, const st
         return { };
     }
 
-    if (unzLocateFile(zip_file, _inner_file_path.c_str( ), 0) != UNZ_OK) {
+    if (unzLocateFile(zip_file, _inner_file_path.u8string( ).c_str( ), 0) != UNZ_OK) {
         std::cerr << U8C(u8"DOCX中未找到文件: ") << _inner_file_path << std::endl;
         unzClose(zip_file);
         return { };
@@ -145,10 +145,8 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
             table.push_back(row_cells);
             row_index++;    // 行索引自增
         }
-
         all_tables.push_back(table);
     }
-
     return all_tables;
 }
 
@@ -250,12 +248,12 @@ DefPerson DefDocx::get_person( ) {
                         if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人简介极少；");
+                                + U8C(u8"个人简介少于20字；");
                             col++;
-                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 150) {    // 50字
+                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 90) {    // 50字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人简介较少；");
+                                + U8C(u8"个人简介少于30字；");
                             col++;
                         }
                     }
@@ -267,12 +265,12 @@ DefPerson DefDocx::get_person( ) {
                         if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人特长极少；");
+                                + U8C(u8"个人特长少于10字；");
                             col++;
                         } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人特长较少；");
+                                + U8C(u8"个人特长少于20字；");
                             col++;
                         }
                     }
@@ -283,12 +281,12 @@ DefPerson DefDocx::get_person( ) {
                         if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"工作经历极少；");
+                                + U8C(u8"工作经历少于10字；");
                             col++;
                         } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
                             perLine.information[U8C(u8"备注")] =
                                 perLine.information[U8C(u8"备注")]
-                                + U8C(u8"工作经历较少；");
+                                + U8C(u8"工作经历少于20字；");
                             col++;
                         }
                     }

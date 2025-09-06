@@ -785,6 +785,8 @@ void DoQingziClass::save_registrationSheet( ) {
         serial++;
     }
     // std::cout << "\n\njunmjkmknujk\n";
+
+    sort_table_string_by(sh, 1);    // 自动排序
     file::save_registrationSheet_to_xlsx(sh);
 }
 
