@@ -219,14 +219,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
 )
-target_link_libraries(SM PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
-)
 # 链接到poppler
 target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
