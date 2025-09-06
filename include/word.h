@@ -9,6 +9,7 @@
  * **************************************************************************************************/
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
 #include <iostream>
 #include <PersonnelInformation.h>
@@ -36,7 +37,7 @@ public:
      * @param _docx_path 要读取的文件的路径
      * @param _inner_file_path docx解压出来之后要读取的文件
      */
-    static std::vector< char > read_docx_file(const std::string &_docx_path, const std::string &_inner_file_path);
+    static std::vector< char > read_docx_file(const chstring &_docx_path, const std::string &_inner_file_path);
 
     /*
      * @brief 解析表格并记录单元格位置
@@ -68,14 +69,13 @@ public:
      * @brief 标准构造函数，输入一个docx文件的路径（按照系统编码）
      * @param _path docx文件的路径
      */
-    DefDocx(const std::string &_path);
+    DefDocx(const chstring &_path);
 
     DefDocx( )  = default;
     ~DefDocx( ) = default;
 
 private:
-    std::string                path_;         // 此文件储存的路径
-    std::string                u8path_;       // 此文件储存的路径(u8编码)
+    chstring                   path_;         // 此文件储存的路径
     list< table< TableCell > > tableList_;    // 解析出的表格
     table< TableCell >         keyTable_;     // 关键表格
 };
