@@ -52,11 +52,11 @@ extern "C" {
 
 // 默认构造对象的方式
 DLL_EXPORT_C(PersonHandle)
-DefPerson_create_default( );
+create_DefPerson_default( );
 
 // 关键信息构造
 DLL_EXPORT_C(PersonHandle)
-DefPerson_create_keyinformation(
+create_DefPerson_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
@@ -64,7 +64,7 @@ DefPerson_create_keyinformation(
     const char *_phonenumber);
 
 DLL_EXPORT_C(bool)
-DefPerson_destroy(PersonHandle);
+destroy_DefPerson(PersonHandle);
 
 STATE_SETTER_PERSON(void, classname, cchptr)
 STATE_SETTER_PERSON(void, name, cchptr)
@@ -109,6 +109,9 @@ DLL_EXPORT_C(bool)
 DefPerson_findkey_otherInformation(PersonHandle, cchptr);
 DLL_EXPORT_C(bool)
 DefPerson_erasekey_otherInformation(PersonHandle, cchptr);
+
+DLL_EXPORT_C(void)
+DefPerson_optimize(PersonHandle);
 }
 
 
@@ -116,10 +119,10 @@ DefPerson_erasekey_otherInformation(PersonHandle, cchptr);
 
 extern "C" {
 DLL_EXPORT_C(PersonLineHandle)
-DefLine_create_default( );
+create_DefLine_default( );
 
 DLL_EXPORT_C(PersonLineHandle)
-DefLine_create_keyinformation(
+create_DefLine_keyinformation(
     const char *_classname,
     const char *_name,
     const char *_studentID,
@@ -127,7 +130,7 @@ DefLine_create_keyinformation(
     const char *_phonenumber);
 
 DLL_EXPORT_C(bool)
-DefLine_destroy(PersonLineHandle);
+destroy_DefLine(PersonLineHandle);
 
 DLL_EXPORT_C(void)
 DefLine_set_classname(PersonLineHandle, cchptr);
@@ -150,7 +153,6 @@ DLL_EXPORT_C(bool)
 DefLine_findkey_information(PersonLineHandle, cchptr);
 DLL_EXPORT_C(bool)
 DefLine_erasekey_information(PersonLineHandle, cchptr);
-
 }
 
 
