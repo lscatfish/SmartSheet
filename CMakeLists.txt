@@ -92,8 +92,6 @@ file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
 file(GLOB PY_WRAPPER "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
                     "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
                     "capi_wrapper/*.h" "capi_wrapper/*.cpp" "capi_wrapper/*.c"
-                    "capi_wrapper/*.h" "capi_wrapper/*.cpp" "capi_wrapper/*.c"
-                    "capi_wrapper/*.h" "capi_wrapper/*.cpp"
 )
 
 ########################################Windows下可运行，linux下需要重新写##########################################
