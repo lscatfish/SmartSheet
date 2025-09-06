@@ -76,6 +76,7 @@ link_directories(${FTXUI_PATH}/lib)
 
 include_directories("${CMAKE_SOURCE_DIR}/include/")
 include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("${CMAKE_SOURCE_DIR}/capi_wrapper/")
 include_directories("${THIRD_PARTY_DLL_DIR}/xlnt/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/opencv/include/")
 include_directories("${THIRD_PARTY_DLL_DIR}/zlib/include/")
@@ -88,12 +89,18 @@ file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
                     "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
 )
 
+file(GLOB PY_WRAPPER "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
+                    "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
+                    "capi_wrapper/*.h" "capi_wrapper/*.cpp"
+)
+
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
 # windows下可运行，linux下需要重新写
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+
 
 ##################################OCR的相关文件############################################
 # ppOCR的相关动态链接库
@@ -165,46 +172,41 @@ add_executable(SearchingTool
 "./searchingTool/searchingTool.hpp"
 ${SOURCES}
 "searchingTool/searchingMain.cpp")
+add_library(SM SHARED ${PY_WRAPPER})
 
+# 设置动态库输出目录（可选，统一输出到bin目录）
+set_target_properties(SM PROPERTIES
+#    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin  # Linux/macOS
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin  # Windows DLL
+)
+
+# 暴露头文件目录（供外部调用者使用）
+target_include_directories(SM
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include  # 公开include目录
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src      # 私有源文件目录（可选）
+)
+
+function(project_link_libraries TARGET_NAME)
 # 链接lib
 # 链接到xlnt
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
-)
-target_link_libraries(SearchingTool PRIVATE
+target_link_libraries(${TARGET_NAME} PRIVATE
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/xlnt/Debug/xlntd.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/xlnt/Release/xlnt.lib>
 )
 # 链接到opencv
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
-
-)
-target_link_libraries(SearchingTool PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100d.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/opencv/lib/opencv_world4100.lib>
 )
 # 链接到zlib
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
-)
-target_link_libraries(SearchingTool PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Debug>:${THIRD_PARTY_DLL_DIR}/zlib/Debug/zlibwapi.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.lib>
 )
 # 链接到icu
-target_link_libraries(SearchingTool PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutest.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icutu.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
-)
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icudt.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuin.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuio.lib>
@@ -213,30 +215,26 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/icu/Release/lib64/icuuc.lib>
 )
 # 链接到poppler
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
-    $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
-)
-target_link_libraries(SearchingTool PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-cpp.lib>
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/poppler-25.07.0/Library/lib/poppler-glib.lib>
 )
 # 链接到ftxui
-target_link_libraries(${PROJECT_NAME} PRIVATE 
+target_link_libraries(${TARGET_NAME} PRIVATE 
     ftxui-dom
     ftxui-component
     ftxui-screen
 )
-target_link_libraries(SearchingTool PRIVATE 
-    ftxui-dom
-    ftxui-component
-    ftxui-screen
-)
+endfunction()
+
+project_link_libraries(${PROJECT_NAME})
+project_link_libraries(SearchingTool)
+project_link_libraries(SM)
 
 # message(STATUS "Xlnt_INCLUDE_DIRS = ${Xlnt_INCLUDE_DIRS}")
 # message(STATUS "xlnt include dirs: $<TARGET_PROPERTY:xlnt::xlnt,INTERFACE_INCLUDE_DIRECTORIES>")
+
 
 # 根据当前配置选择 DLL
 # xlnt的动态链接库地址
@@ -261,97 +259,107 @@ set(ZLIB_DLL_PATH
     $<$<CONFIG:Release>:${THIRD_PARTY_DLL_DIR}/zlib/Release/zlibwapi.dll>
 )
 
-# 把 DLL 拷贝到目标可执行文件目录
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${XLNT_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying xlnt dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCVWORLD_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCV_FFMPEG_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OPENCV_MSMF_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying opencv dll to output directory"
-)
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${ZLIB_DLL_PATH}
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    COMMENT "Copying zlib dll to output directory"
-)
+# 封装文件复制逻辑为函数：参数为 目标名称（如 SmartSheet 或 SearchingTool）
+function(copy_files_to_target TARGET_NAME)
+    # -------------------------- 1. 复制 xlnt DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${XLNT_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying xlnt dll to ${TARGET_NAME} output directory"
+    )
 
-# 遍历每个 OCR-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(OCR_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${OCR_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No OCR DLL files will be copied - none found")
-endif()
+    # -------------------------- 2. 复制 OpenCV DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCVWORLD_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv world dll to ${TARGET_NAME} output directory"
+    )
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCV_FFMPEG_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv ffmpeg dll to ${TARGET_NAME} output directory"
+    )
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${OPENCV_MSMF_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying opencv msmf dll to ${TARGET_NAME} output directory"
+    )
 
-# 复制ocr所需的模型
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    # 1. 如果目标文件夹存在则删除
-    COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
-    # 2. 重新创建目标文件夹
-    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${PROJECT_NAME}>/models  # 确保目标文件夹存在
-    COMMAND ${CMAKE_COMMAND} -E copy_directory                # 复制整个文件夹
-        ${SOURCE_OCR_MODELS}
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/models
-    COMMENT "Copying ${SOURCE_OCR_MODELS} to executable directory"  # 显示提示信息
-)
+    # -------------------------- 3. 复制 zlib DLL --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${ZLIB_DLL_PATH}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>
+        COMMENT "Copying zlib dll to ${TARGET_NAME} output directory"
+    )
 
-# 遍历每个 icu-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(ICU_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${ICU_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No ICU DLL files will be copied - none found")
-endif()
+    # -------------------------- 4. 复制 OCR DLL --------------------------
+    if(OCR_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${OCR_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No OCR DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
 
-# 遍历每个 poppler-DLL 文件并复制到目标目录 ： 只在找到文件时执行
-if(POPPLER_DLL_RELEASE_FILES)
-    foreach(DLL_FILE ${POPPLER_DLL_RELEASE_FILES})
-        get_filename_component(DLL_NAME ${DLL_FILE} NAME)
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${DLL_FILE}"  # 添加引号处理路径中的空格
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-            COMMENT "Copying ${DLL_NAME} to output directory"
-            VERBATIM  # 确保正确处理特殊字符
-        )
-    endforeach()
-else()
-    message(WARNING "No poppler DLL files will be copied - none found")
-endif()
+    # -------------------------- 5. 复制 OCR 模型 --------------------------
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E remove_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${SOURCE_OCR_MODELS}
+                $<TARGET_FILE_DIR:${TARGET_NAME}>/models
+        COMMENT "Copying OCR models to ${TARGET_NAME} output directory"
+    )
+
+    # -------------------------- 6. 复制 ICU DLL --------------------------
+    if(ICU_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${ICU_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No ICU DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
+
+    # -------------------------- 7. 复制 Poppler DLL --------------------------
+    if(POPPLER_DLL_RELEASE_FILES)
+        foreach(DLL_FILE ${POPPLER_DLL_RELEASE_FILES})
+            get_filename_component(DLL_NAME ${DLL_FILE} NAME)
+            add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        "${DLL_FILE}"
+                        $<TARGET_FILE_DIR:${TARGET_NAME}>
+                COMMENT "Copying ${DLL_NAME} to ${TARGET_NAME} output directory"
+                VERBATIM
+            )
+        endforeach()
+    else()
+        message(WARNING "No Poppler DLL files will be copied to ${TARGET_NAME} - none found")
+    endif()
+endfunction()
+
+# -------------------------- 关键：为两个目标调用复制函数 --------------------------
+copy_files_to_target(${PROJECT_NAME})   # 为 SmartSheet 复制文件
+copy_files_to_target(SearchingTool)     # 为 SearchingTool 复制文件
+copy_files_to_target(SM)     # 为 SM 复制文件
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
