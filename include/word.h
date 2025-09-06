@@ -24,11 +24,8 @@ struct TableCell {
     int         row;        // 行号（从0开始）
     int         col;        // 列号（从0开始）
 
-    TableCell( ) {
-        row     = 0;
-        col     = 0;
-        content = "";
-    };
+    TableCell( );
+    ~TableCell( ) = default;
 };
 
 // 此类用于解析docx文件
@@ -71,30 +68,7 @@ public:
      * @brief 标准构造函数，输入一个docx文件的路径（按照系统编码）
      * @param _path docx文件的路径
      */
-    DefDocx(const std::string &_path) {
-        path_   = encoding::utf8_to_sysdcode(_path);
-        u8path_ = encoding::sysdcode_to_utf8(_path);
-
-        std::cout << "Parse DOCX file: \"" << u8path_ << "\"";
-
-        std::vector< char > xml_data = read_docx_file(path_, "word/document.xml");
-        if (xml_data.empty( )) {
-            // 空文件或者是错误
-            std::cout << U8C(u8" 有概率损坏") << std::endl;
-            return;
-        }
-
-        // 解析docx中的表格数据
-        tableList_ = parse_tables_with_position(xml_data);
-        if (tableList_.empty( )) {
-            // 未解析到表格
-            std::cout << U8C(u8" 无表格") << std::endl;
-        }
-
-        keyTable_ = get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"学号") });
-
-        std::cout << " - Done! " << std::endl;
-    };
+    DefDocx(const std::string &_path);
 
     DefDocx( )  = default;
     ~DefDocx( ) = default;

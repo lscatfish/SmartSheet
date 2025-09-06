@@ -63,27 +63,8 @@ public:
      * @brief 输入图片，解析网格
      * @param _img 输入的图片
      */
-    GridResult(const cv::Mat &img) {
-        // 转为灰度图
-        cv::Mat gray;
-        cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
-
-        // 二值化（反相，让线条为白色）
-        cv::Mat thresh;
-        cv::threshold(gray, thresh, 0, 255, cv::THRESH_BINARY_INV | cv::THRESH_OTSU);
-
-        // 提取水平和垂直网格线
-        cv::Mat horizontal = extract_horizontal_lines(thresh);
-        cv::Mat vertical   = extract_vertical_lines(thresh);
-
-        // 获取网格线坐标
-        // 获取网格线坐标（设置边缘阈值为10像素，可根据实际情况调整）
-        this->horizontalYs_ = get_horizontal_lineYs(horizontal, int(img.rows * 0.01));    // 水平线的y坐标
-        this->verticalXs_   = get_vertical_lineXs(vertical, int(img.cols * 0.01));        // 竖线的x坐标
-
-        // 将网格线解析到表格
-        parse_grid_to_sheet( );
-    };
+    GridResult(const cv::Mat &img);
+  
     ~GridResult( ) = default;
 
     // 提取水平网格线
@@ -133,40 +114,8 @@ private:
 //  手动的透视矫正
 class ManualDocPerspectiveCorrector {
 public:
-    ManualDocPerspectiveCorrector(const cv::Mat _inImg, const std::string &_SYSprompt)
-        : srcPts_(4), dispPts_(4) {
-        src_        = _inImg.clone( );
-        windowName_ = "PerspectiveCorrector - " + encoding::utf8_to_sysdcode(_SYSprompt);
-
-        // 初始化原始图像中的四边形顶点（默认在原图内偏移10%位置，避免贴边）
-        float margin = ((std::min)(src_.cols, src_.rows)) * 0.01f;    // 偏移量 = 原图宽高的最小值 * 1%
-        srcPts_[0]   = { margin, margin };                            // 顶点0：左上（x=margin, y=margin）
-        srcPts_[1]   = { src_.cols - margin, margin };                // 顶点1：右上（x=原图宽-margin, y=margin）
-        srcPts_[2]   = { src_.cols - margin, src_.rows - margin };    // 顶点2：右下（x=原图宽-margin, y=原图高-margin）
-        srcPts_[3]   = { margin, src_.rows - margin };                // 顶点3：左下（x=margin, y=原图高-margin）
-
-        // 创建主窗口并初始化
-        cv::namedWindow(windowName_, cv::WINDOW_NORMAL);
-        cv::resizeWindow(windowName_, 1000, 750);                  // 设置窗口初始大小（宽1000px，高750px）
-        cv::setMouseCallback(windowName_, staticOnMouse, this);    // 绑定鼠标回调函数，处理用户交互
-
-        cv::Rect last_roi;
-        for (;;) {
-            cv::Rect img_roi;
-            double   scale;
-            cv::Size sz = cv::getWindowImageRect(windowName_).size( );
-            layout(sz, img_roi, scale);
-
-            if (img_roi != last_roi || !done_) {
-                redraw(img_roi);
-                cv::imshow(windowName_, displayImg_);
-                last_roi = img_roi;
-            }
-            cv::waitKey(10);
-            if (done_) break;
-        }
-        cv::destroyWindow(windowName_);
-    };
+    ManualDocPerspectiveCorrector(const cv::Mat _inImg, const std::string &_SYSprompt);
+     
     ~ManualDocPerspectiveCorrector( ) = default;
 
     /*
@@ -355,9 +304,8 @@ private:
 // @note 此类启用了opencv的后台并行加速，为此类进行多线程加速请注意线程安全
 class DocumentScanner {
 public:
-    DocumentScanner(const cv::Mat &_inImg) {
-        preprocess_ = preprocess(_inImg);
-    }
+    DocumentScanner(const cv::Mat &_inImg);
+    
     ~DocumentScanner( ) = default;
 
     // 照片预处理

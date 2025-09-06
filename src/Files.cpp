@@ -56,6 +56,44 @@ std::string _STORAGE_DIR_ = "./storage/";
 /* ========================================================================================================================= */
 /* ========================================================================================================================= */
 
+/*
+ * @brief 标准构造
+ * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
+ * @param ifp 是否打印加载的文件夹和文件
+ */
+DefFolder::DefFolder(std::string _folderDir, bool ifp) {
+    if (*_folderDir.rbegin( ) == '\\' || *_folderDir.rbegin( ) == '/' && _folderDir.size( ) != 0)
+        _folderDir.pop_back( );
+
+    traverse_folder(_folderDir, this->filePathList_);
+    // 输出u8的文件夹地址，用于在控制台输出
+    for (const auto &fP : this->filePathList_) {
+        u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
+    }
+    if (ifp)
+        std::cout << U8C(u8"已加载文件夹：") << encoding::sysdcode_to_utf8(_folderDir) << std::endl;
+    folderDir_ = _folderDir;
+}
+
+// @brief 按照DefFolder变量来构造
+DefFolder::DefFolder(const DefFolder &other)
+    : folderDir_(other.folderDir_),
+      filePathList_(other.filePathList_),
+      u8filePathList_(other.u8filePathList_) {}
+
+/*
+ * @brief 选择一个DefFolder，按照一定的后缀来选择构造
+ * @param _other 另一个DefFolder
+ * @param _extension 指定的后缀
+ */
+DefFolder::DefFolder(const DefFolder &_other, const list< std::string > &_extension)
+    : folderDir_(_other.folderDir_) {
+    filePathList_   = _other.get_filepath_list(_extension);
+    u8filePathList_ = _other.get_u8filepath_list(_extension);
+};
+
+
+
 // 递归遍历文件夹，收集所有文件路径到 vector 中
 void DefFolder::traverse_folder(const std::string &folderPath, list< std::string > &filePaths) {
     // 构建搜索路径（添加通配符*匹配所有项）
