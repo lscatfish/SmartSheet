@@ -25,6 +25,37 @@
 #include <utility>
 
 
+chstring::chstring(const std::string &_in_, chstring::csType _inType) {
+    if (_inType == chstring::csType::UTF8)
+        this->usingStr_ = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
+    else if (_inType == chstring::csType::SYS)
+        this->usingStr_ = encoding::utf8_to_sysdcode(_in_);
+    usingType_ = _inType;
+}
+chstring::chstring(const char *cstr, chstring::csType _inType) {
+    if (_inType == chstring::csType::UTF8)
+        this->usingStr_ = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
+    else if (_inType == chstring::csType::SYS)
+        this->usingStr_ = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
+    usingType_ = _inType;
+}
+chstring::chstring(const chstring &_in_) {
+    *this = _in_;    // 直接复制底层
+}
+chstring::chstring(const chstring &_in_, chstring::csType _inType) {
+    *this = _in_;    // 直接复制底层
+    chstring::cvtEncode_to(_inType);
+}
+chstring::chstring( ) {
+    this->usingStr_  = "";
+    this->usingType_ = chstring::csType::UTF8;
+}
+chstring::chstring(chstring::csType _inType) {
+    this->usingStr_  = "";
+    this->usingType_ = _inType;
+}
+
+
 // 交换a，b的内容
 void chstring::swap(chstring &a, chstring &b) {
     std::swap(a.usingStr_, b.usingStr_);
@@ -281,3 +312,4 @@ bool chstring::is_all_digits( ) const {
     if (this->usingStr_.empty( )) return false;
     return std::all_of(this->usingStr_.begin( ), this->usingStr_.end( ), [](unsigned char c) { return std::isdigit(c); });
 }
+

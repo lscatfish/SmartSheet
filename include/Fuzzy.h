@@ -36,6 +36,37 @@ enum class LEVEL {
 };
 
 /*
+ * @brief 一般搜索函数，用于其他的搜索，一定要完全匹配才行
+ * @param _target 搜索目标
+ * @param _searchingLib 索引库
+ * @return 是否搜索成功
+ */
+template < typename _SearchType >
+bool perfect_match(const _SearchType &_target, const list< _SearchType > &_searchingLib) {
+    for (const auto &s : _searchingLib) {
+        if (s == _target) return true;
+    }
+    return false;
+}
+
+/*
+ * @brief 一般搜索函数，用于其他的搜索，一定要完全匹配才行
+ * @param _target 搜索目标
+ * @param _searchingLib 索引库
+ * @return 搜索到的list
+ */
+template < typename _SearchType >
+list< _SearchType > search_perfect_match(const _SearchType &_target, const list< _SearchType > &_searchingLib) {
+    list< _SearchType > out;
+    for (const auto &s : _searchingLib) {
+        if (s == _target) {
+            out.push_back(s);
+        }
+    }
+    return out;
+}
+
+/*
  * @brief 模糊搜索函数
  * @note 用于支持部分文字编码、数字编码的模糊搜索
  * @param _target 搜索目标

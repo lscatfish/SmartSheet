@@ -1,5 +1,5 @@
 ﻿
-/* =================================================================================
+/* ===============================================================================================================
  * @file    chstring.hpp
  *
  * 设计初衷：希望可以自动管理中文的编码方式，目前没有集成到
@@ -13,7 +13,7 @@
  *
  * 作者：lscatfish
  * 邮箱：2561925435@qq.com
- * ================================================================================= */
+ * =============================================================================================================== */
 #pragma once
 
 #ifndef CHSTRING_HPP
@@ -34,36 +34,18 @@ public:
         SYS  = 1,    // 系统默认的编码形式
     };
 
-    chstring(const std::string &_in_, csType _inType = csType::UTF8) {
-        if (_inType == csType::UTF8)
-            this->usingStr_ = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
-        else if (_inType == csType::SYS)
-            this->usingStr_ = encoding::utf8_to_sysdcode(_in_);
-        usingType_ = _inType;
-    }
-    chstring(const char *cstr, csType _inType = csType::UTF8) {
-        if (_inType == csType::UTF8)
-            this->usingStr_ = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
-        else if (_inType == csType::SYS)
-            this->usingStr_ = encoding::utf8_to_sysdcode(std::string(cstr));    // 使用Encoding库转换编码
-        usingType_ = _inType;
-    }
-    chstring(const chstring &_in_) {
-        *this = _in_;    // 直接复制底层
-    }
-    chstring(const chstring &_in_, csType _inType) {
-        *this = _in_;    // 直接复制底层
-        chstring::cvtEncode_to(_inType);
-    }
-    chstring( ) {
-        this->usingStr_  = "";
-        this->usingType_ = csType::UTF8;
-    }
-    chstring(csType _inType) {
-        this->usingStr_  = "";
-        this->usingType_ = _inType;
-    }
+    chstring(const std::string &_in_, csType _inType = csType::UTF8);
+    chstring(const char *cstr, csType _inType = csType::UTF8);
+    chstring(const chstring &_in_);
+    chstring(const chstring &_in_, csType _inType);
+    chstring( );
+    chstring(csType _inType);
     ~chstring( ) = default;
+    
+
+    // 交换a，b的内容,交换指针
+    static void swap(chstring &a, chstring &b);
+
 
     // 定义迭代器类型，使用std::string的迭代器作为底层实现
     using iterator               = std::string::iterator;
@@ -167,11 +149,6 @@ public:
 
     // 是否都是数字
     bool is_all_digits( ) const;
-
-
-
-    // 交换a，b的内容,交换指针
-    static void swap(chstring &a, chstring &b);
 
 
 

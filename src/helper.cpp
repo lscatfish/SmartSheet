@@ -12,10 +12,13 @@
 #include <console.h>
 #include <cstdlib>
 #include <Encoding.h>
+#include <functional>
+#include <Fuzzy.h>
 #include <helper.h>
 #include <ios>
 #include <iostream>
 #include <limits>
+#include <set>
 #include <streambuf>
 #include <string>
 #include <utility>
@@ -297,4 +300,47 @@ std::string lower_alpha_numeric(const std::string &str) {
     }
 
     return result;
+}
+
+/*
+ * @brief 去重：去除table中的重复行
+ * @param _sh 一个sheet
+ * @param _excludeCols 排除的列
+ * @param _excludeRows 排除的行
+ */
+void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_excludeCols, const list< size_t > &_excludeRows) {
+    list< size_t >                             itCols;     // 横向遍历器
+    list< size_t >                             itRows;     // 纵向遍历器
+    std::set< size_t, std::greater< size_t > > erasers;    // 要删除的行号
+
+    // 设置遍历器
+    for (size_t i = 0; i < _sh.size( ); i++)
+        if (!fuzzy::perfect_match(i, _excludeRows))
+            itRows.push_back(i);
+
+    for (size_t i = 0; i < _sh[0].size( ); i++)
+        if (!fuzzy::perfect_match(i, _excludeCols))
+            itCols.push_back(i);
+
+    auto if_same_line = [&itCols](const list< std::string > &a, const list< std::string > &b) -> bool {
+        if (a.size( ) != b.size( )) return false;
+        for (const auto c : itCols) {
+            if (a[c].size( ) > 0 && b[c].size( ) > 0 && a[c] != b[c])
+                return false;
+            else if (a[c].size( ) == 0 && b[c].size( ) == 0)
+                continue;
+        }
+        return true;
+    };
+
+    for (size_t i = 0; i < itRows.size( ) - 1; i++)
+        for (size_t j = i + 1; j < itRows.size( ); j++)
+            if (if_same_line(_sh[itRows[i]], _sh[itRows[j]]))
+                erasers.insert(itRows[j]);
+
+    // 擦除
+    for (const auto row : erasers) {
+        auto it = _sh.begin( );
+        _sh.erase(it + row);
+    }
 }
