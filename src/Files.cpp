@@ -478,16 +478,47 @@ list< std::string > DefFolder::get_u8file_list(const list< std::string > &_exten
 
 /*
  * @brief 返回所有的文件名（不包含后缀）
+ * @return 返回的文件名（不包含后缀）
+ */
+list< chstring > DefFolder::get_filename_list( ) const {
+    auto             fileList = get_file_list( );
+    list< chstring > out;
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            auto [filename, ex] = f.split_by_last_of('.');
+            out.push_back(filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回特定后缀的文件名（不包含后缀）
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
+list< chstring > DefFolder::get_filename_list(const list< std::string > &_extension) const {
+    auto             fileList = get_file_list(_extension);
+    list< chstring > out;
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            auto [filename, ex] = f.split_by_last_of('.');
+            out.push_back(filename);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（不包含后缀）
+ * @return 返回的文件名（不包含后缀）
+ */
 list< std::string > DefFolder::get_sysfilename_list( ) const {
-    list< std::string > fileList = get_sysfile_list( );
+    auto                fileList = get_filename_list( );
     list< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
-            auto [filename, ex] = split_filename_and_extension(f);
-            out.push_back(filename);
+            out.push_back(f.sysstring( ));
         }
     }
     return out;
@@ -499,12 +530,11 @@ list< std::string > DefFolder::get_sysfilename_list( ) const {
  * @return 返回的文件名（不包含后缀）
  */
 list< std::string > DefFolder::get_sysfilename_list(const list< std::string > &_extension) const {
-    list< std::string > fileList = get_sysfile_list(_extension);
+    auto                fileList = get_filename_list(_extension);
     list< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
-            auto [filename, ex] = split_filename_and_extension(f);
-            out.push_back(filename);
+            out.push_back(f.sysstring( ));
         }
     }
     return out;
@@ -512,16 +542,14 @@ list< std::string > DefFolder::get_sysfilename_list(const list< std::string > &_
 
 /*
  * @brief 返回所有的文件名（不包含后缀）
- * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
 list< std::string > DefFolder::get_u8filename_list( ) const {
-    list< std::string > u8fileList = get_u8file_list( );
+    auto                fileList = get_filename_list( );
     list< std::string > out;
-    for (const auto &u8f : u8fileList) {
-        if (u8f.size( ) > 0) {
-            auto [u8filename, ex] = split_filename_and_extension(u8f);
-            out.push_back(u8filename);
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            out.push_back(f.u8string( ));
         }
     }
     return out;
@@ -533,12 +561,11 @@ list< std::string > DefFolder::get_u8filename_list( ) const {
  * @return 返回的文件名（不包含后缀）
  */
 list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_extension) const {
-    list< std::string > u8fileList = get_u8file_list(_extension);
+    auto                fileList = get_filename_list(_extension);
     list< std::string > out;
-    for (const auto &u8f : u8fileList) {
-        if (u8f.size( ) > 0) {
-            auto [u8filename, ex] = split_filename_and_extension(u8f);
-            out.push_back(u8filename);
+    for (const auto &f : fileList) {
+        if (f.size( ) > 0) {
+            out.push_back(f.u8string( ));
         }
     }
     return out;
@@ -548,16 +575,16 @@ list< std::string > DefFolder::get_u8filename_list(const list< std::string > &_e
  * @brief 检测此文件夹下是否有有被占用的文件
  * @param ifp 是否打印被占用的文件
  * @param progressBar 是否打开进度条，启用之后ifp不可用
- * @return _occu8PathList 输出被占用的文件路径(utf8)
+ * @return 输出被占用的文件路径
  */
-list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) const {
-    list< std::string > out;
+list< chstring > DefFolder::check_occupied(bool ifp, bool progressBar) const {
+    list< chstring > out;
     // 启用之后，ifp不可用
     if (progressBar) {
         std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
             if (is_file_inuse(filePathList_[i].sysstring( ))) {
-                out.push_back(filePathList_[i].u8string( ));
+                out.push_back(filePathList_[i]);
             }
         });
         std::cout << std::flush;
@@ -567,8 +594,24 @@ list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) c
         if (is_file_inuse(filePathList_[i].sysstring( ))) {
             if (ifp)
                 std::cout << U8C(u8"被占用的文件: ") << filePathList_[i] << std::endl;
-            out.push_back(filePathList_[i].u8string( ));
+            out.push_back(filePathList_[i]);
         }
+    }
+    return out;
+}
+
+/*
+ * @brief 检测此文件夹下是否有有被占用的文件
+ * @param ifp 是否打印被占用的文件
+ * @param progressBar 是否打开进度条，启用之后ifp不可用
+ * @return 输出被占用的文件路径(utf8)
+ */
+list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) const {
+    list< std::string > out;
+    // 启用之后，ifp不可用
+    auto filePathList = check_occupied(ifp, progressBar);
+    for (const auto &fp : filePathList) {
+        out.push_back(fp.u8string( ));
     }
     return out;
 }
@@ -582,22 +625,9 @@ list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) c
 list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) const {
     list< std::string > out;
     // 启用之后，ifp不可用
-    if (progressBar) {
-        std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
-        console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
-            if (is_file_inuse(filePathList_[i].sysstring( ))) {
-                out.push_back(filePathList_[i].sysstring( ));
-            }
-        });
-        std::cout << std::flush;
-        return out;
-    }
-    for (size_t i = 0; i < filePathList_.size( ); i++) {
-        if (is_file_inuse(filePathList_[i].sysstring( ))) {
-            if (ifp)
-                std::cout << U8C(u8"被占用的文件: ") << filePathList_[i] << std::endl;
-            out.push_back(filePathList_[i].sysstring( ));
-        }
+    auto filePathList = check_occupied(ifp, progressBar);
+    for (const auto &fp : filePathList) {
+        out.push_back(fp.sysstring( ));
     }
     return out;
 }
@@ -607,10 +637,9 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) co
  * @param _path 指定的文件路径
  * @return 是否存在
  */
-bool DefFolder::is_filepath_exist(const std::string &_path) const {
-    std::string u8p = encoding::sysdcode_to_utf8(_path);
+bool DefFolder::is_filepath_exist(const chstring &_path) const {
     for (const auto &p : filePathList_) {
-        if (p.u8string( ) == u8p)
+        if (p.u8string( ) == _path.u8string( ))
             return true;
     }
     return false;

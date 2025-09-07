@@ -9,6 +9,7 @@
 
 #include <atomic>
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <condition_variable>
 #include <cstdint>
 #include <cstdlib>

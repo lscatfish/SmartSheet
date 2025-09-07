@@ -218,7 +218,19 @@ public:
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< chstring > get_filename_list( ) const;
+
+    /*
+     * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
+     * @return 返回的文件名（不包含后缀）
+     */
+    list< chstring > get_filename_list(const list< std::string > &_extension) const;
+
+    /*
+     * @brief 返回所有的文件名（不包含后缀）
      * @return 返回的文件名（不包含后缀）
      */
     list< std::string > get_sysfilename_list( ) const;
@@ -248,7 +260,15 @@ public:
      * @brief 检测此文件夹下是否有有被占用的文件
      * @param ifp 是否打印被占用的文件
      * @param progressBar 是否打开进度条，启用之后ifp不可用
-     * @return _occu8PathList 输出被占用的文件路径(utf8)
+     * @return 输出被占用的文件路径
+     */
+    list< chstring > check_occupied(bool ifp = false, bool progressBar = false) const;
+
+    /*
+     * @brief 检测此文件夹下是否有有被占用的文件
+     * @param ifp 是否打印被占用的文件
+     * @param progressBar 是否打开进度条，启用之后ifp不可用
+     * @return 输出被占用的文件路径(utf8)
      */
     list< std::string > check_occupied_utf8(bool ifp = false, bool progressBar = false) const;
 
@@ -265,7 +285,7 @@ public:
      * @param _path 指定的文件路径
      * @return 是否存在
      */
-    bool is_filepath_exist(const std::string &_path) const;
+    bool is_filepath_exist(const chstring &_path) const;
 
 private:
     chstring         folderDir_;       // 文件夹的地址dir(文件夹的名称)
