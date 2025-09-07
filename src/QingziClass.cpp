@@ -648,7 +648,7 @@ void DoQingziClass::registration( ) {
         std::cout << U8C(u8"内存分配失败") << std::endl;
     }
 
-    list< std::string > paths = aFolder->get_filepath_list(list< std::string >{ ".docx", ".DOCX" });    // 文件路径
+    list< std::string > paths = aFolder->get_sysfilepath_list(list< std::string >{ ".docx", ".DOCX" });    // 文件路径
     // 解析docx文件
     if (paths.size( ) != 0) {
         for (const auto &p : paths) {

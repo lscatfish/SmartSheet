@@ -65,11 +65,12 @@ DefFolder::DefFolder(chstring _folderDir, bool ifp) {
     if (*_folderDir.rbegin( ) == '\\' || *_folderDir.sysstring( ).rbegin( ) == '/' && _folderDir.size( ) != 0)
         _folderDir.pop_back( );
 
-    traverse_folder(_folderDir.sysstring( ), this->filePathList_);
-    // 输出u8的文件夹地址，用于在控制台输出
-    for (const auto &fP : this->filePathList_) {
-        u8filePathList_.push_back(encoding::sysdcode_to_utf8(fP));
+    list< std::string > fPL;
+    traverse_folder(_folderDir.sysstring( ), fPL);
+    for (const auto &fp : fPL) {
+        filePathList_.push_back(fp);
     }
+
     if (ifp)
         std::cout << U8C(u8"已加载文件夹：") << _folderDir << std::endl;
     folderDir_ = _folderDir;
@@ -78,8 +79,7 @@ DefFolder::DefFolder(chstring _folderDir, bool ifp) {
 // @brief 按照DefFolder变量来构造
 DefFolder::DefFolder(const DefFolder &other)
     : folderDir_(other.folderDir_),
-      filePathList_(other.filePathList_),
-      u8filePathList_(other.u8filePathList_) {}
+      filePathList_(other.filePathList_) {}
 
 /*
  * @brief 选择一个DefFolder，按照一定的后缀来选择构造
@@ -88,9 +88,8 @@ DefFolder::DefFolder(const DefFolder &other)
  */
 DefFolder::DefFolder(const DefFolder &_other, const list< std::string > &_extension)
     : folderDir_(_other.folderDir_) {
-    filePathList_   = _other.get_filepath_list(_extension);
-    u8filePathList_ = _other.get_u8filepath_list(_extension);
-};
+    filePathList_ = _other.get_filepath_list(_extension);
+}
 
 
 
@@ -145,8 +144,11 @@ void DefFolder::traverse_folder(const std::string &folderPath, list< std::string
  * @brief 输出文件夹下的各个文件路径
  * @return list<string>类型一个列表
  */
-list< std::string > DefFolder::get_filepath_list( ) const {
-    return filePathList_;
+list< std::string > DefFolder::get_sysfilepath_list( ) const {
+    list< std::string > fPL;
+    for (const auto &fp : filePathList_)
+        fPL.push_back(fp.sysstring( ));
+    return fPL;
 }
 
 /*
@@ -154,7 +156,18 @@ list< std::string > DefFolder::get_filepath_list( ) const {
  * @return list<string>类型一个列表
  */
 list< std::string > file::DefFolder::get_u8filepath_list( ) const {
-    return u8filePathList_;
+    list< std::string > fPL;
+    for (const auto &fp : filePathList_)
+        fPL.push_back(fp.u8string( ));
+    return fPL;
+}
+
+/*
+ * @brief 输出文件夹下的各个文件的相对路径
+ * @return list<string>类型一个列表
+ */
+list< chstring > DefFolder::get_filepath_list( ) const {
+    return filePathList_;
 }
 
 /*
@@ -162,13 +175,11 @@ list< std::string > file::DefFolder::get_u8filepath_list( ) const {
  * @param _extension 指定的后缀
  * @return 输出指定后缀的文件路径
  */
-list< std::string > DefFolder::get_filepath_list(const list< std::string > &_extension) const {
+list< std::string > DefFolder::get_sysfilepath_list(const list< std::string > &_extension) const {
     list< std::string > out;
-    for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( ); it_path++) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
-        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High))
-            out.push_back(*it_path);
-    }
+    list< chstring >    fplin = get_filepath_list(_extension);
+    for (const auto &fp : fplin)
+        out.push_back(fp.sysstring( ));
     return out;
 }
 
@@ -179,10 +190,23 @@ list< std::string > DefFolder::get_filepath_list(const list< std::string > &_ext
  */
 list< std::string > DefFolder::get_u8filepath_list(const list< std::string > &_extension) const {
     list< std::string > out;
-    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( ); it_path++) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
+    list< chstring >    fplin = get_filepath_list(_extension);
+    for (const auto &fp : fplin)
+        out.push_back(fp.u8string( ));
+    return out;
+}
+
+/*
+ * @brief 输出指定后缀的文件路径
+ * @param _extension 指定的后缀
+ * @return 输出指定后缀的文件路径
+ */
+list< chstring > DefFolder::get_filepath_list(const list< std::string > &_extension) const {
+    list< chstring > out;
+    for (size_t i = 0; i < filePathList_.size( ); i++) {
+        auto [n, ex] = split_filename_and_extension(filePathList_[i].usstring( ));
         if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High))
-            out.push_back(*it_path);
+            out.push_back(filePathList_[i]);
     }
     return out;
 }
@@ -194,19 +218,11 @@ list< std::string > DefFolder::get_u8filepath_list(const list< std::string > &_e
  */
 size_t DefFolder::keep_with(const list< std::string > &_extension) {
     for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( );) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
+        auto [n, ex] = split_filename_and_extension(it_path->sysstring( ));
         if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
             it_path++;
         } else {
             it_path = this->filePathList_.erase(it_path);
-        }
-    }
-    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( );) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
-        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
-            it_path++;
-        } else {
-            it_path = this->u8filePathList_.erase(it_path);
         }
     }
     return this->filePathList_.size( );
@@ -219,17 +235,9 @@ size_t DefFolder::keep_with(const list< std::string > &_extension) {
  */
 size_t DefFolder::erase_with(const list< std::string > &_extension) {
     for (auto it_path = this->filePathList_.begin( ); it_path != this->filePathList_.end( );) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
+        auto [n, ex] = split_filename_and_extension(it_path->sysstring( ));
         if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
             it_path = this->filePathList_.erase(it_path);
-        } else {
-            it_path++;
-        }
-    }
-    for (auto it_path = this->u8filePathList_.begin( ); it_path != this->u8filePathList_.end( );) {
-        auto [n, ex] = split_filename_and_extension(*it_path);
-        if (fuzzy::search(_extension, ex, fuzzy::LEVEL::High)) {
-            it_path = this->u8filePathList_.erase(it_path);
         } else {
             it_path++;
         }
@@ -248,17 +256,15 @@ bool file::DefFolder::erase_with(const std::string _path) {
     // 查找
     size_t idx    = 0;
     bool   iffind = false;
-    for (; idx < this->u8filePathList_.size( ); idx++) {
-        if (this->u8filePathList_[idx] == u8) {
+    for (; idx < this->filePathList_.size( ); idx++) {
+        if (this->filePathList_[idx].u8string( ) == u8) {
             iffind = true;
             break;
         }
     }
     // 擦除
     if (iffind) {
-        auto it_u8 = this->u8filePathList_.begin( ) + idx;
         auto it_ss = this->filePathList_.begin( ) + idx;
-        u8filePathList_.erase(it_u8);
         filePathList_.erase(it_ss);
         return true;
     }
@@ -290,7 +296,7 @@ bool DefFolder::delete_with(const std::string _path) {
  */
 size_t DefFolder::delete_with(const list< std::string > _extension) {
     size_t sum             = 0;
-    auto   speFilePathList = get_filepath_list(_extension);    // 特定的文件
+    auto   speFilePathList = get_sysfilepath_list(_extension);    // 特定的文件
     for (auto it = speFilePathList.begin( ); it != speFilePathList.end( ); it++) {
         if (is_file_exists(*it)) {
             erase_with(*it);    // 擦除
@@ -310,14 +316,12 @@ size_t DefFolder::delete_with(const list< std::string > _extension) {
 size_t DefFolder::delete_with( ) {
     size_t sum = 0;
     for (auto it = filePathList_.begin( ); sum < filePathList_.size( ); sum++) {
-        if (delete_file(*(it + sum))) {
-            std::cout << U8C(u8"删除 ") << encoding::sysdcode_to_utf8(*(it + sum)) << std::endl;    // 尝试删除u8
+        if (delete_file((it + sum)->sysstring( ))) {
+            std::cout << U8C(u8"删除 ") << (it + sum)->u8string( ) << std::endl;    // 尝试删除u8
         }
     }
     filePathList_.clear( );    // 清空
-    u8filePathList_.clear( );
     filePathList_.shrink_to_fit( );
-    u8filePathList_.shrink_to_fit( );
     std::cout << U8C(u8"已清空文件夹 ") << folderDir_ << std::endl;
     return sum;
 }
@@ -329,7 +333,7 @@ size_t DefFolder::delete_with( ) {
  * @return 复制到的文件的数量
  */
 size_t DefFolder::copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) const {
-    list< std::string > speFilePathList = get_filepath_list(_extension);    // 特定的文件
+    list< std::string > speFilePathList = get_sysfilepath_list(_extension);    // 特定的文件
 
     size_t sum = 0;
     for (const auto &fp : speFilePathList) {
@@ -366,7 +370,7 @@ bool DefFolder::copy_files_to(const std::string &_targetDir, const std::string &
  * @return 复制到的文件的数量
  */
 size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
-    list< std::string > speFilePathList = get_filepath_list( );    // 特定的文件
+    list< std::string > speFilePathList = get_sysfilepath_list( );    // 特定的文件
     std::string         sysDir          = encoding::utf8_to_sysdcode(_targetDir);
     size_t              sum             = 0;
     for (const auto &fp : speFilePathList) {
@@ -379,14 +383,46 @@ size_t DefFolder::copy_files_to(const std::string &_targetDir) const {
 
 /*
  * @brief 返回所有的文件名（包含后缀）
+ * @return 返回的文件（包含后缀）
+ */
+list< chstring > DefFolder::get_file_list( ) const {
+    list< chstring > out;
+    for (const auto &fp : filePathList_) {
+        if (fp.size( ) > 0) {
+            auto [first, last] = fp.split_by_last_of("/\\");
+            out.push_back(first);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（包含后缀）
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_file_list( ) const {
-    list< std::string > out;
-    for (const auto &fp : filePathList_) {
+list< chstring > DefFolder::get_file_list(const list< std::string > &_extension) const {
+    list< chstring > out;
+    list< chstring > speFilePathList = get_filepath_list(_extension);
+    for (const auto &fp : speFilePathList) {
         if (fp.size( ) > 0) {
-            out.push_back(split_file_from_path(fp));
+            auto [first, last] = fp.split_by_last_of("/\\");
+            out.push_back(first);
+        }
+    }
+    return out;
+}
+
+/*
+ * @brief 返回所有的文件名（包含后缀）
+ * @return 返回的文件（包含后缀）
+ */
+list< std::string > DefFolder::get_sysfile_list( ) const {
+    list< std::string > out;
+    list< chstring >    fl = get_file_list( );
+    for (const auto &fp : fl) {
+        if (fp.size( ) > 0) {
+            out.push_back(fp.sysstring( ));
         }
     }
     return out;
@@ -397,12 +433,12 @@ list< std::string > DefFolder::get_file_list( ) const {
  * @param _extension 指定的后缀
  * @return 返回的文件（包含后缀）
  */
-list< std::string > DefFolder::get_file_list(const list< std::string > &_extension) const {
-    list< std::string > speFilePathList = get_filepath_list(_extension);
+list< std::string > DefFolder::get_sysfile_list(const list< std::string > &_extension) const {
     list< std::string > out;
-    for (const auto &fp : speFilePathList) {
+    list< chstring >    speFileList = get_file_list(_extension);
+    for (const auto &fp : speFileList) {
         if (fp.size( ) > 0) {
-            out.push_back(split_file_from_path(fp));
+            out.push_back(fp.sysstring( ));
         }
     }
     return out;
@@ -415,9 +451,10 @@ list< std::string > DefFolder::get_file_list(const list< std::string > &_extensi
  */
 list< std::string > DefFolder::get_u8file_list( ) const {
     list< std::string > out;
-    for (const auto &u8fp : u8filePathList_) {
-        if (u8fp.size( ) > 0) {
-            out.push_back(split_file_from_path(u8fp));
+    list< chstring >    fl = get_file_list( );
+    for (const auto &fp : fl) {
+        if (fp.size( ) > 0) {
+            out.push_back(fp.u8string( ));
         }
     }
     return out;
@@ -429,11 +466,11 @@ list< std::string > DefFolder::get_u8file_list( ) const {
  * @return 返回的文件（包含后缀）
  */
 list< std::string > DefFolder::get_u8file_list(const list< std::string > &_extension) const {
-    list< std::string > speu8FilePathList = get_u8filepath_list(_extension);
     list< std::string > out;
-    for (const auto &u8fp : speu8FilePathList) {
-        if (u8fp.size( ) > 0) {
-            out.push_back(split_file_from_path(u8fp));
+    list< chstring >    speFileList = get_file_list(_extension);
+    for (const auto &fp : speFileList) {
+        if (fp.size( ) > 0) {
+            out.push_back(fp.u8string( ));
         }
     }
     return out;
@@ -444,8 +481,8 @@ list< std::string > DefFolder::get_u8file_list(const list< std::string > &_exten
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_filename_list( ) const {
-    list< std::string > fileList = get_file_list( );
+list< std::string > DefFolder::get_sysfilename_list( ) const {
+    list< std::string > fileList = get_sysfile_list( );
     list< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -461,8 +498,8 @@ list< std::string > DefFolder::get_filename_list( ) const {
  * @param _extension 指定的后缀
  * @return 返回的文件名（不包含后缀）
  */
-list< std::string > DefFolder::get_filename_list(const list< std::string > &_extension) const {
-    list< std::string > fileList = get_file_list(_extension);
+list< std::string > DefFolder::get_sysfilename_list(const list< std::string > &_extension) const {
+    list< std::string > fileList = get_sysfile_list(_extension);
     list< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -519,18 +556,18 @@ list< std::string > DefFolder::check_occupied_utf8(bool ifp, bool progressBar) c
     if (progressBar) {
         std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
-            if (is_file_inuse(filePathList_[i])) {
-                out.push_back(u8filePathList_[i]);
+            if (is_file_inuse(filePathList_[i].sysstring( ))) {
+                out.push_back(filePathList_[i].u8string( ));
             }
         });
         std::cout << std::flush;
         return out;
     }
     for (size_t i = 0; i < filePathList_.size( ); i++) {
-        if (is_file_inuse(filePathList_[i])) {
+        if (is_file_inuse(filePathList_[i].sysstring( ))) {
             if (ifp)
-                std::cout << U8C(u8"被占用的文件: ") << u8filePathList_[i] << std::endl;
-            out.push_back(u8filePathList_[i]);
+                std::cout << U8C(u8"被占用的文件: ") << filePathList_[i] << std::endl;
+            out.push_back(filePathList_[i].u8string( ));
         }
     }
     return out;
@@ -548,18 +585,18 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) co
     if (progressBar) {
         std::cout << U8C(u8"检测") << "\"" << folderDir_ << "\"";
         console::opt_by_progressBar(filePathList_.size( ), 20, [this, &out](size_t i) {
-            if (is_file_inuse(filePathList_[i])) {
-                out.push_back(filePathList_[i]);
+            if (is_file_inuse(filePathList_[i].sysstring( ))) {
+                out.push_back(filePathList_[i].sysstring( ));
             }
         });
         std::cout << std::flush;
         return out;
     }
     for (size_t i = 0; i < filePathList_.size( ); i++) {
-        if (is_file_inuse(filePathList_[i])) {
+        if (is_file_inuse(filePathList_[i].sysstring( ))) {
             if (ifp)
-                std::cout << U8C(u8"被占用的文件: ") << encoding::sysdcode_to_utf8(u8filePathList_[i]) << std::endl;
-            out.push_back(filePathList_[i]);
+                std::cout << U8C(u8"被占用的文件: ") << filePathList_[i] << std::endl;
+            out.push_back(filePathList_[i].sysstring( ));
         }
     }
     return out;
@@ -572,8 +609,8 @@ list< std::string > DefFolder::check_occupied_sys(bool ifp, bool progressBar) co
  */
 bool DefFolder::is_filepath_exist(const std::string &_path) const {
     std::string u8p = encoding::sysdcode_to_utf8(_path);
-    for (const auto &p : u8filePathList_) {
-        if (p == u8p)
+    for (const auto &p : filePathList_) {
+        if (p.u8string( ) == u8p)
             return true;
     }
     return false;

@@ -58,11 +58,32 @@ std::string trim_whitespace(const std::string &str);
 std::pair< std::string, std::string > split_by_equal(const std::string &str);
 
 /*
- * @brief 分割字符串，获取一个字符的前后的内容
+ * @brief 分割字符串，获取第一目标字符的前后的内容
  * @param str 输入的字符串
  * @param cutter 分割的字符
  */
-std::pair< std::string, std::string > split_by(const std::string &str, const char cutter);
+std::pair< std::string, std::string > split_by_first_of(const std::string &str, const char cutter);
+
+/*
+ * @brief 分割字符串，获取最后目标一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_last_of(const std::string &str, const char cutter);
+
+/*
+ * @brief 分割字符串，获取第一目标字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_first_of(const std::string &str, const std::string& cutter);
+
+/*
+ * @brief 分割字符串，获取最后目标一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_last_of(const std::string &str, const std::string &cutter);
 
 // 判断一个字符串是否都是数字
 bool is_all_digits(const std::string &s);

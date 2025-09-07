@@ -26,7 +26,7 @@
 #include <string>
 #include <utility>
 
-
+// chstring不允许对单个char的大小进行操作
 class chstring {
 public:
     enum class csType {
@@ -117,7 +117,7 @@ public:
     // 获取大小，不同的编码不同
     size_t size( ) const;
 
-    //删除最后一位
+    // 删除最后一位
     void pop_back( );
 
     // 打印文字到控制台
@@ -131,6 +131,9 @@ public:
 
     // 获取底层字符串，按照系统编码返回
     std::string sysstring( ) const;
+
+    // 获取底层字符串，按照当前编码返回
+    std::string usstring( ) const;
 
     // 获取宽字符方式
     std::wstring wstring( ) const;
@@ -150,8 +153,17 @@ public:
     // 分离键与值
     std::pair< chstring, chstring > split_by_equal( ) const;
 
-    // 按照char分离
-    std::pair< chstring, chstring > split_by(const char cutter) const;
+    // 按照第一个char分离
+    std::pair< chstring, chstring > split_by_first_of(const char cutter) const;
+
+    // 按照最后一个char分离
+    std::pair< chstring, chstring > split_by_last_of(const char cutter) const;
+
+    // 按照第一个char分离
+    std::pair< chstring, chstring > split_by_first_of(const std::string& cutter) const;
+    
+    // 按照最后一个char分离
+    std::pair< chstring, chstring > split_by_last_of(const std::string &cutter) const;
 
     // 是否都是数字
     bool is_all_digits( ) const;

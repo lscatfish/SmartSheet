@@ -246,7 +246,7 @@ private:
     template < typename T >
     void parse_list(list< T > &_list, const list< std::string > _ex) {
         list< std::string > u8PathList  = this->get_u8filepath_list(_ex);
-        list< std::string > sysPathList = this->get_filepath_list(_ex);
+        list< std::string > sysPathList = this->get_sysfilepath_list(_ex);
 
         for (size_t i = 0; i < sysPathList.size( ); i++) {
             if constexpr (std::is_same_v< T, TextList< xlnt::workbook > >) {

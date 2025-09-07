@@ -287,8 +287,8 @@ void test_for_sort_table_by( ) {
 void test_for_ManualDocPerspectiveCorrector( ) {
 
     file::DefFolder imgFolder(file::_INPUT_ATT_IMGS_DIR_, false);
-    auto            filelist = imgFolder.get_file_list( );
-    auto            pathlist = imgFolder.get_filepath_list( );
+    auto            filelist = imgFolder.get_sysfile_list( );
+    auto            pathlist = imgFolder.get_sysfilepath_list( );
 
     for (size_t i = 0; i < pathlist.size( ); i++) {
         cv::Mat us;
