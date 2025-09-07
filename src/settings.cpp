@@ -90,7 +90,7 @@ void set_path( ) {
         serLine++;
         line = trim_whitespace(line);
         if ((line.size( ) != 0 && line[0] == '#') || line.size( ) == 0) continue;
-        auto [usable, annotation] = split_by(line, '#');    // 分离注释
+        auto [usable, annotation] = split_by_first_of(line, '#');    // 分离注释
         auto [before, after]      = split_by_equal(usable);
         after                     = trim_whitespace(after);
         before                    = trim_whitespace(before);

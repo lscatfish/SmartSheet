@@ -77,7 +77,7 @@ public:
      * @brief 输出文件夹下的各个文件的相对路径
      * @return list<string>类型一个列表
      */
-    list< std::string > get_filepath_list( ) const;
+    list< std::string > get_sysfilepath_list( ) const;
 
     /*
      * @brief 输出文件夹下的各个文件的相对路径(utf8编码)
@@ -86,11 +86,17 @@ public:
     list< std::string > get_u8filepath_list( ) const;
 
     /*
+     * @brief 输出文件夹下的各个文件的相对路径
+     * @return list<string>类型一个列表
+     */
+    list< chstring > get_filepath_list( ) const;
+
+    /*
      * @brief 输出指定后缀的文件路径
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径
      */
-    list< std::string > get_filepath_list(const list< std::string > &_extension) const;
+    list< std::string > get_sysfilepath_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 输出指定后缀的文件路径(u8编码)
@@ -98,6 +104,13 @@ public:
      * @return 输出指定后缀的文件路径（u8编码）
      */
     list< std::string > get_u8filepath_list(const list< std::string > &_extension) const;
+
+    /*
+     * @brief 输出指定后缀的文件路径
+     * @param _extension 指定的后缀
+     * @return 输出指定后缀的文件路径
+     */
+    list< chstring > get_filepath_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 保留指定后缀的文件
@@ -165,17 +178,29 @@ public:
 
     /*
      * @brief 返回所有的文件名（包含后缀）
+     * @return 返回的文件（包含后缀）
+     */
+    list< chstring > get_file_list( ) const;
+
+    /*
+     * @brief 返回所有的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_file_list( ) const;
+    list< chstring > get_file_list(const list< std::string > &_extension) const;
+
+    /*
+     * @brief 返回所有的文件名（包含后缀）
+     * @return 返回的文件（包含后缀）
+     */
+    list< std::string > get_sysfile_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_file_list(const list< std::string > &_extension) const;
+    list< std::string > get_sysfile_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
@@ -196,14 +221,14 @@ public:
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_filename_list( ) const;
+    list< std::string > get_sysfilename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_filename_list(const list< std::string > &_extension) const;
+    list< std::string > get_sysfilename_list(const list< std::string > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
@@ -243,9 +268,8 @@ public:
     bool is_filepath_exist(const std::string &_path) const;
 
 private:
-    chstring         folderDir_;         // 文件夹的地址dir(文件夹的名称)
-    list< std::string > filePathList_;      // 文件夹下的文件路径（按照此电脑编码）
-    list< std::string > u8filePathList_;    // 文件夹下的文件路径（按照utf8编码）
+    chstring         folderDir_;       // 文件夹的地址dir(文件夹的名称)
+    list< chstring > filePathList_;    // 文件夹下的文件路径（按照此电脑编码）
 };
 /* ========================================================================================================================= */
 

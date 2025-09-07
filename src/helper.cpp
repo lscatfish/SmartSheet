@@ -104,24 +104,105 @@ std::pair< std::string, std::string > split_by_equal(const std::string &str) {
 }
 
 /*
- * @brief 分割字符串，获取一个字符的前后的内容
+ * @brief 分割字符串，获取第一个目标一个字符的前后的内容
  * @param str 输入的字符串
  * @param cutter 分割的字符
  */
-std::pair< std::string, std::string > split_by(const std::string &str, const char cutter) {
+std::pair< std::string, std::string > split_by_first_of(const std::string &str, const char cutter) {
     if (str.empty( )) return { "", "" };
     // 查找cutter的位置
-    size_t equalPos = str.find(cutter);
+    size_t equalPos = str.find_first_of(cutter);
 
-    // 如果没有找到'='，返回原字符串和空字符串
+    // 如果没有找到，返回原字符串和空字符串
     if (equalPos == std::string::npos) {
         return { str, "" };
     }
 
-    // 提取'='前面的子字符串
+    // 提取c前面的子字符串
     std::string before = str.substr(0, equalPos);
 
-    // 提取'='后面的子字符串
+    // 提取c后面的子字符串
+    std::string after;
+    if (equalPos + 1 < str.size( ))
+        after = str.substr(equalPos + 1);
+    else
+        after = "";
+    return { before, after };
+}
+
+/*
+ * @brief 分割字符串，获取最后目标一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_last_of(const std::string &str, const char cutter) {
+    if (str.empty( )) return { "", "" };
+    // 查找cutter的位置
+    size_t equalPos = str.find_last_of(cutter);
+
+    // 如果没有找到，返回原字符串和空字符串
+    if (equalPos == std::string::npos) {
+        return { str, "" };
+    }
+
+    // 提取c前面的子字符串
+    std::string before = str.substr(0, equalPos);
+
+    // 提取c后面的子字符串
+    std::string after;
+    if (equalPos + 1 < str.size( ))
+        after = str.substr(equalPos + 1);
+    else
+        after = "";
+    return { before, after };
+}
+
+/*
+ * @brief 分割字符串，获取第一目标字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_first_of(const std::string &str, const std::string &cutter) {
+    if (str.empty( )) return { "", "" };
+    // 查找cutter的位置
+    size_t equalPos = str.find_first_of(cutter);
+
+    // 如果没有找到，返回原字符串和空字符串
+    if (equalPos == std::string::npos) {
+        return { str, "" };
+    }
+
+    // 提取c前面的子字符串
+    std::string before = str.substr(0, equalPos);
+
+    // 提取c后面的子字符串
+    std::string after;
+    if (equalPos + 1 < str.size( ))
+        after = str.substr(equalPos + 1);
+    else
+        after = "";
+    return { before, after };
+}
+
+/*
+ * @brief 分割字符串，获取最后目标一个字符的前后的内容
+ * @param str 输入的字符串
+ * @param cutter 分割的字符
+ */
+std::pair< std::string, std::string > split_by_last_of(const std::string &str, const std::string &cutter) {
+    if (str.empty( )) return { "", "" };
+    // 查找cutter的位置
+    size_t equalPos = str.find_last_of(cutter);
+
+    // 如果没有找到，返回原字符串和空字符串
+    if (equalPos == std::string::npos) {
+        return { str, "" };
+    }
+
+    // 提取c前面的子字符串
+    std::string before = str.substr(0, equalPos);
+
+    // 提取c后面的子字符串
     std::string after;
     if (equalPos + 1 < str.size( ))
         after = str.substr(equalPos + 1);

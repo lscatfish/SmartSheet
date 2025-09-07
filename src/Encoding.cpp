@@ -66,20 +66,24 @@ void Init( ) {
  * @note 基于 ICU77.1
  **/
 std::wstring utf8_to_wstring(const std::string u8) {
+    std::string u8s = u8;
     if (u8.empty( )) return { };
+    if (!is_utf8(u8)) {
+        u8s = sysdcode_to_utf8(u8);
+    }
 
     UErrorCode  status = U_ZERO_ERROR;
     UConverter *cnv    = ucnv_open("UTF-8", &status);
     if (U_FAILURE(status)) {
         std::cout << "\n"
-                  << u8 << "   "
+                  << u8s << "   "
                   << U8C(u8"ICU: 无法创建 UTF-8 转换器") << "\n";
         throw std::runtime_error(U8C(u8"ICU: 无法创建 UTF-8 转换器"));
     }
 
     // 1. 预查询所需 UTF-16 单元数（不含终止 0）
     int32_t dst_len = ucnv_toUChars(cnv, nullptr, 0,
-                                    u8.data( ), static_cast< int32_t >(u8.size( )),
+                                    u8s.data( ), static_cast< int32_t >(u8s.size( )),
                                     &status);
     if (status == U_BUFFER_OVERFLOW_ERROR) status = U_ZERO_ERROR;
 
@@ -88,14 +92,14 @@ std::wstring utf8_to_wstring(const std::string u8) {
     ucnv_toUChars(cnv,
                   reinterpret_cast< UChar * >(out.data( )),
                   dst_len + 1,    // 关键：+1 避免 ICU 认为空间不足
-                  u8.data( ), static_cast< int32_t >(u8.size( )),
+                  u8s.data( ), static_cast< int32_t >(u8s.size( )),
                   &status);
 
     ucnv_close(cnv);
 
     if (U_FAILURE(status)) {
         std::cout << "\n"
-                  << u8 << "    "
+                  << u8s << "    "
                   << U8C(u8"ICU: UTF-8 → UTF-16 转换失败") << "\n";
         throw std::runtime_error(U8C(u8"ICU: UTF-8 → UTF-16 转换失败"));
     }

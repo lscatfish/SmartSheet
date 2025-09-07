@@ -198,6 +198,11 @@ std::string chstring::sysstring( ) const {
         return "";
 }
 
+// 获取底层字符串，按照当前编码返回
+std::string chstring::usstring( ) const {
+    return this->usingStr_;
+}
+
 // 获取宽字符方式
 std::wstring chstring::wstring( ) const {
     if (this->usingType_ == csType::UTF8)
@@ -247,9 +252,27 @@ std::pair< chstring, chstring > chstring::split_by_equal( ) const {
     return std::pair< chstring, chstring >(chstring(r.first, this->usingType_), chstring(r.second, this->usingType_));
 }
 
-// 按照char分离
-std::pair< chstring, chstring > chstring::split_by(const char cutter) const {
-    auto [first, last] = ::split_by(this->usingStr_, cutter);
+// 按照第一个char分离
+std::pair< chstring, chstring > chstring::split_by_first_of(const char cutter) const {
+    auto [first, last] = ::split_by_first_of(this->usingStr_, cutter);
+    return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
+}
+
+// 按照最后一个char分离
+std::pair< chstring, chstring > chstring::split_by_last_of(const char cutter) const {
+    auto [first, last] = ::split_by_last_of(this->usingStr_, cutter);
+    return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
+}
+
+// 按照第一个char分离
+std::pair< chstring, chstring > chstring::split_by_first_of(const std::string &cutter) const {
+    auto [first, last] = ::split_by_first_of(this->usingStr_, cutter);
+    return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
+}
+
+// 按照最后一个char分离
+std::pair< chstring, chstring > chstring::split_by_last_of(const std::string &cutter) const {
+    auto [first, last] = ::split_by_last_of(this->usingStr_, cutter);
     return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
 }
 
