@@ -76,7 +76,7 @@ std::pair< std::string, std::string > split_by_last_of(const std::string &str, c
  * @param str 输入的字符串
  * @param cutter 分割的字符
  */
-std::pair< std::string, std::string > split_by_first_of(const std::string &str, const std::string& cutter);
+std::pair< std::string, std::string > split_by_first_of(const std::string &str, const std::string &cutter);
 
 /*
  * @brief 分割字符串，获取最后目标一个字符的前后的内容
@@ -145,5 +145,13 @@ bool is_alpha_numeric(const std::string &str);
 
 // 将字符串中的大写字母转为小写，数字保持不变
 std::string lower_alpha_numeric(const std::string &str);
+
+/*
+ * @brief 去重：去除table中的重复行
+ * @param _sh 一个sheet
+ * @param _excludeCols 排除的列
+ * @param _excludeRows 排除的行
+ */
+void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_excludeCols, const list< size_t > &_excludeRows);
 
 #endif    // !HELPER_H

@@ -787,6 +787,10 @@ void DoQingziClass::save_registrationSheet( ) {
     // std::cout << "\n\njunmjkmknujk\n";
 
     sort_table_string_by(sh, 1);    // 自动排序
+    deduplication_sheet(sh, list< size_t >{ 0, 23 }, list< size_t >{ 0 });
+    // 修改第一列
+    for (size_t i = 1; i < sh.size( ); i++)
+        sh[i][0] = std::to_string(i);
     file::save_registrationSheet_to_xlsx(sh);
 }
 
