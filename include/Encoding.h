@@ -11,9 +11,9 @@
 #ifndef ENCODING_H
 #define ENCODING_H
 
+#include <high.h>
 #include <icu_encoding_handler.h>
 #include <string>
-
 
 namespace encoding    // 使用时请用namespace encoding=ec;
 {
@@ -64,14 +64,14 @@ bool check_utf8_validity(const std::string &utf8);
  * @param _sheet 输入的sheet
  * @return 返回是否有效
  */
-bool check_sheet_utf8_validity(const table< std::string > &_sheet);
+bool check_sheet_utf8_validity(const myTable< std::string > &_sheet);
 
 /*
  * @brief 修复table<string>内部的非法字符集错误
  * @param _sheet 输入的sheet
  * @return 返回修复的字符集的错误数量
  */
-size_t repair_sheet_utf8_invalidity(table< std::string > &_sheet);
+size_t repair_sheet_utf8_invalidity(myTable< std::string > &_sheet);
 
 }    // namespace encoding
 

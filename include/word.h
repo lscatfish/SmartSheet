@@ -21,9 +21,9 @@ namespace docx {
 
 // 定义单元格结构体，包含内容和位置信息
 struct TableCell {
-    std::string content;    // 单元格内容
-    int         row;        // 行号（从0开始）
-    int         col;        // 列号（从0开始）
+    chstring content;    // 单元格内容
+    int      row;        // 行号（从0开始）
+    int      col;        // 列号（从0开始）
 
     TableCell( );
     ~TableCell( ) = default;
@@ -43,14 +43,14 @@ public:
      * @brief 解析表格并记录单元格位置
      * @param _xml_data 输入的docx的xml信息
      */
-    static list< table< TableCell > > parse_tables_with_position(const std::vector< char > &_xml_data);
+    static myList< myTable< TableCell > > parse_tables_with_position(const std::vector< char > &_xml_data);
 
     /*
      * @brief 返回一个具有列表中关键值的表
      * @param _u8imp u8编码的搜索表
      * @return table<TableCell>类型的表
      */
-    table< TableCell > get_table_with(const list< std::string > &_u8imp);
+    myTable< TableCell > get_table_with(const myList< chstring > &_u8imp);
 
     /*
      * @brief 返回一个标准人员信息
@@ -58,7 +58,7 @@ public:
     DefPerson get_person( );
 
     // 返回解析出的表格列表
-    list< table< TableCell > > get_table_list( ) const;
+    myList< myTable< TableCell > > get_table_list( ) const;
 
     // 打印带位置信息的表格
     void print_tables_with_position( );
@@ -76,8 +76,8 @@ public:
 
 private:
     chstring                   path_;         // 此文件储存的路径
-    list< table< TableCell > > tableList_;    // 解析出的表格
-    table< TableCell >         keyTable_;     // 关键表格
+    myList< myTable< TableCell > > tableList_;    // 解析出的表格
+    myTable< TableCell >         keyTable_;     // 关键表格
 };
 
 }    // namespace docx

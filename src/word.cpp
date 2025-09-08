@@ -47,7 +47,7 @@ DefDocx::DefDocx(const chstring &_path) {
         std::cout << U8C(u8" 无表格") << std::endl;
     }
 
-    keyTable_ = get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"学号") });
+    keyTable_ = get_table_with(myList< chstring >{ U8C(u8"姓名"), U8C(u8"学号") });
 
     std::cout << " - Done! " << std::endl;
 }
@@ -103,9 +103,9 @@ std::vector< char > DefDocx::read_docx_file(const chstring &_docx_path, const ch
  * @brief 解析表格并记录单元格位置
  * @param 输入的docx的xml信息
  */
-list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector< char > &_xml_data) {
+myList< myTable< TableCell > > DefDocx::parse_tables_with_position(const std::vector< char > &_xml_data) {
 
-    list< table< TableCell > > all_tables;
+    myList< myTable< TableCell > > all_tables;
 
     pugi::xml_document     doc;
     pugi::xml_parse_result result = doc.load_buffer(_xml_data.data( ), _xml_data.size( ));
@@ -116,7 +116,7 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
 
     // 遍历所有表格（<w:tbl>）
     for (auto tbl_node : doc.select_nodes("//w:tbl")) {
-        std::vector< std::vector< TableCell > > table;
+        std::vector< std::vector< TableCell > > myTable;
         int                                     row_index = 0;    // 行索引（从0开始）
 
         // 遍历表格行（<w:tr>）
@@ -137,15 +137,16 @@ list< table< TableCell > > DefDocx::parse_tables_with_position(const std::vector
                 cell.content = cell_text;
                 cell.row     = row_index;
                 cell.col     = col_index;
+                cell.content.trim_whitespace( );
 
                 row_cells.push_back(cell);
                 col_index++;    // 列索引自增
             }
 
-            table.push_back(row_cells);
+            myTable.push_back(row_cells);
             row_index++;    // 行索引自增
         }
-        all_tables.push_back(table);
+        all_tables.push_back(myTable);
     }
     return all_tables;
 }
@@ -175,10 +176,10 @@ void DefDocx::print_tables_with_position( ) {
  * @param _u8imp u8编码的搜索表
  * @return table<TableCell>类型的表
  */
-table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
+myTable< TableCell > DefDocx::get_table_with(const myList< chstring > &_u8imp) {
     for (const auto &t : this->tableList_) {
         // 构造搜索库
-        list< std::string > searchingLib;
+        myList< chstring > searchingLib;
         for (const auto &r : t) {
             for (const auto &c : r) {
                 if (c.content.size( ) != 0) {
@@ -201,7 +202,7 @@ table< TableCell > DefDocx::get_table_with(const list< std::string > &_u8imp) {
             return t;
         }
     }
-    return table< TableCell >( );    // 返回空表
+    return myTable< TableCell >( );    // 返回空表
 }
 
 /*
@@ -217,7 +218,7 @@ DefPerson DefDocx::get_person( ) {
     perLine.information[U8C(u8"个人简介")] = "";
     DefPerson per;
     // 定义关键的词
-    const list< std::string > headerLib{
+    const myList< chstring > headerLib{
         U8C(u8"姓名"),
         U8C(u8"性别"), U8C(u8"年级"),
         U8C(u8"学号"), U8C(u8"政治面貌"),
@@ -235,66 +236,51 @@ DefPerson DefDocx::get_person( ) {
     for (size_t row = 0; row < keyTable_.size( ); row++) {
         for (size_t col = 0; col < keyTable_[row].size( ); col++) {
             if (keyTable_[row][col].content.size( ) != 0) {
-                if (fuzzy::search(headerLib, trim_whitespace(keyTable_[row][col].content), fuzzy::LEVEL::High)) {
+                if (fuzzy::search(headerLib, keyTable_[row][col].content, fuzzy::LEVEL::High)) {
                     if (col + 1 < keyTable_[row].size( )) {
-                        perLine.information[trim_whitespace(keyTable_[row][col].content)] = trim_whitespace(keyTable_[row][col + 1].content);
+                        perLine.information[keyTable_[row][col].content] = keyTable_[row][col + 1].content;
                         col++;
                     }
-                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"个人简介")) {
+                } else if (keyTable_[row][col].content |= U8C(u8"个人简介")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"个人简介")] =
-                                trim_whitespace(keyTable_[row][col + 1].content);
-                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人简介少于20字；");
+                            perLine.information[U8C(u8"个人简介")] = keyTable_[row][col + 1].content;
+                        if (keyTable_[row][col + 1].content.size( ) < 60) {    // 20字
+                            perLine.information[U8C(u8"备注")] += U8C(u8"个人简介少于20字；");
                             col++;
-                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 90) {    // 50字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人简介少于30字；");
+                        } else if (keyTable_[row][col + 1].content.size( ) < 90) {    // 50字
+                            perLine.information[U8C(u8"备注")] += U8C(u8"个人简介少于30字；");
                             col++;
                         }
                     }
-                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"个人特长")) {
+                } else if (keyTable_[row][col].content |= U8C(u8"个人特长")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"个人特长")] =
-                                trim_whitespace(keyTable_[row][col + 1].content);
-                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人特长少于10字；");
+                            perLine.information[U8C(u8"个人特长")] = keyTable_[row][col + 1].content;
+                        if (keyTable_[row][col + 1].content.size( ) < 30) {    // 10字
+                            perLine.information[U8C(u8"备注")] += +U8C(u8"个人特长少于10字；");
                             col++;
-                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"个人特长少于20字；");
+                        } else if (keyTable_[row][col + 1].content.size( ) < 60) {    // 20字
+                            perLine.information[U8C(u8"备注")] += U8C(u8"个人特长少于20字；");
                             col++;
                         }
                     }
-                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"工作经历")) {
+                } else if (keyTable_[row][col].content |= U8C(u8"工作经历")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"工作经历")] = trim_whitespace(keyTable_[row][col + 1].content);
-                        if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 30) {    // 10字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"工作经历少于10字；");
+                            perLine.information[U8C(u8"工作经历")] = keyTable_[row][col + 1].content;
+                        if (keyTable_[row][col + 1].content.size( ) < 30) {    // 10字
+                            perLine.information[U8C(u8"备注")] += U8C(u8"工作经历少于10字；");
                             col++;
-                        } else if (trim_whitespace(keyTable_[row][col + 1].content).size( ) < 60) {    // 20字
-                            perLine.information[U8C(u8"备注")] =
-                                perLine.information[U8C(u8"备注")]
-                                + U8C(u8"工作经历少于20字；");
+                        } else if (keyTable_[row][col + 1].content.size( ) < 60) {    // 20字
+                            perLine.information[U8C(u8"备注")] += U8C(u8"工作经历少于20字；");
                             col++;
                         }
                     }
-                } else if (trim_whitespace(keyTable_[row][col].content) == U8C(u8"获奖情况")) {
+                } else if (keyTable_[row][col].content |= U8C(u8"获奖情况")) {
                     if (col + 1 < keyTable_[row].size( )) {
                         if (keyTable_[row][col + 1].content.size( ) != 0)
-                            perLine.information[U8C(u8"获奖情况")] =
-                                trim_whitespace(keyTable_[row][col + 1].content);
+                            perLine.information[U8C(u8"获奖情况")] = keyTable_[row][col + 1].content;
                         col++;
                     }
                 }
@@ -302,19 +288,19 @@ DefPerson DefDocx::get_person( ) {
         }
     }
     DoQingziClass::trans_personline_to_person(perLine, per);
-    if (fuzzy::search_substring(path_.u8string( ), U8C(u8"自主报名")))
+    if (path_.has_subchstring(U8C(u8"自主报名")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
-    else if (fuzzy::search_substring(path_.u8string( ), U8C(u8"重庆大学团校")))
+    else if (path_.has_subchstring(U8C(u8"重庆大学团校")))
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
     else
         per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-    per.otherInformation[U8C(u8"文件地址")] = path_.u8string( );
+    per.otherInformation[U8C(u8"文件地址")] = path_;
     per.optimize( );
     return per;
 }
 
 // 返回解析出的表格列表
-list< table< TableCell > > DefDocx::get_table_list( ) const {
+myList< myTable< TableCell > > DefDocx::get_table_list( ) const {
     return tableList_;
 }
 

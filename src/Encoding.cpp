@@ -9,8 +9,7 @@
  * 作者：lscatfish
  *****************************************************************************/
 
-#include <basic.hpp>
-#include <consoleapi2.h>
+#include <high.h>
 #include <cstdint>
 #include <cstring>
 #include <Encoding.h>
@@ -191,7 +190,7 @@ bool check_utf8_validity(const std::string &utf8) {
  * @param _sheet 输入的sheet
  * @return 返回是否有效
  */
-bool check_sheet_utf8_validity(const table< std::string > &_sheet) {
+bool check_sheet_utf8_validity(const myTable< std::string > &_sheet) {
     for (const auto &r : _sheet) {
         for (const auto &c : r) {
             if (!check_utf8_validity(c)) {
@@ -207,7 +206,7 @@ bool check_sheet_utf8_validity(const table< std::string > &_sheet) {
  * @param _sheet 输入的sheet
  * @return 返回修复的字符集的错误数量
  */
-size_t repair_sheet_utf8_invalidity(table< std::string > &_sheet) {
+size_t repair_sheet_utf8_invalidity(myTable< std::string > &_sheet) {
     size_t sum = 0;
     for (auto &row : _sheet) {
         for (auto &cell : row) {

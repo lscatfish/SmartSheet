@@ -64,7 +64,7 @@ public:
      * @param _img 输入的图片
      */
     GridResult(const cv::Mat &img);
-  
+
     ~GridResult( ) = default;
 
     // 提取水平网格线
@@ -96,7 +96,7 @@ public:
     SHEET get_sheet( ) const;
 
     // 返回只有string的表格
-    table< std::string > get_stringSheet( ) const;
+    myTable< chstring > get_stringSheet( ) const;
 
 private:
     std::vector< int > horizontalYs_;    // 水平线的y坐标
@@ -115,7 +115,7 @@ private:
 class ManualDocPerspectiveCorrector {
 public:
     ManualDocPerspectiveCorrector(const cv::Mat _inImg, const std::string &_SYSprompt);
-     
+
     ~ManualDocPerspectiveCorrector( ) = default;
 
     /*
@@ -305,7 +305,7 @@ private:
 class DocumentScanner {
 public:
     DocumentScanner(const cv::Mat &_inImg);
-    
+
     ~DocumentScanner( ) = default;
 
     // 照片预处理
@@ -329,7 +329,7 @@ private:
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径(系统编码格式)
  */
-void load_sheet_from_img(table< std::string > &_sheet, const std::string &_path);
+void load_sheet_from_img(myTable< chstring > &_sheet, const chstring &_path);
 
 }    // namespace img
 

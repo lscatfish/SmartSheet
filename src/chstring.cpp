@@ -15,7 +15,6 @@
  * ================================================================================= */
 
 #include <algorithm>
-#include <basic.hpp>
 #include <cctype>
 #include <chstring.hpp>
 #include <Encoding.h>
@@ -24,15 +23,14 @@
 #include <string>
 #include <utility>
 
-
-chstring::chstring(const std::string &_in_, chstring::csType _inType) {
+chstring::chstring(const std::string &_in_, const chstring::csType _inType) {
     if (_inType == chstring::csType::UTF8)
         this->usingStr_ = encoding::sysdcode_to_utf8(_in_);    // 使用Encoding库转换编码
     else if (_inType == chstring::csType::SYS)
         this->usingStr_ = encoding::utf8_to_sysdcode(_in_);
     usingType_ = _inType;
 }
-chstring::chstring(const char *cstr, chstring::csType _inType) {
+chstring::chstring(const char *cstr, const chstring::csType _inType) {
     if (_inType == chstring::csType::UTF8)
         this->usingStr_ = encoding::sysdcode_to_utf8(std::string(cstr));    // 使用Encoding库转换编码
     else if (_inType == chstring::csType::SYS)
@@ -42,15 +40,15 @@ chstring::chstring(const char *cstr, chstring::csType _inType) {
 chstring::chstring(const chstring &_in_) {
     *this = _in_;    // 直接复制底层
 }
-chstring::chstring(const chstring &_in_, chstring::csType _inType) {
+chstring::chstring(const chstring &_in_, const chstring::csType _inType) {
     *this = _in_;    // 直接复制底层
-    chstring::cvtEncode_to(_inType);
+    this->cvtEncode_to(_inType);
 }
 chstring::chstring( ) {
     this->usingStr_  = "";
     this->usingType_ = chstring::csType::UTF8;
 }
-chstring::chstring(chstring::csType _inType) {
+chstring::chstring(const chstring::csType _inType) {
     this->usingStr_  = "";
     this->usingType_ = _inType;
 }
@@ -62,12 +60,58 @@ void chstring::swap(chstring &a, chstring &b) {
     std::swap(a.usingType_, b.usingType_);
 }
 
+// 产生u8list
+myList< std::string > chstring::get_u8list(const myList< chstring > &_inList) {
+    myList< std::string > out;
+    for (const auto &str : _inList)
+        out.push_back(str.u8string( ));
+    return out;
+}
+
+// 产生u8table
+myTable< std::string > chstring::get_u8table(const myTable< chstring > &_inTable) {
+    myTable< std::string > out;
+    for (const auto &row : _inTable) {
+        myList< std::string > r;
+        for (const auto &str : row) {
+            r.push_back(str.u8string( ));
+        }
+        out.push_back(r);
+    }
+    return out;
+}
+
+// 产生syslist
+myList< std::string > chstring::get_syslist(const myList< chstring > &_inList) {
+    myList< std::string > out;
+    for (const auto &str : _inList)
+        out.push_back(str.sysstring( ));
+    return out;
+}
+
+// 产生systable
+myTable< std::string > chstring::get_systable(const myTable< chstring > &_inTable) {
+    myTable< std::string > out;
+    for (const auto &row : _inTable) {
+        myList< std::string > r;
+        for (const auto &str : row) {
+            r.push_back(str.sysstring( ));
+        }
+        out.push_back(r);
+    }
+    return out;
+}
+
 // 比较运算符实现
 bool chstring::operator==(const chstring &b) const {
     if (this->usingType_ == b.usingType_)
         return this->usingStr_ == b.usingStr_;
     else
         return false;
+}
+bool chstring::operator|=(const chstring &b) const {
+    chstring a(*this, b.usingType_);
+    return a.usingStr_ == b.usingStr_;
 }
 bool chstring::operator>(const chstring &b) const {
     if (this->usingType_ == b.usingType_)
@@ -152,6 +196,15 @@ chstring &chstring::operator+=(const char *b) {
     return *this;
 }
 
+// 底层拷贝
+chstring &chstring::operator=(const chstring &other) {
+    if (this != &other) {                       // 避免自赋值
+        this->usingStr_  = other.usingStr_;     // 拷贝底层字符串
+        this->usingType_ = other.usingType_;    // 拷贝编码类型
+    }
+    return *this;
+}
+
 
 // 迭代器相关方法
 chstring::iterator chstring::begin( ) {
@@ -178,6 +231,12 @@ chstring::const_iterator chstring::cbegin( ) const {
 chstring::const_iterator chstring::cend( ) const {
     return this->usingStr_.cend( );
 }    // 常量迭代器（C++11）
+chstring::const_reverse_iterator chstring::crbegin( ) const {
+    return this->usingStr_.crbegin( );
+}
+chstring::const_reverse_iterator chstring::crend( ) const {
+    return this->usingStr_.crend( );
+}
 
 // 获取长度
 size_t chstring::length( ) const {
@@ -197,6 +256,22 @@ size_t chstring::size( ) const {
 // 删除最后一位
 void chstring::pop_back( ) {
     this->usingStr_.pop_back( );
+}
+
+// 擦除其中内容
+void chstring::erase( ) {
+    this->usingStr_.erase( );
+    this->usingType_ = csType::UTF8;
+}
+
+// 获取字串
+chstring chstring::substr(size_t pos, size_t count) const {
+    return chstring(this->usingStr_.substr(pos, count), this->usingType_);
+}
+
+// 末尾的字符
+const char &chstring::back( ) const {
+    return this->usingStr_.back( );
 }
 
 // 打印文字到控制台
@@ -236,12 +311,8 @@ std::string chstring::usstring( ) const {
 
 // 获取宽字符方式
 std::wstring chstring::wstring( ) const {
-    if (this->usingType_ == csType::UTF8)
-        return encoding::utf8_to_wstring(this->usingStr_);
-    else if (this->usingType_ == csType::SYS)
-        return encoding::utf8_to_wstring(encoding::sysdcode_to_utf8(this->usingStr_));
-    else
-        return L"";
+    if (this->usingStr_.empty( )) return L"";
+    return encoding::utf8_to_wstring(this->u8string( ));
 }
 
 // 获取当前使用的文字的编码类型
@@ -269,6 +340,13 @@ void chstring::trim_whitespace( ) {
     } else {
         return;
     }
+}
+
+// 单获取清除字符串前后的所有空白字符（包括空格、\t、\n等）
+chstring chstring::get_trim_whitespace( ) const {
+    chstring a = *this;
+    a.trim_whitespace( );
+    return a;
 }
 
 // 分离中文与数字
@@ -307,9 +385,23 @@ std::pair< chstring, chstring > chstring::split_by_last_of(const std::string &cu
     return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
 }
 
+std::pair< chstring, chstring > chstring::split_filename_and_extension( ) const {
+    auto [first, last] = chstring::split_by_last_of('.');
+    if (last.empty( )) return { first, "" };
+    last = chstring(".") + last;
+    return { first, last };
+}
+
 // 是否都是数字
 bool chstring::is_all_digits( ) const {
     if (this->usingStr_.empty( )) return false;
     return std::all_of(this->usingStr_.begin( ), this->usingStr_.end( ), [](unsigned char c) { return std::isdigit(c); });
 }
 
+// 是否含有子串
+bool chstring::has_subchstring(const chstring &_substr) const {
+    if (_substr.empty( )) return true;
+    chstring a(_substr, this->usingType_);
+    size_t   found = this->usingStr_.find(a.usingStr_);
+    return (found != std::string::npos);
+}

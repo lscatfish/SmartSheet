@@ -1,6 +1,6 @@
 ﻿/*
  * @file ppocr_API.cpp
- * 
+ *
  * 作者：lscatfish、KIMI
  */
 #include <dll.h>
@@ -21,13 +21,6 @@ DefDirs _ppocrDir_ = {
     "./models/ch_PP-OCRv4_rec_infer",
     "./models/ch_ppocr_mobile_v2.0_cls_infer"
 };
-
-//DefDirs _ppocrDir_ = {
-//    "./models/ppocr_keys.txt",    // 字典库
-//    "./models/ch_PP-OCRv4_det_infer",
-//    "./models/ch_PP-OCRv4_rec_infer",
-//    "./models/ch_ppocr_mobile_v2.0_cls_infer"
-//};
 
 // 获取导出函数地址
 SetModelDirFunc setModelDir = nullptr;
@@ -56,7 +49,7 @@ bool Init( ) {
     }
 
     // 设置识别字典路径
-    setRecDict(_ppocrDir_.rec_char_dict_path.c_str());
+    setRecDict(_ppocrDir_.rec_char_dict_path.c_str( ));
     // 设置模型目录
     setModelDir(_ppocrDir_.det_model_dir.c_str( ), _ppocrDir_.rec_model_dir.c_str( ), _ppocrDir_.cls_model_dir.c_str( ), true);
 }

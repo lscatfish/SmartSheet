@@ -19,7 +19,7 @@ void my_inputer(std::string &inputStr) {
 }
 
 // 搜索函数实现
-bool SearchingTool::search_value(list< std::string > &_out, const std::string &_target) {
+bool SearchingTool::search_value(myList< std::string > &_out, const std::string &_target) {
     bool found = false;
     if (founder(_out, _target, xlsxList_)) {
         found = true;

@@ -51,7 +51,7 @@ struct TextList {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(list< std::string > &_out, const std::string &_target);
+    bool is_value_exists(myList< std::string > &_out, const std::string &_target);
 };
 
 /// <summary>
@@ -79,7 +79,7 @@ struct TextList< xlnt::workbook > {
     std::string               sysPath;          // 文件路径（按照系统编码）
     std::string               u8Path;           // 文件路径（按照UTF-8编码）
     FileType                  fileType;         // 文件类型
-    list< table< xlsxCELL > > sheetList;        // excel表格的所有工作表
+    myList< myTable< xlsxCELL > > sheetList;        // excel表格的所有工作表
     size_t                    searchNum = 0;    // 搜索到的单元格数量
 
     TextList(const std::string &_sysPath, const std::string &_u8Path)
@@ -90,12 +90,12 @@ struct TextList< xlnt::workbook > {
         std::cout << "Parse XLSX file: \"" << u8Path << "\"";
         wb.load(u8Path);
         for (auto ws : wb) {
-            table< xlsxCELL > sheet;
+            myTable< xlsxCELL > sheet;
             std::string       sheetName = ws.title( );
             // 按行遍历
             for (auto row : ws.rows(false)) {
                 // 保存当前行所有单元格文本的临时向量
-                list< xlsxCELL > aSingleRow;
+                myList< xlsxCELL > aSingleRow;
                 // 遍历当前行的每个单元格
                 for (auto cell : row) {
                     // cell.to_string() 把数字、日期、公式等统一转为字符串
@@ -113,7 +113,7 @@ struct TextList< xlnt::workbook > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(list< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
         bool found = false;
         for (const auto &sheet : sheetList) {
             for (const auto &row : sheet) {
@@ -145,7 +145,7 @@ struct TextList< docx::DefDocx > {
     FileType    fileType;    // 文件类型
     // size_t      searchNum = 0;    // 搜索到的单元格数量
 
-    list< table< docx::TableCell > > tList;    // docx文件中的表格列表
+    myList< myTable< docx::TableCell > > tList;    // docx文件中的表格列表
 
     TextList(const std::string &_sysPath, const std::string &_u8Path)
         : sysPath(_sysPath), u8Path(_u8Path) {
@@ -158,12 +158,12 @@ struct TextList< docx::DefDocx > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(list< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
         bool found = false;
         int  page  = 0;
-        for (const auto &table : tList) {
+        for (const auto &myTable : tList) {
             page++;
-            for (const auto &row : table) {
+            for (const auto &row : myTable) {
                 for (const auto &cell : row) {
                     if (cell.content.size( ) != 0) {
                         if (fuzzy::search_substring(cell.content, _target)) {
@@ -191,7 +191,7 @@ struct TextList< pdf::DefPdf > {
     std::string u8Path;      // 文件路径（按照UTF-8编码）
     FileType    fileType;    // 文件类型
 
-    list< list< CELL > > outList;
+    myList< myList< CELL > > outList;
 
     TextList(const std::string &_sysPath, const std::string &_u8Path)
         : sysPath(_sysPath), u8Path(_u8Path) {
@@ -203,7 +203,7 @@ struct TextList< pdf::DefPdf > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(list< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
         bool found = false;
         for (size_t i = 0; i < outList.size( ); i++) {
             for (const auto &c : outList[i]) {
@@ -228,25 +228,25 @@ public:
     // 构造方式
     SearchingTool( )
         : file::DefFolder(file::_INPUT_DIR_, false) {
-        parse_list(xlsxList_, list< std::string >{ ".xlsx" });
-        parse_list(pdfList_, list< std::string >{ ".pdf", ".PDF" });
-        parse_list(docxList_, list< std::string >{ ".docx", ".DOCX" });
+        parse_list(xlsxList_, myList< std::string >{ ".xlsx" });
+        parse_list(pdfList_, myList< std::string >{ ".pdf", ".PDF" });
+        parse_list(docxList_, myList< std::string >{ ".docx", ".DOCX" });
     };
     ~SearchingTool( ) = default;
 
     // 公开搜索函数
-    bool search_value(list< std::string > &_out, const std::string &_target);
+    bool search_value(myList< std::string > &_out, const std::string &_target);
 
 private:
-    list< TextList< xlnt::workbook > > xlsxList_;
-    list< TextList< pdf::DefPdf > >    pdfList_;
-    list< TextList< docx::DefDocx > >  docxList_;
+    myList< TextList< xlnt::workbook > > xlsxList_;
+    myList< TextList< pdf::DefPdf > >    pdfList_;
+    myList< TextList< docx::DefDocx > >  docxList_;
 
     // 解析list
     template < typename T >
-    void parse_list(list< T > &_list, const list< std::string > _ex) {
-        list< std::string > u8PathList  = this->get_u8filepath_list(_ex);
-        list< std::string > sysPathList = this->get_sysfilepath_list(_ex);
+    void parse_list(myList< T > &_list, const myList< std::string > _ex) {
+        myList< std::string > u8PathList  = this->get_u8filepath_list(_ex);
+        myList< std::string > sysPathList = this->get_sysfilepath_list(_ex);
 
         for (size_t i = 0; i < sysPathList.size( ); i++) {
             if constexpr (std::is_same_v< T, TextList< xlnt::workbook > >) {
@@ -267,7 +267,7 @@ private:
 
     // 搜索
     template < typename T >
-    bool founder(list< std::string > &_out, const std::string &_target, list< T > &_list) {
+    bool founder(myList< std::string > &_out, const std::string &_target, myList< T > &_list) {
         bool found = false;
         /*for (auto &f : _list) {
             if (f.is_value_exists(_out, _target)) {

@@ -27,7 +27,7 @@ int main( ) {
         }
         std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl
                   << std::endl;
-        list< std::string > out;
+        myList< std::string > out;
         if (s.search_value(out, inputStr)) {
             for (const auto &line : out) {
                 std::cout << line << std::endl

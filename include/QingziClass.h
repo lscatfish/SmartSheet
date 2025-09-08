@@ -39,7 +39,7 @@ public:
      * @brief 比较学号
      * @return 相同返回true  不同返回false
      */
-    static bool compare_studentID(const std::string &a, const std::string &b);
+    static bool compare_studentID(const chstring &a, const chstring &b);
 
     // 人员信息的记录方式（标准与非标准）
     enum class PersonFormat {
@@ -48,20 +48,20 @@ public:
     };
 
 private:
-    list< std::string > className_;          // 班级名字
-    list< std::string > filePathAndName_;    // 每个标准xlsx文件的位置
-    list< DefPerson >   personStd_;          // 定义的标准人员信息
+    myList< chstring >    className_;          // 班级名字
+    myList< chstring >  filePathAndName_;    // 每个标准xlsx文件的位置
+    myList< DefPerson >   personStd_;          // 定义的标准人员信息
 
     // 定义名单中不存在的人员
     struct DefUnknownPerson {
         DefLine           personLine;
         DefPerson         personStd;
-        list< DefPerson > likelyPerson;    // 相似的人
-        list< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
+        myList< DefPerson > likelyPerson;    // 相似的人
+        myList< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
     };
 
-    list< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
-    list< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
+    myList< DefUnknownPerson > unknownAppPerson_;    // 定义名单中不存在的(班委发过来的报名表)人员(直接对比)
+    myList< DefUnknownPerson > unknownAttPerson_;    // 名单中不存在（现场签到）的人员
 
     /* ========================================================================================= */
 
@@ -70,7 +70,7 @@ private:
      * @param _chosseAll 总选项数目
      * @param _outPrint 要打印在控制台上的内容
      */
-    int choose_function(int _chosseAll, const list< std::string > &_outPrint);
+    int choose_function(int _chosseAll, const myList< std::string > &_outPrint);
 
     // @brief 加载全学员表的函数
     void load_all_personnel_information_list( );
@@ -114,7 +114,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    bool search_person(list< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
+    bool search_person(myList< DefPerson >::iterator &_it_output, DefPerson _targetPerson);
 
     /*
      * @brief 搜索，从全人员名单中搜素目标人员信息
@@ -123,7 +123,7 @@ private:
      * @note 可以考虑怎么优化这四个search函数
      * @shit if很多吧，慢慢看  (^-^)
      */
-    bool search_person(list< DefPerson >::iterator &_it_output, DefLine _targetPerson);
+    bool search_person(myList< DefPerson >::iterator &_it_output, DefLine _targetPerson);
 
     // @brief 缓存全部报名的人员
     void save_storageSheet( );
@@ -135,14 +135,14 @@ private:
      * @brief 保存尚未搜索到的成员
      * @param _in_unLists 未搜索到的成员列表
      */
-    void save_unknown_person(const list< DefUnknownPerson > &_in_unLists);
+    void save_unknown_person(const myList< DefUnknownPerson > &_in_unLists);
 
     /*
      * @brief 打赢未知的人员
      * @param _unknownPersonList 未知人员信息表
      * @param _prompt 提示词
      */
-    void print_unknown_person(const list< DefUnknownPerson > &_unknownPersonList, const std ::string &_prompt = "");
+    void print_unknown_person(const myList< DefUnknownPerson > &_unknownPersonList, const std ::string &_prompt = "");
 };
 
 

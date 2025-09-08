@@ -1,6 +1,7 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <console.h>
 #include <cstdlib>
 #include <Fuzzy.h>
@@ -59,7 +60,7 @@ DefPdf::DefPdf(const chstring &_path)
  * @param _u8path u8地址
  * @param out 输出的解析结果
  */
-DefPdf::DefPdf(const chstring &_path, list< list< CELL > > &out)
+DefPdf::DefPdf(const chstring &_path, myList< myList< CELL > > &out)
     : pdfdoc_(std::make_unique< GooString >(_path.u8string( ).c_str( ))) {
     path_     = _path;
     document_ = poppler::document::load_from_file(path_.u8string( ));
@@ -76,7 +77,7 @@ DefPdf::DefPdf(const chstring &_path, list< list< CELL > > &out)
     }
     sheetType_ = SheetType::Others;
     num_pages_ = pdfdoc_.getNumPages( );
-    list< CELL > aP;    // 一页
+    myList< CELL > aP;    // 一页
     for (int i = 1; i <= num_pages_; i++) {
         aP = extract_textblocks(i);
         out.push_back(aP);
@@ -89,7 +90,7 @@ DefPdf::DefPdf(const chstring &_path, list< list< CELL > > &out)
  * @param pageNum_  页码（从 1 开始）
  * @return  所有线段的列表
  */
-list< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
+myList< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
 
     Page *page = pdfdoc_.getPage(pageNum_);
     if (!page || !page->isOk( )) {
@@ -107,8 +108,8 @@ list< LineSegment > DefPdf::extract_linesegments(int pageNum_) {
  * 解析pdf文件的所有文本框
  * @param pageNum_ 页码（从1开始）
  */
-list< CELL > DefPdf::extract_textblocks(int pageNum_) {
-    list< CELL > textBoxes;
+myList< CELL > DefPdf::extract_textblocks(int pageNum_) {
+    myList< CELL > textBoxes;
 
     auto   page       = document_->create_page(pageNum_ - 1);
     auto   textList   = page->text_list( );
@@ -127,11 +128,11 @@ list< CELL > DefPdf::extract_textblocks(int pageNum_) {
  */
 bool DefPdf::parse( ) {
     // 关键词(班委报名)
-    const std::string keyWordCom = U8C(u8"应聘岗位");
-    const std::string keyWordCla = U8C(u8"所任职务");
+    const chstring keyWordCom = U8C(u8"应聘岗位");
+    const chstring keyWordCla = U8C(u8"所任职务");
 
-    list< CELL >        textBoxList;
-    list< LineSegment > lineSegmentList;
+    myList< CELL >        textBoxList;
+    myList< LineSegment > lineSegmentList;
     // 遍历每一页
     for (int ipage = 1; ipage <= num_pages_; ipage++) {
         textBoxList = extract_textblocks(ipage);
@@ -139,12 +140,12 @@ bool DefPdf::parse( ) {
         bool ifBreak = false;
         // 采用字串匹配到keyWord
         for (const auto &t : textBoxList) {
-            if (fuzzy::search_substring(keyWordCom, t.text)) {
+            if (keyWordCom.has_subchstring(t.text)) {
                 sheetType_      = SheetType::Committee;
                 lineSegmentList = extract_linesegments(ipage);
                 ifBreak         = true;
                 break;
-            } else if (fuzzy::search_substring(keyWordCla, t.text)) {
+            } else if (keyWordCla.has_subchstring(t.text)) {
                 sheetType_      = SheetType::Classmate;
                 lineSegmentList = extract_linesegments(ipage);
                 ifBreak         = true;
@@ -197,11 +198,11 @@ bool DefPdf::parse( ) {
  * 解析表格线到table中
  * @param _lineSegmentList 解析出的线
  */
-table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmentList) {
-    table< CELL > outSheet;    // 输出的表格
+myTable< CELL > DefPdf::parse_line_to_sheet(const myList< LineSegment > &_lineSegmentList) {
+    myTable< CELL > outSheet;    // 输出的表格
     // 对线段分类
-    list< LineSegment > horizontalLines;    // 水平线
-    list< LineSegment > verticalLines;      // 竖线
+    myList< LineSegment > horizontalLines;    // 水平线
+    myList< LineSegment > verticalLines;      // 竖线
     for (const auto &line : _lineSegmentList) {
         if (line.t == LineSegment::Type::Horizontal) {
             horizontalLines.push_back(line);
@@ -225,7 +226,7 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
      * 合并的单元格按照左上角所对应的行列进行储存
      ******************************************构造sheet***********************************************/
     for (size_t h1 = 0; h1 < horizontalLines.size( ) - 1; h1++) {
-        list< CELL > row;
+        myList< CELL > row;
         for (size_t v1 = 0; v1 < verticalLines.size( ) - 1; v1++) {
             bool ifnext = false;
             for (size_t h2 = h1 + 1; h2 < horizontalLines.size( ); h2++) {
@@ -254,11 +255,11 @@ table< CELL > DefPdf::parse_line_to_sheet(const list< LineSegment > &_lineSegmen
  * @brief 直接按照文本框解析表格
  * @param _textBoxList 解析出的内容
  */
-table< CELL > DefPdf::parse_textbox_to_sheet(const list< CELL > &_textBoxList) {
-    table< CELL > out;                   // 输出
+myTable< CELL > DefPdf::parse_textbox_to_sheet(const myList< CELL > &_textBoxList) {
+    myTable< CELL > out;                   // 输出
     out = cluster_rows(_textBoxList);    // 聚类
     // 按行排序
-    sort_my_list(out, [](const list< CELL > &a, const list< CELL > &b) { return a[0].corePoint.y > b[0].corePoint.y; });
+    sort_my_list(out, [](const myList< CELL > &a, const myList< CELL > &b) { return a[0].corePoint.y > b[0].corePoint.y; });
     return out;
 }
 
@@ -267,9 +268,9 @@ table< CELL > DefPdf::parse_textbox_to_sheet(const list< CELL > &_textBoxList) {
  * @param _textBoxList 解析出的内容
  * @return 返回聚类之后的行
  */
-table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
+myTable< CELL > DefPdf::cluster_rows(myList< CELL > _textBoxList) {
     for (auto &t : _textBoxList) t.ifSelect = false;    // 这行可以不要，不过o2应该优化掉了
-    table< CELL > out;
+    myTable< CELL > out;
     // 输出中位数
     auto get_medianY = [](const std::multiset< CELL, CELL::CompareByCorePointYDesc > &rowHeight) -> double {
         auto it = rowHeight.begin( );
@@ -300,7 +301,7 @@ table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
         // 为每一个cell进行解析
         std::multiset< CELL, CELL::CompareByCorePointXAsc >  row;          // 每行中的内容要升序排列(从左到右)
         std::multiset< CELL, CELL::CompareByCorePointYDesc > rowHeight;    // 判断是否在同一行的set（从上到下）
-        list< CELL >                                         r;            // 标准行
+        myList< CELL >                                         r;            // 标准行
         if (!_textBoxList[i].ifSelect) {
             row.insert(_textBoxList[i]);
             rowHeight.insert(_textBoxList[i]);
@@ -328,7 +329,7 @@ table< CELL > DefPdf::cluster_rows(list< CELL > _textBoxList) {
  * @brief 填充解析出的表格
  * @param _textBoxList 解析出的文字块
  */
-void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
+void DefPdf::fill_sheet(const myList< CELL > &_textBoxList) {
     // 填充之前对位置进行修正
     double deltaH = 18000;    // 修正参数
     for (const auto &c : _textBoxList) {
@@ -339,7 +340,7 @@ void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
     }
 
     // 重构_textBoxList
-    list< CELL > thisBox;
+    myList< CELL > thisBox;
     for (const auto &c : _textBoxList) {
         CELL thisCc(c, deltaH);
         thisBox.push_back(thisCc);
@@ -357,13 +358,13 @@ void DefPdf::fill_sheet(const list< CELL > &_textBoxList) {
 }
 
 // 返回解析出的表格
-table< std::string > DefPdf::get_sheet( ) {
+myTable< chstring > DefPdf::get_sheet( ) {
     if (sheet_.size( ) == 0) {
-        return table< std::string >{ };
+        return myTable< chstring >{ };
     }
-    table< std::string > outSheet;
+    myTable< chstring > outSheet;
     for (const auto &row : sheet_) {
-        list< std::string > r;
+        myList< chstring > r;
         for (const auto &cell : row) {
             r.push_back(cell.text);
         }
@@ -396,7 +397,7 @@ DefPerson DefPdf::get_person( ) const {
     perLine.information[U8C(u8"个人简介")] = "";
 
     // 定义关键的词
-    const list< std::string > headerLib{
+    const myList< chstring > headerLib{
         U8C(u8"姓名"),
         U8C(u8"性别"), U8C(u8"年级"),
         U8C(u8"学号"), U8C(u8"政治面貌"),
@@ -416,17 +417,17 @@ DefPerson DefPdf::get_person( ) const {
         for (size_t r = 0; r < sheet_.size( ); r++) {
             for (size_t c = 0; c < sheet_[r].size( ); c++) {
                 if (sheet_[r][c].text.size( ) != 0) {
-                    if (fuzzy::search(headerLib, trim_whitespace(sheet_[r][c].text), fuzzy::LEVEL::High)) {
-                        std::string key = trim_whitespace(sheet_[r][c].text);
+                    if (fuzzy::search(headerLib, sheet_[r][c].text, fuzzy::LEVEL::High)) {
+                        chstring key = (sheet_[r][c].text);
                         if (c + 1 < sheet_[r].size( )) {
-                            perLine.information[key] = trim_whitespace(sheet_[r][c + 1].text);
+                            perLine.information[key] = (sheet_[r][c + 1].text);
                         } else {
                             perLine.information[key] = "";
                         }
                         c++;
-                    } else if (fuzzy::search_substring(U8C(u8"应聘岗位"), trim_whitespace(sheet_[r][c].text))) {
+                    } else if (chstring(U8C(u8"应聘岗位")).has_subchstring((sheet_[r][c].text))) {
                         if (c + 1 < sheet_[r].size( )) {
-                            perLine.information[U8C(u8"应聘岗位")] = trim_whitespace(sheet_[r][c + 1].text);
+                            perLine.information[U8C(u8"应聘岗位")] = sheet_[r][c + 1].text;
                         } else {
                             perLine.information[U8C(u8"应聘岗位")] = "UNKNOWN";
                         }
@@ -443,66 +444,51 @@ DefPerson DefPdf::get_person( ) const {
         for (size_t row = 0; row < sheet_.size( ); row++) {
             for (size_t col = 0; col < sheet_[row].size( ); col++) {
                 if (sheet_[row][col].text.size( ) != 0) {
-                    if (fuzzy::search(headerLib, trim_whitespace(sheet_[row][col].text), fuzzy::LEVEL::High)) {
+                    if (fuzzy::search(headerLib, sheet_[row][col].text, fuzzy::LEVEL::High)) {
                         if (col + 1 < sheet_[row].size( )) {
-                            perLine.information[trim_whitespace(sheet_[row][col].text)] = trim_whitespace(sheet_[row][col + 1].text);
+                            perLine.information[sheet_[row][col].text] = sheet_[row][col + 1].text;
                             col++;
                         }
-                    } else if (trim_whitespace(sheet_[row][col].text) == U8C(u8"个人简介")) {
+                    } else if (sheet_[row][col].text |= U8C(u8"个人简介")) {
                         if (col + 1 < sheet_[row].size( )) {
                             if (sheet_[row][col + 1].text.size( ) != 0)
-                                perLine.information[U8C(u8"个人简介")] =
-                                    trim_whitespace(sheet_[row][col + 1].text);
-                            if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 60) {    // 20字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"个人简介极少；");
+                                perLine.information[U8C(u8"个人简介")] = sheet_[row][col + 1].text;
+                            if (sheet_[row][col + 1].text.size( ) < 60) {    // 20字
+                                perLine.information[U8C(u8"备注")] += U8C(u8"个人简介极少；");
                                 col++;
-                            } else if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 150) {    // 50字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"个人简介较少；");
+                            } else if (sheet_[row][col + 1].text.size( ) < 150) {    // 50字
+                                perLine.information[U8C(u8"备注")] += U8C(u8"个人简介较少；");
                                 col++;
                             }
                         }
-                    } else if (trim_whitespace(sheet_[row][col].text) == U8C(u8"个人特长")) {
+                    } else if (sheet_[row][col].text |= U8C(u8"个人特长")) {
                         if (col + 1 < sheet_[row].size( )) {
                             if (sheet_[row][col + 1].text.size( ) != 0)
-                                perLine.information[U8C(u8"个人特长")] =
-                                    trim_whitespace(sheet_[row][col + 1].text);
-                            if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 30) {    // 10字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"个人特长极少；");
+                                perLine.information[U8C(u8"个人特长")] = sheet_[row][col + 1].text;
+                            if (sheet_[row][col + 1].text.size( ) < 30) {    // 10字
+                                perLine.information[U8C(u8"备注")] |= U8C(u8"个人特长极少；");
                                 col++;
-                            } else if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 60) {    // 20字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"个人特长较少；");
+                            } else if (sheet_[row][col + 1].text.size( ) < 60) {    // 20字
+                                perLine.information[U8C(u8"备注")] += U8C(u8"个人特长较少；");
                                 col++;
                             }
                         }
-                    } else if (trim_whitespace(sheet_[row][col].text) == U8C(u8"工作经历")) {
+                    } else if (sheet_[row][col].text |= U8C(u8"工作经历")) {
                         if (col + 1 < sheet_[row].size( )) {
                             if (sheet_[row][col + 1].text.size( ) != 0)
-                                perLine.information[U8C(u8"工作经历")] = trim_whitespace(sheet_[row][col + 1].text);
-                            if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 30) {    // 10字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"工作经历极少；");
+                                perLine.information[U8C(u8"工作经历")] = sheet_[row][col + 1].text;
+                            if (sheet_[row][col + 1].text.size( ) < 30) {    // 10字
+                                perLine.information[U8C(u8"备注")] += U8C(u8"工作经历极少；");
                                 col++;
-                            } else if (trim_whitespace(sheet_[row][col + 1].text).size( ) < 60) {    // 20字
-                                perLine.information[U8C(u8"备注")] =
-                                    perLine.information[U8C(u8"备注")]
-                                    + U8C(u8"工作经历较少；");
+                            } else if (sheet_[row][col + 1].text.size( ) < 60) {    // 20字
+                                perLine.information[U8C(u8"备注")] += U8C(u8"工作经历较少；");
                                 col++;
                             }
                         }
-                    } else if (trim_whitespace(sheet_[row][col].text) == U8C(u8"获奖情况")) {
+                    } else if (sheet_[row][col].text |= U8C(u8"获奖情况")) {
                         if (col + 1 < sheet_[row].size( )) {
                             if (sheet_[row][col + 1].text.size( ) != 0)
-                                perLine.information[U8C(u8"获奖情况")] =
-                                    trim_whitespace(sheet_[row][col + 1].text);
+                                perLine.information[U8C(u8"获奖情况")] = sheet_[row][col + 1].text;
                             col++;
                         }
                     }
@@ -510,13 +496,13 @@ DefPerson DefPdf::get_person( ) const {
             }
         }
         DoQingziClass::trans_personline_to_person(perLine, per);
-        if (fuzzy::search_substring(path_.u8string( ), U8C(u8"自主报名")))
+        if (path_.has_subchstring(U8C(u8"自主报名")))
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
-        else if (fuzzy::search_substring(path_.u8string( ), U8C(u8"重庆大学团校")))
+        else if (path_.has_subchstring(U8C(u8"重庆大学团校")))
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"自主报名");
         else
             per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-        per.otherInformation[U8C(u8"文件地址")] = path_.u8string( );
+        per.otherInformation[U8C(u8"文件地址")] = path_;
         per.optimize( );
         return per;
     }

@@ -1,15 +1,13 @@
 ﻿
 #include <algorithm>
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
 #include <Fuzzy.h>
 #include <PersonnelInformation.h>
 #include <QingziClass.h>
 #include <string>
-#include <stringapiset.h>
 #include <vector>
-#include <Windows.h>
-#include <WinNls.h>
 
 namespace fuzzy {
 
@@ -73,16 +71,16 @@ static bool ifmatch_levenshtein(int dp, LEVEL _matchLevel) {
  * @param _matchLevel 匹配度
  * @return 系列可能的答案
  */
-list< std::string > search(
-    std::string                _target,
-    const list< std::string > &_searchingLib,
-    LEVEL                      _matchLevel) {
+myList< chstring > search(
+    const chstring            _target,
+    const myList< chstring > &_searchingLib,
+    const LEVEL               _matchLevel) {
 
-    list< std::string > outList;
+    myList< chstring > outList;
     if (search(outList, _target, _searchingLib, _matchLevel)) {
         return outList;
     } else {
-        return list< std::string >( );
+        return myList< chstring >( );
     }
 }
 
@@ -96,15 +94,15 @@ list< std::string > search(
  * @return 是否搜索成功
  */
 bool search(
-    list< std::string >       &_outList,
-    std::string                _target,
-    const list< std::string > &_searchingLib,
-    LEVEL                      _matchLevel) {
+    myList< chstring >       &_outList,
+    const chstring            _target,
+    const myList< chstring > &_searchingLib,
+    const LEVEL               _matchLevel) {
 
-    if ( _matchLevel == LEVEL::Part ) {
+    if (_matchLevel == LEVEL::Part) {
         // 部分匹配，直接使用子串匹配
         for (auto &libstr : _searchingLib) {
-            if (search_substring(libstr, _target)) {
+            if (libstr.has_subchstring(_target)) {
                 _outList.push_back(libstr);
             }
         }
@@ -115,11 +113,11 @@ bool search(
     }
 
     // 目标wstring
-    std::wstring targrt = encoding::utf8_to_wstring(_target);
+    std::wstring targrt = _target.wstring( );
 
     int s = 0;    // 用于记录lib里是否有满足模糊条件的字符串
     for (auto &libstr : _searchingLib) {
-        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring(libstr)), _matchLevel)) {
+        if (ifmatch_levenshtein(levenshtein_distance(targrt, libstr.wstring( )), _matchLevel)) {
             s++;
             _outList.push_back(libstr);
         }
@@ -140,14 +138,14 @@ bool search(
  * @return 是否搜索成功
  */
 bool search(
-    const list< std::string > &_searchingLib,
-    std::string                _target,
-    LEVEL                      _matchLevel) {
+    const myList< chstring > &_searchingLib,
+    const chstring            _target,
+    const LEVEL               _matchLevel) {
 
-    if ( _matchLevel == LEVEL::Part ) {
+    if (_matchLevel == LEVEL::Part) {
         // 部分匹配，直接使用子串匹配
         for (auto &libstr : _searchingLib) {
-            if (search_substring(libstr, _target)) {
+            if (libstr.has_subchstring(_target)) {
                 return true;
             }
         }
@@ -158,7 +156,7 @@ bool search(
     if (_matchLevel == LEVEL::High) {
         // 直接比较
         for (auto &libstr : _searchingLib) {
-            if (libstr == _target) {
+            if (libstr |= _target) {
                 s++;
                 return true;
             }
@@ -170,9 +168,9 @@ bool search(
     }
 
     // 目标wstring
-    std::wstring targrt = encoding::utf8_to_wstring(_target);
+    std::wstring targrt = _target.wstring( );
     for (auto &libstr : _searchingLib) {
-        if (ifmatch_levenshtein(levenshtein_distance(targrt, encoding::utf8_to_wstring(libstr)), _matchLevel)) {
+        if (ifmatch_levenshtein(levenshtein_distance(targrt, libstr.wstring( )), _matchLevel)) {
             s++;
             return true;
         }
@@ -193,10 +191,10 @@ bool search(
  * @retrun 是否搜索成功
  */
 bool search_for_person(
-    list< DefPerson >       &_outList,
-    list< double >          &_likelyRate,
-    DefPerson                _target,
-    const list< DefPerson > &_searchingLib) {
+    myList< DefPerson >       &_outList,
+    myList< double >          &_likelyRate,
+    DefPerson                  _target,
+    const myList< DefPerson > &_searchingLib) {
 
     /*
      * ****************************** 函数思路 ************************************
@@ -214,22 +212,21 @@ bool search_for_person(
                 _likelyRate.push_back(1.0);
                 s++;
             } else {    // low匹配
-                std::string i1 = it_lib.studentID;
-                std::string i2 = _target.studentID;
+                chstring i1 = it_lib.studentID;
+                chstring i2 = _target.studentID;
 
                 // 去掉末尾的t
                 if (!i1.empty( ) && (i1.back( ) == 't' || i1.back( ) == 'T')) i1.pop_back( );
                 if (!i2.empty( ) && (i2.back( ) == 't' || i2.back( ) == 'T')) i2.pop_back( );
                 if (ifmatch_levenshtein(
-                        levenshtein_distance(encoding::utf8_to_wstring(i1), encoding::utf8_to_wstring(i2)),
+                        levenshtein_distance(i1.wstring( ), i2.wstring( )),
                         LEVEL::Low)) {
                     _outList.push_back(it_lib);
                     _likelyRate.push_back(0.6);
                     s++;
                 } else {    // 姓名匹配
                     if (ifmatch_levenshtein(
-                            levenshtein_distance(encoding::utf8_to_wstring(it_lib.name), encoding::utf8_to_wstring(_target.name)),
-                            LEVEL::Medium)) {
+                            levenshtein_distance(it_lib.name.wstring( ), _target.name.wstring( )), LEVEL::Medium)) {
                         _outList.push_back(it_lib);
                         _likelyRate.push_back(0.7);
                         s++;
