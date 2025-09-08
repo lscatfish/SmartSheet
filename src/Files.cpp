@@ -377,7 +377,7 @@ bool DefFolder::copy_files_to(const chstring &_targetDir, const chstring &_fileP
  */
 size_t DefFolder::copy_files_to(const chstring &_targetDir) const {
     myList< std::string > speFilePathList = get_sysfilepath_list( );    // 特定的文件
-    size_t              sum             = 0;
+    size_t                sum             = 0;
     for (const auto &fp : speFilePathList) {
         if (copy_file_to_folder(fp, _targetDir.sysstring( ))) {
             sum++;
@@ -412,7 +412,7 @@ myList< chstring > DefFolder::get_file_list(const myList< chstring > &_extension
     for (const auto &fp : speFilePathList) {
         if (fp.size( ) > 0) {
             auto [first, last] = fp.split_by_last_of("/\\");
-            out.push_back(first);
+            out.push_back(last);
         }
     }
     return out;
@@ -486,7 +486,7 @@ myList< std::string > DefFolder::get_u8file_list(const myList< chstring > &_exte
  * @return 返回的文件名（不包含后缀）
  */
 myList< chstring > DefFolder::get_filename_list( ) const {
-    auto             fileList = get_file_list( );
+    auto               fileList = get_file_list( );
     myList< chstring > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -503,7 +503,7 @@ myList< chstring > DefFolder::get_filename_list( ) const {
  * @return 返回的文件名（不包含后缀）
  */
 myList< chstring > DefFolder::get_filename_list(const myList< chstring > &_extension) const {
-    auto             fileList = get_file_list(_extension);
+    auto               fileList = get_file_list(_extension);
     myList< chstring > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -519,7 +519,7 @@ myList< chstring > DefFolder::get_filename_list(const myList< chstring > &_exten
  * @return 返回的文件名（不包含后缀）
  */
 myList< std::string > DefFolder::get_sysfilename_list( ) const {
-    auto                fileList = get_filename_list( );
+    auto                  fileList = get_filename_list( );
     myList< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -535,7 +535,7 @@ myList< std::string > DefFolder::get_sysfilename_list( ) const {
  * @return 返回的文件名（不包含后缀）
  */
 myList< std::string > DefFolder::get_sysfilename_list(const myList< chstring > &_extension) const {
-    auto                fileList = get_filename_list(_extension);
+    auto                  fileList = get_filename_list(_extension);
     myList< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -550,7 +550,7 @@ myList< std::string > DefFolder::get_sysfilename_list(const myList< chstring > &
  * @return 返回的文件名（不包含后缀）
  */
 myList< std::string > DefFolder::get_u8filename_list( ) const {
-    auto                fileList = get_filename_list( );
+    auto                  fileList = get_filename_list( );
     myList< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -566,7 +566,7 @@ myList< std::string > DefFolder::get_u8filename_list( ) const {
  * @return 返回的文件名（不包含后缀）
  */
 myList< std::string > DefFolder::get_u8filename_list(const myList< chstring > &_extension) const {
-    auto                fileList = get_filename_list(_extension);
+    auto                  fileList = get_filename_list(_extension);
     myList< std::string > out;
     for (const auto &f : fileList) {
         if (f.size( ) > 0) {
@@ -901,8 +901,8 @@ void load_sheet_from_xlsx(myTable< chstring > &_sheet, chstring _path) {
  */
 void save_attSheet_to_xlsx(
     myTable< chstring > &_sheet1,
-    chstring           _path,
-    chstring           _titleName) {
+    chstring             _path,
+    chstring             _titleName) {
 
     myTable< std::string > _sheet = chstring::get_u8table(_sheet1);
     encoding::repair_sheet_utf8_invalidity(_sheet);
@@ -996,8 +996,8 @@ void save_attSheet_to_xlsx(
  */
 void save_sttSheet_to_xlsx(
     const myTable< chstring > &_sheet,
-    chstring                &_path,
-    chstring                &_titleName) {
+    chstring                  &_path,
+    chstring                  &_titleName) {
     myTable< std::string > sh = chstring::get_u8table(_sheet);
     encoding::repair_sheet_utf8_invalidity(sh);
 

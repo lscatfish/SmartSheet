@@ -351,7 +351,7 @@ chstring chstring::get_trim_whitespace( ) const {
 
 // 分离中文与数字
 std::pair< chstring, chstring > chstring::split_chinese_and_number( ) const {
-    auto result = ::split_chinese_and_number(this->usingStr_);
+    auto result = ::split_chinese_and_number(this->sysstring( ));
     return std::pair< chstring, chstring >(chstring(result.first, this->usingType_), chstring(result.second, this->usingType_));
 }
 
