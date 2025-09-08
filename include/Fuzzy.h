@@ -16,6 +16,7 @@
 #define FUZZY_H
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <PersonnelInformation.h>
@@ -42,7 +43,7 @@ enum class LEVEL {
  * @return 是否搜索成功
  */
 template < typename _SearchType >
-bool perfect_match(const _SearchType &_target, const list< _SearchType > &_searchingLib) {
+bool perfect_match(const _SearchType &_target, const myList< _SearchType > &_searchingLib) {
     for (const auto &s : _searchingLib) {
         if (s == _target) return true;
     }
@@ -56,8 +57,8 @@ bool perfect_match(const _SearchType &_target, const list< _SearchType > &_searc
  * @return 搜索到的list
  */
 template < typename _SearchType >
-list< _SearchType > search_perfect_match(const _SearchType &_target, const list< _SearchType > &_searchingLib) {
-    list< _SearchType > out;
+myList< _SearchType > search_perfect_match(const _SearchType &_target, const myList< _SearchType > &_searchingLib) {
+    myList< _SearchType > out;
     for (const auto &s : _searchingLib) {
         if (s == _target) {
             out.push_back(s);
@@ -74,10 +75,10 @@ list< _SearchType > search_perfect_match(const _SearchType &_target, const list<
  * @param _matchLevel 匹配度
  * @return 系列可能的答案
  */
-list< std::string > search(
-    std::string                _target,
-    const list< std::string > &_searchingLib,
-    LEVEL                      _matchLevel);
+myList< chstring > search(
+    const chstring          _target,
+    const myList< chstring > &_searchingLib,
+    const LEVEL             _matchLevel);
 
 /*
  * @brief 模糊搜索函数
@@ -89,10 +90,10 @@ list< std::string > search(
  * @return 是否搜索成功
  */
 bool search(
-    list< std::string >       &_outList,
-    std::string                _target,
-    const list< std::string > &_searchingLib,
-    LEVEL                      _matchLevel);
+    myList< chstring >       &_outList,
+    const chstring          _target,
+    const myList< chstring > &_searchingLib,
+    const LEVEL             _matchLevel);
 
 /*
  * @brief 模糊搜索函数,没有返回可能匹配的答案
@@ -103,9 +104,9 @@ bool search(
  * @return 是否搜索成功
  */
 bool search(
-    const list< std::string > &_searchingLib,
-    std::string                _target,
-    LEVEL                      _matchLevel);
+    const myList< chstring > &_searchingLib,
+    const chstring          _target,
+    const LEVEL             _matchLevel);
 
 /*
  * @brief 模糊搜索人员信息
@@ -116,10 +117,10 @@ bool search(
  * @retrun 是否搜索成功
  */
 bool search_for_person(
-    list< DefPerson >       &_outList,
-    list< double >          &_likelyRate,
+    myList< DefPerson >       &_outList,
+    myList< double >          &_likelyRate,
     DefPerson                _target,
-    const list< DefPerson > &_searchingLib);
+    const myList< DefPerson > &_searchingLib);
 
 /*
  * @brief 检查主字符串中是否包含子串

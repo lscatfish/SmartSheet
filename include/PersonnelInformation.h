@@ -9,37 +9,37 @@
  *******************************************************************************/
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
 #include <map>
 #include <string>
+
 
 /*
  * 此结构体用于定义标准人员信息
  */
 struct DefPerson {
 public:
-    std::string classname;           // 班级名字
-    std::string name;                // 姓名
-    std::string gender;              // 性别
-    std::string grade;               // 年级
-    std::string studentID;           // 学号
-    std::string politicaloutlook;    // 政治面貌
-    std::string academy;             // 学院
-    std::string majors;              // 专业
-    std::string phonenumber;         // 电话
-    std::string qqnumber;            // QQ号
-
-    std::string position;     // 所任职务
-    std::string email;        // 邮箱
-    std::string ethnicity;    // 民族
-    std::string club;         // 社团
-
-    std::string signPosition;    // 报名岗位
+    chstring classname;           // 班级名字
+    chstring name;                // 姓名
+    chstring gender;              // 性别
+    chstring grade;               // 年级
+    chstring studentID;           // 学号
+    chstring politicaloutlook;    // 政治面貌
+    chstring academy;             // 学院
+    chstring majors;              // 专业
+    chstring phonenumber;         // 电话
+    chstring qqnumber;            // QQ号
+    chstring position;            // 所任职务
+    chstring email;               // 邮箱
+    chstring ethnicity;           // 民族
+    chstring club;                // 社团
+    chstring signPosition;        // 报名岗位
 
     bool ifcheck;    // 是否签到
     bool ifsign;     // 是否报名
 
-    std::map< std::string, std::string > otherInformation;    // 其他信息
+    std::map< chstring, chstring, chstring::CompareByUTF8Desc > otherInformation;    // 其他信息
 
 
     // @brief 基本构造函数
@@ -115,10 +115,10 @@ public:
  */
 struct DefLine {
 public:
-    std::string                          classname;    // 班级名字
-    std::map< std::string, std::string > information;
-    bool                                 ifcheck;    // 是否签到
-    bool                                 ifsign;     // 是否报名
+    chstring                                                    classname;      // 班级名字
+    std::map< chstring, chstring, chstring::CompareByUTF8Desc > information;    //
+    bool                                                        ifcheck;        // 是否签到
+    bool                                                        ifsign;         // 是否报名
 
     // @brief 基本构造函数
     DefLine( ) {

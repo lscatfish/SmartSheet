@@ -1,10 +1,10 @@
 ﻿#pragma once
 /*
  * @file ppocr_API.h
- * 
+ *
  * 详细的API接口说明请参考README.md
  * ppocr的API源码文件请参看API_sourc_code中的文件
- * 
+ *
  * 作者：lscatfish、KIMI
  */
 #ifndef PPOCR_API_H
@@ -35,9 +35,9 @@ struct OCRPredictResult {
 
 // 要传入的模型与字典库的地址
 struct DefDirs {
-   std::string rec_char_dict_path;    // 字典库地址
+    std::string rec_char_dict_path;    // 字典库地址
     std::string det_model_dir;
-   std::string rec_model_dir;
+    std::string rec_model_dir;
     std::string cls_model_dir;
 };
 

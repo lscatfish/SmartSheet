@@ -13,6 +13,7 @@
 #define HELPER_H
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <string>
 #include <utility>
 #include <vector>
@@ -24,30 +25,16 @@ void pause( );
 // 分离字符串，返回一个 pair，第一个元素是中文部分，第二个元素是数字部分
 std::pair< std::string, std::string > split_chinese_and_number(const std::string &input);
 
-// 递归终止函数
-void mergeHelper(table< std::string > &result);
-
-// 可变参数模板函数，用于合并任意数量的vector<vector<string>>
-template < typename... Args >
-void mergeHelper(table< std::string >       &result,
-                 const table< std::string > &first,
-                 Args &&...rest) {
-    // 添加当前vector的所有元素
-    result.insert(result.end( ), first.begin( ), first.end( ));
-    // 递归处理剩余的vector
-    mergeHelper(result, std::forward< Args >(rest)...);
-}
-
-// 合并任意数量的vector<vector<string>>
-template < typename... Args >
-table< std::string > mergeMultipleSheets(Args &&...args) {
-    table< std::string > result;
-    mergeHelper(result, std::forward< Args >(args)...);
-    return result;
+template < typename _T >
+myTable< _T > merge_table(const myTable< _T > &t1, const myTable< _T > &t2) {
+    myTable< _T > t = t1;
+    for (const auto &l : t2)
+        t.push_back(l);
+    return t;
 }
 
 // 合并两个list<std::string>
-list< std::string > merge_two_string_lists(const list< std::string > &list1, const list< std::string > &list2);
+myList< std::string > merge_two_string_lists(const myList< std::string > &list1, const myList< std::string > &list2);
 
 // 清除字符串前后的所有空白字符（包括空格、\t、\n等）
 std::string trim_whitespace(const std::string &str);
@@ -97,12 +84,12 @@ bool is_all_digits(const std::string &s);
  * @param _excludeHeader 是否排除表头（第一行）进行排序，默认为true
  * @return 排序是否成功
  */
-bool sort_table_string_by(
-    table< std::string > &_inTable,
-    size_t                _sortColIndex,
-    bool                  _ascending     = true,
-    bool                  _keepFirstCol  = true,
-    bool                  _excludeHeader = true);
+bool sort_table_chstring_by(
+    myTable< chstring > &_inTable,
+    size_t             _sortColIndex,
+    bool               _ascending     = true,
+    bool               _keepFirstCol  = true,
+    bool               _excludeHeader = true);
 
 /*
  * @brief 对table< string > 进行排序(自定义排序)
@@ -113,18 +100,18 @@ bool sort_table_string_by(
  * @return 排序是否成功
  */
 template < typename Compare >
-bool sort_table_string_by(
-    table< std::string > &_inTable,
-    bool                  _keepFirstCol,
-    bool                  _excludeHeader,
-    Compare               comparator) {
+bool sort_table_chstring_by(
+    myTable< chstring > &_inTable,
+    bool               _keepFirstCol,
+    bool               _excludeHeader,
+    Compare            comparator) {
 
     if (_inTable.size( ) <= 1) return false;    // 如果表格行数小于等于1，无需排序
     // 交换两行
-    auto swap_rows = [_keepFirstCol](std::vector< std::string > &a, std::vector< std::string > &b) {
+    auto swap_rows = [_keepFirstCol](std::vector< chstring > &a, std::vector< chstring > &b) {
         std::swap(a, b);
         if (_keepFirstCol && a.size( ) > 0 && b.size( ) > 0) {
-            std::swap(a[0], b[0]);    // 保持第一列不变
+            chstring::swap(a[0], b[0]);    // 保持第一列不变
         }
     };
     size_t startRow = _excludeHeader ? 1 : 0;    // 排除表头则从第二行开始排序
@@ -152,6 +139,6 @@ std::string lower_alpha_numeric(const std::string &str);
  * @param _excludeCols 排除的列
  * @param _excludeRows 排除的行
  */
-void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_excludeCols, const list< size_t > &_excludeRows);
+void deduplication_sheet(myTable< chstring > &_sh, const myList< size_t > &_excludeCols, const myList< size_t > &_excludeRows);
 
 #endif    // !HELPER_H

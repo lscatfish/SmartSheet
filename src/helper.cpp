@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <basic.hpp>
 #include <cctype>    // 用于 std::isdigit
+#include <chstring.hpp>
 #include <console.h>
 #include <cstdlib>
 #include <Encoding.h>
@@ -51,12 +52,9 @@ std::pair< std::string, std::string > split_chinese_and_number(const std::string
     return { chinesePart, numberPart };
 }
 
-// 递归终止函数
-void mergeHelper(table< std::string > &result) {}
-
 // 合并两个list<std::string>
-list< std::string > merge_two_string_lists(const list< std::string > &list1, const list< std::string > &list2) {
-    list< std::string > mergedList = list1;                                // 复制第一个列表
+myList< std::string > merge_two_string_lists(const myList< std::string > &list1, const myList< std::string > &list2) {
+    myList< std::string > mergedList = list1;                                // 复制第一个列表
     mergedList.insert(mergedList.end( ), list2.begin( ), list2.end( ));    // 插入第二个列表的元素
     return mergedList;
 }
@@ -229,32 +227,32 @@ bool is_all_digits(const std::string &s) {
  * @param _excludeHeader 是否排除表头（第一行）进行排序，默认为true
  * @return 排序是否成功
  */
-bool sort_table_string_by(
-    table< std::string > &_inTable,
-    size_t                _sortColIndex,
-    bool                  _ascending,
-    bool                  _keepFirstCol,
-    bool                  _excludeHeader) {
+bool sort_table_chstring_by(
+    myTable< chstring > &_inTable,
+    size_t             _sortColIndex,
+    bool               _ascending,
+    bool               _keepFirstCol,
+    bool               _excludeHeader) {
     if (_inTable.size( ) <= 1) return false;                   // 如果表格行数小于等于1，无需排序
     if (_sortColIndex >= _inTable[0].size( )) return false;    // 如果排序列索引超出范围，返回false
 
     /* ==============================lambda===================================== */
     // 比较两列,是否满足排序条件
-    auto comparator = [_sortColIndex, _ascending](const std::vector< std::string > &a, const std::vector< std::string > &b) -> bool {
+    auto comparator = [_sortColIndex, _ascending](const std::vector< chstring > &a, const std::vector< chstring > &b) -> bool {
         if (_sortColIndex >= a.size( ) || _sortColIndex >= b.size( )) {
             return false;    // 如果索引超出范围，保持原有顺序
         }
         if (_ascending) {
-            return a[_sortColIndex] < b[_sortColIndex];    // 升序
+            return a[_sortColIndex].u8string( ) < b[_sortColIndex].u8string( );    // 升序
         } else {
-            return a[_sortColIndex] > b[_sortColIndex];    // 降序
+            return a[_sortColIndex].u8string( ) > b[_sortColIndex].u8string( );    // 降序
         }
     };
     // 交换两行
-    auto swap_rows = [_keepFirstCol](std::vector< std::string > &a, std::vector< std::string > &b) {
+    auto swap_rows = [_keepFirstCol](std::vector< chstring > &a, std::vector< chstring > &b) {
         std::swap(a, b);
         if (_keepFirstCol && a.size( ) > 0 && b.size( ) > 0) {
-            std::swap(a[0], b[0]);    // 保持第一列不变
+            chstring::swap(a[0], b[0]);    // 保持第一列不变
         }
     };
     /* ==============================lambda===================================== */
@@ -308,9 +306,9 @@ std::string lower_alpha_numeric(const std::string &str) {
  * @param _excludeCols 排除的列
  * @param _excludeRows 排除的行
  */
-void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_excludeCols, const list< size_t > &_excludeRows) {
-    list< size_t >                             itCols;     // 横向遍历器
-    list< size_t >                             itRows;     // 纵向遍历器
+void deduplication_sheet(myTable< chstring > &_sh, const myList< size_t > &_excludeCols, const myList< size_t > &_excludeRows) {
+    myList< size_t >                             itCols;     // 横向遍历器
+    myList< size_t >                             itRows;     // 纵向遍历器
     std::set< size_t, std::greater< size_t > > erasers;    // 要删除的行号
 
     // 设置遍历器
@@ -322,13 +320,15 @@ void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_exclu
         if (!fuzzy::perfect_match(i, _excludeCols))
             itCols.push_back(i);
 
-    auto if_same_line = [&itCols](const list< std::string > &a, const list< std::string > &b) -> bool {
+    auto if_same_line = [&itCols](const myList< chstring > &a, const myList< chstring > &b) -> bool {
         if (a.size( ) != b.size( )) return false;
         for (const auto c : itCols) {
-            if (a[c].size( ) > 0 && b[c].size( ) > 0 && a[c] != b[c])
-                return false;
+            if (a[c].size( ) > 0 && b[c].size( ) > 0 && (a[c] |= b[c]))
+                continue;
             else if (a[c].size( ) == 0 && b[c].size( ) == 0)
                 continue;
+            else
+                return false;
         }
         return true;
     };
@@ -344,3 +344,5 @@ void deduplication_sheet(table< std::string > &_sh, const list< size_t > &_exclu
         _sh.erase(it + row);
     }
 }
+
+

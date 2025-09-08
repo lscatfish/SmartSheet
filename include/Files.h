@@ -52,7 +52,7 @@ public:
      * @param _folderDir 文件夹的地址dir（请按照工作电脑编码）
      * @param ifp 是否打印加载的文件夹和文件
      */
-    DefFolder(chstring _folderDir, bool ifp);
+    DefFolder(chstring _folderDir, bool ifp = false);
 
     // @brief 按照DefFolder变量来构造
     DefFolder(const DefFolder &other);
@@ -62,7 +62,7 @@ public:
      * @param _other 另一个DefFolder
      * @param _extension 指定的后缀
      */
-    DefFolder(const DefFolder &_other, const list< std::string > &_extension);
+    DefFolder(const DefFolder &_other, const myList< chstring > &_extension);
 
     ~DefFolder( ) = default;
 
@@ -71,81 +71,81 @@ public:
      * @param folderPath 文件夹的地址dir(文件夹的名称)
      * @param filePaths 文件夹下的文件路径（按照此电脑编码）
      */
-    static void traverse_folder(const std::string &folderPath, list< std::string > &filePaths);
+    static void traverse_folder(const std::string &folderPath, myList< std::string > &filePaths);
 
     /*
      * @brief 输出文件夹下的各个文件的相对路径
-     * @return list<string>类型一个列表
+     * @return myList<string>类型一个列表
      */
-    list< std::string > get_sysfilepath_list( ) const;
+    myList< std::string > get_sysfilepath_list( ) const;
 
     /*
      * @brief 输出文件夹下的各个文件的相对路径(utf8编码)
-     * @return list<string>类型一个列表
+     * @return myList<string>类型一个列表
      */
-    list< std::string > get_u8filepath_list( ) const;
+    myList< std::string > get_u8filepath_list( ) const;
 
     /*
      * @brief 输出文件夹下的各个文件的相对路径
-     * @return list<string>类型一个列表
+     * @return myList<string>类型一个列表
      */
-    list< chstring > get_filepath_list( ) const;
+    myList< chstring > get_filepath_list( ) const;
 
     /*
      * @brief 输出指定后缀的文件路径
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径
      */
-    list< std::string > get_sysfilepath_list(const list< std::string > &_extension) const;
+    myList< std::string > get_sysfilepath_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 输出指定后缀的文件路径(u8编码)
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径（u8编码）
      */
-    list< std::string > get_u8filepath_list(const list< std::string > &_extension) const;
+    myList< std::string > get_u8filepath_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 输出指定后缀的文件路径
      * @param _extension 指定的后缀
      * @return 输出指定后缀的文件路径
      */
-    list< chstring > get_filepath_list(const list< std::string > &_extension) const;
+    myList< chstring > get_filepath_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 保留指定后缀的文件
      * @param _extension 指定的后缀
      * @return 剩余文件的数量
      */
-    size_t keep_with(const list< std::string > &_extension);
+    size_t keep_with(const myList< chstring > &_extension);
 
     /*
      * @brief 擦除指定的后缀
      * @param _extension 指定的后缀
      * @return 剩余文件的数量
      */
-    size_t erase_with(const list< std::string > &_extension);
+    size_t erase_with(const myList< chstring > &_extension);
 
     /*
      * @brief 擦除指定文件名的文件
      * @param _path 指定的文件路径
      * @return 是否成功
      */
-    bool erase_with(const std::string _path);
+    bool erase_with(const chstring &_path);
 
     /*
      * @brief 删除指定文件名的文件
      * @param _path 指定的文件路径
      * @return 是否成功
      */
-    bool delete_with(const std::string _path);
+    bool delete_with(const chstring &_path);
 
     /*
      * @brief 删除指定后缀的文件
      * @param _extension 指定的后缀
      * @return 删除的文件数量
      */
-    size_t delete_with(const list< std::string > _extension);
+    size_t delete_with(const myList< chstring > &_extension);
 
     /*
      * @brief 删除所有文件
@@ -159,7 +159,7 @@ public:
      * @param _extension 指定的后缀
      * @return 复制到的文件的数量
      */
-    size_t copy_files_to(const std::string &_targetDir, const list< std::string > &_extension) const;
+    size_t copy_files_to(const chstring &_targetDir, const myList< chstring > &_extension) const;
 
     /*
      * @brief 复制指定的文件到指定的路径
@@ -167,94 +167,94 @@ public:
      * @param _filePath 指定的文件路径
      * @return 是否成功
      */
-    bool copy_files_to(const std::string &_targetDir, const std::string &_filePath) const;
+    bool copy_files_to(const chstring &_targetDir, const chstring &_filePath) const;
 
     /*
      * @brief 复制文件到指定的路径
      * @param _targetDir 指定路径
      * @return 复制到的文件的数量
      */
-    size_t copy_files_to(const std::string &_targetDir) const;
+    size_t copy_files_to(const chstring &_targetDir) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @return 返回的文件（包含后缀）
      */
-    list< chstring > get_file_list( ) const;
+    myList< chstring > get_file_list( ) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< chstring > get_file_list(const list< std::string > &_extension) const;
+    myList< chstring > get_file_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_sysfile_list( ) const;
+    myList< std::string > get_sysfile_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_sysfile_list(const list< std::string > &_extension) const;
+    myList< std::string > get_sysfile_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_u8file_list( ) const;
+    myList< std::string > get_u8file_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件（包含后缀）
      */
-    list< std::string > get_u8file_list(const list< std::string > &_extension) const;
+    myList< std::string > get_u8file_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
      * @return 返回的文件名（不包含后缀）
      */
-    list< chstring > get_filename_list( ) const;
+    myList< chstring > get_filename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< chstring > get_filename_list(const list< std::string > &_extension) const;
+    myList< chstring > get_filename_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_sysfilename_list( ) const;
+    myList< std::string > get_sysfilename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_sysfilename_list(const list< std::string > &_extension) const;
+    myList< std::string > get_sysfilename_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 返回所有的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_u8filename_list( ) const;
+    myList< std::string > get_u8filename_list( ) const;
 
     /*
      * @brief 返回特定后缀的文件名（不包含后缀）
      * @param _extension 指定的后缀
      * @return 返回的文件名（不包含后缀）
      */
-    list< std::string > get_u8filename_list(const list< std::string > &_extension) const;
+    myList< std::string > get_u8filename_list(const myList< chstring > &_extension) const;
 
     /*
      * @brief 检测此文件夹下是否有有被占用的文件
@@ -262,7 +262,7 @@ public:
      * @param progressBar 是否打开进度条，启用之后ifp不可用
      * @return 输出被占用的文件路径
      */
-    list< chstring > check_occupied(bool ifp = false, bool progressBar = false) const;
+    myList< chstring > check_occupied(bool ifp = false, bool progressBar = false) const;
 
     /*
      * @brief 检测此文件夹下是否有有被占用的文件
@@ -270,7 +270,7 @@ public:
      * @param progressBar 是否打开进度条，启用之后ifp不可用
      * @return 输出被占用的文件路径(utf8)
      */
-    list< std::string > check_occupied_utf8(bool ifp = false, bool progressBar = false) const;
+    myList< std::string > check_occupied_utf8(bool ifp = false, bool progressBar = false) const;
 
     /*
      * @brief 检测此文件夹下是否有有被占用的文件
@@ -278,7 +278,7 @@ public:
      * @param progressBar 是否打开进度条，启用之后ifp不可用
      * @return 输出被占用的文件路径(sys)
      */
-    list< std::string > check_occupied_sys(bool ifp = false, bool progressBar = false) const;
+    myList< std::string > check_occupied_sys(bool ifp = false, bool progressBar = false) const;
 
     /*
      * @brief 检查文件路径是否在此文件夹存在
@@ -289,7 +289,7 @@ public:
 
 private:
     chstring         folderDir_;       // 文件夹的地址dir(文件夹的名称)
-    list< chstring > filePathList_;    // 文件夹下的文件路径（按照此电脑编码）
+    myList< chstring > filePathList_;    // 文件夹下的文件路径（按照此电脑编码）
 };
 /* ========================================================================================================================= */
 
@@ -329,34 +329,34 @@ bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_des
  * @param _extension 文件的后缀集合
  * @return 错误返回false，读取成功返回true
  */
-bool get_filepath_from_folder(
-    list< std::string >       &_name,
-    list< std::string >       &_path,
-    std::string                _foldername,
-    const list< std::string > &_extension);
-
-/*
- * @brief 为了cv库,从一个文件下获取所有符合后缀条件的img
- * @param _path 返回的文件路径，cv使用
- * @param _u8name 返回的文件名（无格式后缀）
- * @param _u8path 返回的文件路径
- * @param _foldername 目标文件夹名称
- * @param _extension 文件的后缀集合
- * @return 错误返回false，读取成功返回true
- */
-bool get_imgpath_from_folder(
-    list< std::string >       &_path,
-    list< std::string >       &_u8name,
-    list< std::string >       &_u8path,
-    std::string                _foldername,
-    const list< std::string > &_extension);
+//bool get_filepath_from_folder(
+//    myList< std::string >       &_name,
+//    myList< std::string >       &_path,
+//    std::string                _foldername,
+//    const myList< std::string > &_extension);
+//
+///*
+// * @brief 为了cv库,从一个文件下获取所有符合后缀条件的img
+// * @param _path 返回的文件路径，cv使用
+// * @param _u8name 返回的文件名（无格式后缀）
+// * @param _u8path 返回的文件路径
+// * @param _foldername 目标文件夹名称
+// * @param _extension 文件的后缀集合
+// * @return 错误返回false，读取成功返回true
+// */
+//bool get_imgpath_from_folder(
+//    myList< std::string >       &_path,
+//    myList< std::string >       &_u8name,
+//    myList< std::string >       &_u8path,
+//    std::string                _foldername,
+//    const myList< std::string > &_extension);
 
 /*
  * @brief 用于读取表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径
  */
-void load_sheet_from_xlsx(table< std::string > &_sheet, std::string _path);
+void load_sheet_from_xlsx(myTable< chstring > &_sheet, chstring _path);
 
 /*
  * @brief 签到表表格的储存
@@ -365,9 +365,9 @@ void load_sheet_from_xlsx(table< std::string > &_sheet, std::string _path);
  * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
-    table< std::string > &_sheet,
-    std::string           _path,
-    std::string           _titleName);
+    myTable< chstring > &_sheet,
+    chstring           _path,
+    chstring           _titleName);
 
 /*
  * @brief 考勤表表格的储存
@@ -376,33 +376,33 @@ void save_attSheet_to_xlsx(
  * @param _titleName 表格标题的名称
  */
 void save_sttSheet_to_xlsx(
-    const table< std::string > &_sheet,
-    std::string                &_path,
-    std::string                &_titleName);
+    const myTable< chstring > &_sheet,
+    chstring                &_path,
+    chstring                &_titleName);
 
 /*
  * @brief 保存报名信息到xlsx
  * @param _sheet 表格
  */
-void save_storageSheet_to_xlsx(const table< std::string > &_sheet);
+void save_storageSheet_to_xlsx(const myTable< chstring > &_sheet);
 
 /*
  * @brief 加载缓存报名信息到xlsx
  * @param _sheet 表格
  */
-void load_storageSheet_from_xlsx(table< std::string > &_sheet);
+void load_storageSheet_from_xlsx(myTable< chstring > &_sheet);
 
 /*
  * @brief 保存尚未搜索到的成员到xlsx
  * @param _sheet 表格
  */
-void save_unknownPerSheet_to_xlsx(table< std::string > &_sheet);
+void save_unknownPerSheet_to_xlsx(myTable< chstring > &_sheet);
 
 /*
  * @brief 保存青字班报名表
  * @param _sheet 表格
  */
-void save_registrationSheet_to_xlsx(const table< std::string > &_sheet);
+void save_registrationSheet_to_xlsx(const myTable< chstring > &_sheet);
 
 /**
  * 替换字符串中的所有指定字符

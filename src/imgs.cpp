@@ -291,10 +291,10 @@ SHEET GridResult::get_sheet( ) const {
 }
 
 // 返回只有string的表格
-table< std::string > GridResult::get_stringSheet( ) const {
-    table< std::string > sh;
+myTable< chstring > GridResult::get_stringSheet( ) const {
+    myTable< chstring > sh;
     for (auto &line : this->sheet_) {
-        list< std::string > l;
+        myList< chstring > l;
         for (auto &cell : line) {
             l.push_back(cell.text);
         }
@@ -983,15 +983,16 @@ static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径(系统编码格式)
  */
-void load_sheet_from_img(table< std::string > &_sheet, const std::string &_path) {
+void load_sheet_from_img(myTable< chstring > &_sheet, const chstring &_path) {
 
     // 读取图片
     cv::Mat img;
-    if (!_read_img(_path, img)) return;    // 读取失败
+    if (!_read_img(_path.sysstring( ), img)) return;    // 读取失败
 
     // @todo 这里应该全部裁剪之后再进入，需要重构母函数
     if (enable_ManualDocPerspectiveCorrector) {
-        ManualDocPerspectiveCorrector perspectiveCorrector(img, file::split_file_from_path(_path));
+        auto [up, file] = _path.split_by_last_of("\\/");
+        ManualDocPerspectiveCorrector perspectiveCorrector(img, file.sysstring( ));
         img = perspectiveCorrector.get_corrected_img( );
     }
 
@@ -1009,7 +1010,7 @@ void load_sheet_from_img(table< std::string > &_sheet, const std::string &_path)
     std::cout << U8C(u8"ppocr工作") << std::endl;
     ppocr::ocr(ocrPR, img.clone( ));    // 这里返回的text为utf8编码
     std::cout << std::endl
-              << U8C(u8"图片:\"") << encoding::sysdcode_to_utf8(_path) << U8C(u8"\"加载结束...") << std::endl
+              << U8C(u8"图片:\"") << _path << U8C(u8"\"加载结束...") << std::endl
               << std::endl;
 
     // 解析照片中表格的网格线

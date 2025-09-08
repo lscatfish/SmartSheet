@@ -14,6 +14,7 @@
 #ifndef BASIC_HPP
 #define BASIC_HPP
 
+#include <chstring.hpp>
 #include <cstdlib>
 #include <poppler/cpp/poppler-document.h>
 #include <poppler/cpp/poppler-global.h>
@@ -27,22 +28,6 @@
 
 #define U8C(s) reinterpret_cast< const char * >(s)
 
-// 表格
-template < typename _T >
-using table = std::vector< std::vector< _T > >;    // 如果冲突，请封装到namespace中，或者改名为 MyTable
-
-// 一行（列）
-template < typename _T >
-using list = std::vector< _T >;    // 如果冲突，请封装到namespace中，或者改名为 MyList
-
-// 模板函数：对 vector<T>按指定成员变量排序
-// 参数：容器引用、比较函数（决定排序规则和依据的成员）
-// @note [@lscatfish] ***多此一举***却似用筷子夹勺子喝粥***
-template < typename _T, typename Compare >
-void sort_my_list(list< _T > &vec, Compare comp) {
-    std::sort(vec.begin( ), vec.end( ), comp);
-}
-// @note [@lscatfish] ***多此一举***却似用筷子夹勺子喝粥***
 
 namespace pdf {
 // 定义线段结构体
@@ -118,13 +103,13 @@ struct GridPoint {
 // 一个表格的单元格，包含在图片中的四个顶点的坐标
 struct CELL {
 
-    GridPoint   top_left;
-    GridPoint   top_right;
-    GridPoint   bottom_right;
-    GridPoint   bottom_left;
-    GridPoint   corePoint;    // box的中心点坐标(x,y)
-    std::string text;         // 储存的文字
-    bool        ifSelect;     // 是否已被选中
+    GridPoint top_left;
+    GridPoint top_right;
+    GridPoint bottom_right;
+    GridPoint bottom_left;
+    GridPoint corePoint;    // box的中心点坐标(x,y)
+    chstring  text;         // 储存的文字
+    bool      ifSelect;     // 是否已被选中
 
     // 基于 OCRPredictResult 构造
     CELL(ppocr::OCRPredictResult _ocrPR) {
@@ -179,9 +164,12 @@ struct CELL {
         GridPoint p1(tb.bbox( ).x( ), _h - tb.bbox( ).y( ));
         GridPoint p2(tb.bbox( ).x( ) + tb.bbox( ).width( ), _h - (tb.bbox( ).y( ) - tb.bbox( ).height( )));
         *this = CELL(p1, p2);
+        std::string temp;
         for (const auto &c : tb.text( ).to_utf8( )) {
-            this->text.push_back(c);
+            temp.push_back(c);
         }
+        this->text = temp;
+        this->text.trim_whitespace( );
     }
 
     /*
@@ -293,5 +281,7 @@ struct CELL {
     };
     /* ================================适配STL======================================== */
 };
+
+#include <high.h>
 
 #endif    // !BASIC_H

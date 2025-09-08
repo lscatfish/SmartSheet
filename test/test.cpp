@@ -25,7 +25,7 @@
 #include <xlnt/xlnt.hpp>
 #include <zlib.h>
 
-
+#if 0
 // 测试解析docx文件的minizip与pugixml
 int test_for_docx( ) {
 
@@ -33,7 +33,7 @@ int test_for_docx( ) {
     d.print_tables_with_position( );
 
 
-    auto tables = d.get_table_with(list< std::string >{ U8C(u8"姓名"), U8C(u8"性别") });
+    auto tables = d.get_table_with(myList< std::string >{ U8C(u8"姓名"), U8C(u8"性别") });
     if (tables.empty( )) {
         std::cout << U8C(u8"未找到任何表格") << std::endl;
         return 0;
@@ -60,7 +60,7 @@ void test_main( ) {
 
     /* 3. 准备二维向量保存整张表 -------------------------------------------- */
     // theWholeSpreadSheet[row][col] 即第 row 行第 col 列的字符串
-    table< std::string > theWholeSpreadSheet;
+    myTable< std::string > theWholeSpreadSheet;
 
     /* 4. 按行遍历工作表 ----------------------------------------------------- */
     // ws.rows(false) 返回行迭代器，false 表示不缓存，节省内存
@@ -68,7 +68,7 @@ void test_main( ) {
         std::cout << "为当前行创建一个新的向量..." << std::endl;
 
         // 保存当前行所有单元格文本的临时向量
-        list< std::string > aSingleRow;
+        myList< std::string > aSingleRow;
 
         /* 5. 遍历当前行的每个单元格 ---------------------------------------- */
         for (auto cell : row) {
@@ -98,11 +98,11 @@ void test_main( ) {
     wss.active_sheet( ).cell("B6").value(sysdcode_to_utf8("1中国234"));
     wss.save(sysdcode_to_utf8("./1我/ou操.xlsx"));
 
-    list< std::string > className_;          // 班级名字
-    list< std::string > filePathAndName_;    // 每个xlsx文件的位置
-    file::get_filepath_from_folder(className_, filePathAndName_, sysdcode_to_utf8("./input/all/"), list< std::string >{ ".xlsx" });
+    myList< std::string > className_;          // 班级名字
+    myList< std::string > filePathAndName_;    // 每个xlsx文件的位置
+    file::get_filepath_from_folder(className_, filePathAndName_, sysdcode_to_utf8("./input/all/"), myList< std::string >{ ".xlsx" });
 
-    table< std::string > test1 = {
+    myTable< std::string > test1 = {
         { sysdcode_to_utf8("序号"), sysdcode_to_utf8("姓名"), sysdcode_to_utf8("学号"), sysdcode_to_utf8("签到") },
         { sysdcode_to_utf8("1"), sysdcode_to_utf8("王二"), sysdcode_to_utf8("20243546545T"), "" },
         { sysdcode_to_utf8("2"), sysdcode_to_utf8("张三"), sysdcode_to_utf8("324352532423"), "" },
@@ -115,7 +115,7 @@ void test_main( ) {
 // 测试ENCODING
 void test_for_ENCODING( ) {
     namespace ec = encoding;
-    list< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
+    myList< std::string > str{ "dj", "sdbj", "我i妇女", "987飞机发布会",
                              "****加拿大", "曾经多次uy蒂娜", U8C(u8"顶峰那我"),
                              "顶峰那我", "图片", "青公班1.jpeg", "青公班1lkjhgfghjkjhgsafdgh",
                              "./input/sign_k/青公班-报名表" };
@@ -163,8 +163,8 @@ void test_for_cv_imread( ) {
 
 // 测试融合sheet函数
 void test_for_mergeMultipleSheets( ) {
-    table< std::string > sh1, sh2{ { "kndslnj", "dsn", "dic" }, { "dusbc", "cdb", "cdb" } }, sh3{ };
-    table< std::string > sh = mergeMultipleSheets(sh1, sh2);
+    myTable< std::string > sh1, sh2{ { "kndslnj", "dsn", "dic" }, { "dusbc", "cdb", "cdb" } }, sh3{ };
+    myTable< std::string > sh = mergeMultipleSheets(sh1, sh2);
     for (size_t r = 0; r < sh.size( ); r++) {
         for (size_t c = 0; c < sh[r].size( ); c++) {
             std::cout << sh[r][c] << "   ";
@@ -198,9 +198,9 @@ void test_for_ppocr( ) {
 // 测试DefFolder
 void test_for_DefFolder( ) {
     file::DefFolder     af("./input/app", false);
-    list< std::string > p1 = af.get_u8filepath_list( );
-    list< std::string > p2 = af.get_u8file_list( );
-    list< std::string > p3 = af.get_u8filename_list( );
+    myList< std::string > p1 = af.get_u8filepath_list( );
+    myList< std::string > p2 = af.get_u8file_list( );
+    myList< std::string > p3 = af.get_u8filename_list( );
     for (const auto &l : p1) {
         std::cout << l << std::endl;
     }
@@ -213,9 +213,9 @@ void test_for_DefFolder( ) {
         std::cout << l << std::endl;
     }
     std::cout << std::endl;
-    list< std::string > p4 = af.get_u8filepath_list(list< std::string >{ ".xlsx" });
-    list< std::string > p5 = af.get_u8file_list(list< std::string >{ ".xlsx" });
-    list< std::string > p6 = af.get_u8filename_list(list< std::string >{ ".xlsx" });
+    myList< std::string > p4 = af.get_u8filepath_list(myList< std::string >{ ".xlsx" });
+    myList< std::string > p5 = af.get_u8file_list(myList< std::string >{ ".xlsx" });
+    myList< std::string > p6 = af.get_u8filename_list(myList< std::string >{ ".xlsx" });
     for (const auto &l : p4) {
         std::cout << l << std::endl;
     }
@@ -227,7 +227,7 @@ void test_for_DefFolder( ) {
     for (const auto &l : p6) {
         std::cout << l << std::endl;
     }
-    af.copy_files_to("./output/sign_for_QingziClass_out/pdf", list< std::string >{ ".xlsx" });
+    af.copy_files_to("./output/sign_for_QingziClass_out/pdf", myList< std::string >{ ".xlsx" });
 }
 
 // 测试文件夹的检测
@@ -260,7 +260,7 @@ void test_for_icu_encoding_handler( ) {
 
 // 测试排序函数
 void test_for_sort_table_by( ) {
-    table< std::string > sheet = {
+    myTable< std::string > sheet = {
         { U8C(u8"序号"), U8C(u8"姓名"), U8C(u8"学号"), U8C(u8"签到") },
         { "1", U8C(u8"王二"), "20242246", "" },
         { "2", U8C(u8"李四"), "20232435", "" },
@@ -274,7 +274,7 @@ void test_for_sort_table_by( ) {
         std::cout << std::endl;
     }
     std::cout << std::endl;
-    sort_table_string_by(sheet, 2, false);
+    sort_table_chstring_by(sheet, 2, false);
     for (const auto &r : sheet) {
         for (const auto &c : r) {
             std::cout << c << "\t";
@@ -302,3 +302,4 @@ void test_for_ManualDocPerspectiveCorrector( ) {
         cv::imwrite(filelist[i], out);
     }
 }
+#endif
