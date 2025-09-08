@@ -293,9 +293,9 @@ void DoQingziClass::stats_applicants( ) {
     // 报名，标定人员
     for (auto it_app_person = app_person.begin( ); it_app_person != app_person.end( ); it_app_person++) {
         myList< DefPerson >::iterator it_search = personStd_.end( );    // 赋值到哨兵迭代器
-        if (search_person(it_search, *it_app_person)) {               // 说明搜索到了
-            it_search->ifsign      = true;                            // 已报名
-            it_app_person->ifcheck = true;                            // 这里的ifcheck说明报了名的人已经匹配
+        if (search_person(it_search, *it_app_person)) {                 // 说明搜索到了
+            it_search->ifsign      = true;                              // 已报名
+            it_app_person->ifcheck = true;                              // 这里的ifcheck说明报了名的人已经匹配
         } else {
             it_app_person->ifcheck = false;    // 没有搜索到
         }
@@ -416,7 +416,7 @@ void DoQingziClass::stats_checkinners( ) {
      */
     auto extract_attendance_to_vector = [&att_person](const myTable< chstring > &sh, const chstring &cn) -> void {
         myList< DefLine >  att_person_line;    // 人员行信息
-        size_t           rowHeader = 1;      // 默认表头在第一行
+        size_t             rowHeader = 1;      // 默认表头在第一行
         myList< chstring > headerLine;         // 表头
 
         // 首先找到 表头 所在的行
@@ -509,15 +509,16 @@ void DoQingziClass::stats_checkinners( ) {
 
     file::DefFolder att_imgs = file::DefFolder(file::_INPUT_ATT_IMGS_DIR_, true);
     att_filePathAndName      = att_imgs.get_filepath_list(myList< chstring >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
-                                                                            ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+                                                                              ".jpe", ".bmp", ".dib", ".webp", ".raw" });
     att_fileName             = att_imgs.get_filename_list(myList< chstring >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
-                                                                            ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+                                                                              ".jpe", ".bmp", ".dib", ".webp", ".raw" });
 
     // 2.解析班级的名字与名单的数量，储存到classname__filePathAndName中
     for (auto it_att_fileName = att_fileName.begin( ), it_att_filePathAndName = att_filePathAndName.begin( );
          it_att_fileName != att_fileName.end( ) && it_att_filePathAndName != att_filePathAndName.end( );
          it_att_fileName++, it_att_filePathAndName++) {
         auto [chinese, number] = it_att_fileName->split_chinese_and_number( );
+        std::cout << *it_att_fileName << chinese << std::endl;
         classname__filepath[chinese].push_back(*it_att_filePathAndName);
     }
 
@@ -532,6 +533,7 @@ void DoQingziClass::stats_checkinners( ) {
         }
         // 打印结果
         sheet_printer(sh);
+        std::cout << it_cfp->first << std::endl;
         extract_attendance_to_vector(sh, it_cfp->first);
     }
     // 4.解析人员的签到情况到全人员表
