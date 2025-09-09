@@ -20,7 +20,6 @@ int main( ) {
     encoding::Init( );
     pdf::Init( );    // 初始化poppler
 
-    SearchingTool s;
     std::string   inputStr = "";
     while (true) {
         console::clear_console( );
@@ -30,7 +29,7 @@ int main( ) {
         }
         std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl
                   << std::endl;
-        if (s.search_value(inputStr)) {
+        if (searchingTool.search_value(inputStr)) {
             myList< chstring > out = msglogger.get_tempmsgs_chstring( );
             for (const auto &a : out)
                 std::cout << a << std::endl

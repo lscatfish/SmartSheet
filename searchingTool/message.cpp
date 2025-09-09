@@ -11,6 +11,7 @@ MessageLogger::MessageLogger( ) {
     std::cout << "" << std::endl;
 }
 
+//析构函数保存搜索记录
 MessageLogger::~MessageLogger( ) {
 }
 
