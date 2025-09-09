@@ -102,6 +102,28 @@ myTable< std::string > chstring::get_systable(const myTable< chstring > &_inTabl
     return out;
 }
 
+// 产生chstringlist
+myList< chstring > chstring::get_cslist(const myList< std::string > &_inList) {
+    myList< chstring > out;
+    for (const auto &str : _inList) {
+        out.push_back(str);
+    }
+    return out;
+}
+
+// 产生chstringtable
+myTable< chstring > chstring::get_cstable(const myTable< std::string > &_inList) {
+    myTable< chstring > out;
+    for (const auto &row : _inList) {
+        myList< chstring > r;
+        for (const auto &str : row) {
+            r.push_back(str);
+        }
+        out.push_back(r);
+    }
+    return out;
+}
+
 // 比较运算符实现
 bool chstring::operator==(const chstring &b) const {
     if (this->usingType_ == b.usingType_)
@@ -385,6 +407,7 @@ std::pair< chstring, chstring > chstring::split_by_last_of(const std::string &cu
     return std::pair< chstring, chstring >(chstring(first, this->usingType_), chstring(last, this->usingType_));
 }
 
+// 分离前后缀
 std::pair< chstring, chstring > chstring::split_filename_and_extension( ) const {
     auto [first, last] = chstring::split_by_last_of('.');
     if (last.empty( )) return { first, "" };

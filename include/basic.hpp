@@ -28,7 +28,6 @@
 
 #define U8C(s) reinterpret_cast< const char * >(s)
 
-
 namespace pdf {
 // 定义线段结构体
 struct LineSegment {

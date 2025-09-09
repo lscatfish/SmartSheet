@@ -15,13 +15,16 @@
  ******************************************************************************/
 
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <console.h>
 #include <Encoding.h>
 #include <Files.h>
 #include <Fuzzy.h>
 #include <helper.h>
+#include <high.h>
 #include <iostream>
 #include <pdf.h>
+#include <searchingTool/message.hpp>
 #include <string>
 #include <type_traits>
 #include <vector>
@@ -43,15 +46,14 @@ enum class FileType {
 /// </summary>
 template < typename T >
 struct TextList {
-    std::string sysPath;      // 文件路径（按照系统编码）
-    std::string u8Path;       // 文件路径（按照UTF-8编码）
-    FileType    fileType;     // 文件类型
-    size_t      searchNum;    // 搜索到的单元格数量
+    chstring path;         // 文件路径（按照系统编码）
+    FileType fileType;     // 文件类型
+    size_t   searchNum;    // 搜索到的单元格数量
 
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(myList< std::string > &_out, const std::string &_target);
+    bool is_value_exists(const chstring &_target);
 };
 
 /// <summary>
@@ -61,9 +63,9 @@ template <>
 struct TextList< xlnt::workbook > {
     // excel表格的一个单元格
     struct xlsxCELL {
-        std::string sheetName;    // 工作表名称
-        std::string address;      // 单元格地址
-        std::string value;        // 单元格内容
+        chstring sheetName;    // 工作表名称
+        chstring address;      // 单元格地址
+        chstring value;        // 单元格内容
 
         xlsxCELL( ) = default;
         xlsxCELL(const std::string &_sheetName,
@@ -76,22 +78,21 @@ struct TextList< xlnt::workbook > {
         }
     };
 
-    std::string               sysPath;          // 文件路径（按照系统编码）
-    std::string               u8Path;           // 文件路径（按照UTF-8编码）
-    FileType                  fileType;         // 文件类型
+    chstring                      path;             // 文件路径（按照系统编码）
+    FileType                      fileType;         // 文件类型
     myList< myTable< xlsxCELL > > sheetList;        // excel表格的所有工作表
-    size_t                    searchNum = 0;    // 搜索到的单元格数量
+    size_t                        searchNum = 0;    // 搜索到的单元格数量
 
-    TextList(const std::string &_sysPath, const std::string &_u8Path)
-        : sysPath(_sysPath), u8Path(_u8Path) {
+    TextList(const chstring &_path)
+        : path(_path) {
         fileType = FileType::XLSX;
         sheetList.clear( );
         xlnt::workbook wb;
-        std::cout << "Parse XLSX file: \"" << u8Path << "\"";
-        wb.load(u8Path);
+        std::cout << "Parse XLSX file: \"" << path << "\"";
+        wb.load(path.u8string( ));
         for (auto ws : wb) {
             myTable< xlsxCELL > sheet;
-            std::string       sheetName = ws.title( );
+            std::string         sheetName = ws.title( );
             // 按行遍历
             for (auto row : ws.rows(false)) {
                 // 保存当前行所有单元格文本的临时向量
@@ -113,18 +114,14 @@ struct TextList< xlnt::workbook > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(const chstring &_target) {
         bool found = false;
         for (const auto &sheet : sheetList) {
             for (const auto &row : sheet) {
                 for (const auto &cell : row) {
                     if (!cell.is_empty( )) {
-                        if (fuzzy::search_substring(cell.value, _target)) {
-                            _out.push_back(
-                                "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                                + " -sheet:    \"" + cell.sheetName + "\"\n"
-                                + " -position: \"" + cell.address + "\"\n"
-                                + " -textual:   " + cell.value);
+                        if (cell.value.has_subchstring(_target)) {
+                            msglogger.inmsg(mXLSX(path, _target, cell.value, cell.address, cell.sheetName));
                             found = true;
                         }
                     }
@@ -140,17 +137,15 @@ struct TextList< xlnt::workbook > {
 /// </summary>
 template <>
 struct TextList< docx::DefDocx > {
-    std::string sysPath;     // 文件路径（按照系统编码）
-    std::string u8Path;      // 文件路径（按照UTF-8编码）
-    FileType    fileType;    // 文件类型
-    // size_t      searchNum = 0;    // 搜索到的单元格数量
+    chstring path;        // 文件路径（按照系统编码）
+    FileType fileType;    // 文件类型
 
     myList< myTable< docx::TableCell > > tList;    // docx文件中的表格列表
 
-    TextList(const std::string &_sysPath, const std::string &_u8Path)
-        : sysPath(_sysPath), u8Path(_u8Path) {
+    TextList(const chstring &_path)
+        : path(_path) {
         fileType = FileType::DOCX;
-        docx::DefDocx aDocx(sysPath);
+        docx::DefDocx aDocx(path);
         tList = aDocx.get_table_list( );
     };
     ~TextList( ) = default;
@@ -158,7 +153,7 @@ struct TextList< docx::DefDocx > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(const chstring &_target) {
         bool found = false;
         int  page  = 0;
         for (const auto &myTable : tList) {
@@ -166,12 +161,8 @@ struct TextList< docx::DefDocx > {
             for (const auto &row : myTable) {
                 for (const auto &cell : row) {
                     if (cell.content.size( ) != 0) {
-                        if (fuzzy::search_substring(cell.content, _target)) {
-                            _out.push_back(
-                                "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                                + U8C(u8" -page:     页 ") + std::to_string(page) + "\n"
-                                + U8C(u8" -position: 行 ") + std::to_string(cell.row + 1) + U8C(u8" 列 ") + std::to_string(cell.col + 1) + "\n"
-                                + " -textual:   " + cell.content);
+                        if (cell.content.has_subchstring(_target)) {
+                            msglogger.inmsg(mDOCX(path, _target, cell.content, page, cell.row, cell.col));
                             found = true;
                         }
                     }
@@ -187,15 +178,14 @@ struct TextList< docx::DefDocx > {
 /// </summary>
 template <>
 struct TextList< pdf::DefPdf > {
-    std::string sysPath;     // 文件路径（按照系统编码）
-    std::string u8Path;      // 文件路径（按照UTF-8编码）
-    FileType    fileType;    // 文件类型
+    chstring path;        // 文件路径（按照系统编码）
+    FileType fileType;    // 文件类型
 
     myList< myList< CELL > > outList;
 
-    TextList(const std::string &_sysPath, const std::string &_u8Path)
-        : sysPath(_sysPath), u8Path(_u8Path) {
-        pdf::DefPdf a(_u8Path, outList);
+    TextList(const chstring &_path)
+        : path(_path) {
+        pdf::DefPdf a(path, outList);
         fileType = FileType::PDF;
     };
     ~TextList( ) = default;
@@ -203,16 +193,13 @@ struct TextList< pdf::DefPdf > {
     // 判断是否存在值
     // out 输出的结果
     //_target 目标值
-    bool is_value_exists(myList< std::string > &_out, const std::string &_target) {
+    bool is_value_exists(const chstring &_target) {
         bool found = false;
         for (size_t i = 0; i < outList.size( ); i++) {
             for (const auto &c : outList[i]) {
                 if (!c.text.empty( )) {
-                    if (fuzzy::search_substring(c.text, _target)) {
-                        _out.push_back(
-                            "Found \"" + _target + "\" in path: \"" + u8Path + "\"\n"
-                            + U8C(u8" -page:     页 ") + std::to_string(i + 1) + "\n"
-                            + " -textual:   " + c.text);
+                    if (c.text.has_subchstring(_target)) {
+                        msglogger.inmsg(mPDF(path, _target, c.text, i + 1));
                         found = true;
                     }
                 }
@@ -228,14 +215,14 @@ public:
     // 构造方式
     SearchingTool( )
         : file::DefFolder(file::_INPUT_DIR_, false) {
-        parse_list(xlsxList_, myList< std::string >{ ".xlsx" });
-        parse_list(pdfList_, myList< std::string >{ ".pdf", ".PDF" });
-        parse_list(docxList_, myList< std::string >{ ".docx", ".DOCX" });
+        parse_list(xlsxList_, myList< chstring >{ ".xlsx" });
+        parse_list(pdfList_, myList< chstring >{ ".pdf", ".PDF" });
+        parse_list(docxList_, myList< chstring >{ ".docx", ".DOCX" });
     };
     ~SearchingTool( ) = default;
 
     // 公开搜索函数
-    bool search_value(myList< std::string > &_out, const std::string &_target);
+    bool search_value(const chstring &_target);
 
 private:
     myList< TextList< xlnt::workbook > > xlsxList_;
@@ -244,20 +231,19 @@ private:
 
     // 解析list
     template < typename T >
-    void parse_list(myList< T > &_list, const myList< std::string > _ex) {
-        myList< std::string > u8PathList  = this->get_u8filepath_list(_ex);
-        myList< std::string > sysPathList = this->get_sysfilepath_list(_ex);
+    void parse_list(myList< T > &_list, const myList< chstring > &_ex) {
+        myList< chstring > PathList = this->get_filepath_list(_ex);
 
-        for (size_t i = 0; i < sysPathList.size( ); i++) {
+        for (size_t i = 0; i < PathList.size( ); i++) {
             if constexpr (std::is_same_v< T, TextList< xlnt::workbook > >) {
-                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"xlsx文件解析"));
+                console::set_progressBar(PathList.size( ), 25, i + 1, 1, 1, U8C(u8"xlsx文件解析"));
             } else if constexpr (std::is_same_v< T, TextList< pdf::DefPdf > >) {
-                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"pdf文件解析"));
+                console::set_progressBar(PathList.size( ), 25, i + 1, 1, 1, U8C(u8"pdf文件解析"));
             } else if constexpr (std::is_same_v< T, TextList< docx::DefDocx > >) {
-                console::set_progressBar(sysPathList.size( ), 25, i + 1, 1, 1, U8C(u8"docx文件解析"));
+                console::set_progressBar(PathList.size( ), 25, i + 1, 1, 1, U8C(u8"docx文件解析"));
             }
             std::cout << std::endl;
-            T afile(sysPathList[i], u8PathList[i]);
+            T afile(PathList[i]);
             console::clear_console_after_line(2);
             _list.push_back(afile);
         }
@@ -267,27 +253,19 @@ private:
 
     // 搜索
     template < typename T >
-    bool founder(myList< std::string > &_out, const std::string &_target, myList< T > &_list) {
+    bool founder(const chstring &_target, myList< T > &_list) {
         bool found = false;
-        /*for (auto &f : _list) {
-            if (f.is_value_exists(_out, _target)) {
-                found = true;
-            }
-        }*/
         for (size_t i = 0; i < _list.size( ); i++) {
-            if (_list[i].is_value_exists(_out, _target)) {
+            if (_list[i].is_value_exists(_target)) {
                 found = true;
             }
-            if (fuzzy::search_substring(_list[i].u8Path, _target)) {
-                _out.push_back(
-                    "Found \"" + _target + "\" in path: \"" + _list[i].u8Path + "\"\n"
-                    + " -textual_path:   " + _list[i].u8Path);
+            if (_list[i].path.has_subchstring(_target)) {
+                msglogger.inmsg(mPath(_list[i].path, _target));
                 found = true;
             }
         }
         return found;
     }
-
 };
 
 // 输入器

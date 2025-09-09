@@ -1,11 +1,14 @@
 ﻿
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <console.h>
 #include <Encoding.h>
 #include <Files.h>
 #include <helper.h>
+#include <high.h>
 #include <iostream>
 #include <pdf.h>
+#include <searchingTool/message.hpp>
 #include <searchingTool/searchingTool.hpp>
 #include <string>
 #include <thread>
@@ -27,16 +30,16 @@ int main( ) {
         }
         std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl
                   << std::endl;
-        myList< std::string > out;
-        if (s.search_value(out, inputStr)) {
-            for (const auto &line : out) {
-                std::cout << line << std::endl
+        if (s.search_value(inputStr)) {
+            myList< chstring > out = msglogger.get_tempmsgs_chstring( );
+            for (const auto &a : out)
+                std::cout << a << std::endl
                           << std::endl;
-            }
         } else {
             std::cout << "Not Found!" << std::endl;
         }
         pause( );
+        msglogger.clear_temp_msgs( );
     }
 
     return 0;    // 程序正常结束
