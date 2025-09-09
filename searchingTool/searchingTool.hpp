@@ -221,6 +221,13 @@ public:
     };
     ~SearchingTool( ) = default;
 
+    // 全局访问点（懒汉式：首次调用时初始化）
+    static SearchingTool &getInstance( ) {
+        // C++11 后，局部静态变量初始化是线程安全的
+        static SearchingTool instance;
+        return instance;
+    }
+
     // 公开搜索函数
     bool search_value(const chstring &_target);
 
@@ -266,7 +273,11 @@ private:
         }
         return found;
     }
+
+    SearchingTool(const SearchingTool &)            = delete;
+    SearchingTool &operator=(const SearchingTool &) = delete;
 };
+#define searchingTool SearchingTool::getInstance( )
 
 // 输入器
 void my_inputer(std::string &inputStr);
