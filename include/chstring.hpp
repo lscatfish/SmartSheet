@@ -102,6 +102,12 @@ public:
     // 产生systable
     static myTable< std::string > get_systable(const myTable< chstring > &_inTable);
 
+    // 产生chstringlist
+    static myList< chstring > get_cslist(const myList< std::string > &_inList);
+
+    // 产生chstringtable
+    static myTable< chstring > get_cstable(const myTable< std::string > &_inList);
+
     // 定义迭代器类型，使用std::string的迭代器作为底层实现
     using iterator               = std::string::iterator;
     using reverse_iterator       = std::string::reverse_iterator;
