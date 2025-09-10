@@ -10,6 +10,7 @@
 #include <Files.h>
 #include <Fuzzy.h>
 #include <helper.h>
+#include <high.h>
 #include <imgs.h>
 #include <iostream>
 #include <map>
@@ -23,8 +24,11 @@
 #include <vector>
 #include <word.h>
 
+const size_t _NUMMAX_CLASS_ = 14;    // 最大的青字班数量
 
 DoQingziClass::DoQingziClass( ) {
+    className_.reserve(_NUMMAX_CLASS_);
+    personStd_.reserve(2000);    // 预留2000人的空间
 }
 
 DoQingziClass::~DoQingziClass( ) {
@@ -142,24 +146,23 @@ bool DoQingziClass::self_check( ) {
     return true;
 }
 
-
 /*
  * @brief 选择函数
- * @param _chosseAll 总选项数目
+ * @param _chooseAll 总选项数目
  * @param _outPrint 要打印在控制台上的内容
  */
-int DoQingziClass::choose_function(int _chosseAll, const myList< std::string > &_outPrint) {
+int DoQingziClass::choose_function(int _chooseAll, const myList< std::string > &_outPrint) {
     std::string a = "";
     while (true) {
         console::clear_console( );
         for (const auto &line : _outPrint)
             std::cout << line << std::endl;
-        std::cout << U8C(u8"请选择（输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键）：");
+        std::cout << U8C(u8"请选择（输入 1 - ") << _chooseAll << U8C(u8" 之间的整数后按下 Enter 键）：");
         std::cin >> a;
-        if (is_all_digits(a) && std::stoi(a) >= 1 && std::stoi(a) <= _chosseAll) {
+        if (is_all_digits(a) && std::stoi(a) >= 1 && std::stoi(a) <= _chooseAll) {
             return std::stoi(a);
         } else {
-            std::cout << U8C(u8"你的输入错误，请输入 1 - ") << _chosseAll << U8C(u8" 之间的整数后按下 Enter 键")
+            std::cout << U8C(u8"你的输入错误，请输入 1 - ") << _chooseAll << U8C(u8" 之间的整数后按下 Enter 键")
                       << std::endl;
             std::this_thread::sleep_for(std::chrono::milliseconds(1500));
         }
@@ -174,9 +177,10 @@ void DoQingziClass::load_all_personnel_information_list( ) {
               << U8C(u8"读取全学院名单...") << std::endl
               << std::endl;
 
-    file::DefFolder all_dir = file::DefFolder(file::_INPUT_ALL_DIR_, true);    // 我正常构造会报错
-    className_              = all_dir.get_filename_list(myList< chstring >{ ".xlsx" });
-    filePathAndName_        = all_dir.get_filepath_list(myList< chstring >{ ".xlsx" });
+    file::DefFolder all_dir(file::_INPUT_ALL_DIR_, true);
+    className_ = all_dir.get_filename_list(myList< chstring >{ ".xlsx" });
+
+    myList< chstring > filePathAndName_ = all_dir.get_filepath_list(myList< chstring >{ ".xlsx" });
 
     // 按文件读取每个青字班的信息表
     for (auto it_className = className_.begin( ), it_filePathAndName = filePathAndName_.begin( );
@@ -236,6 +240,9 @@ void DoQingziClass::stats_applicants( ) {
     myList< chstring > app_classname;    // 班级名称
     myList< chstring > app_filepath;     // applicationSheet的excel文件的路径
     myList< DefLine >  app_person;       // 定义从报名表中获得的人员信息
+    app_classname.reserve(13);
+    app_filepath.reserve(13);
+    app_person.reserve(2000);
 
     int a = choose_function(2, myList< std::string >{
                                    U8C(u8"请选择生成方式："),
