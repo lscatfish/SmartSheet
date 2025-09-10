@@ -1,14 +1,19 @@
 ﻿
+#include <basic.hpp>
 #include <chstring.hpp>
 #include <console.h>
 #include <iostream>
+#include <searchingTool/message.hpp>
 #include <searchingTool/searchingTool.hpp>
 #include <string>
 
 // 输入器
 void my_inputer(std::string &inputStr) {
     console::clear_input_buffer( );
-    std::cout << std::endl;
+    std::cout
+        << U8C(u8"输入“$exit$”直接退出；输入“$save$”可以保存所有搜索信息后退出，保存的信息在") + msglogger._SEARCH_LOG_
+        << std::endl
+        << std::endl;
     std::cout << "Search >>> ";
     std::cin >> inputStr;
 }
