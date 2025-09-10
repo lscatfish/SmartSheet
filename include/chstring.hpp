@@ -227,6 +227,12 @@ public:
     // 分离前后缀
     std::pair< chstring, chstring > split_filename_and_extension( ) const;
 
+    //获取文件
+    chstring splitout_file( ) const;
+
+    //获取文件名（无后缀）
+    chstring splitout_filename( ) const;
+
     // 是否都是数字
     bool is_all_digits( ) const;
 

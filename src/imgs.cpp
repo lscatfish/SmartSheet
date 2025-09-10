@@ -981,36 +981,16 @@ static bool _read_img(const std::string _pathAndName, cv::Mat &_img) {
 /*
  * @brief 用于读取图片的表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
- * @param _path 文件的路径(系统编码格式)
+ * @param img 预处理好的照片
  */
-void load_sheet_from_img(myTable< chstring > &_sheet, const chstring &_path) {
-
-    // 读取图片
-    cv::Mat img;
-    if (!_read_img(_path.sysstring( ), img)) return;    // 读取失败
-
-    // @todo 这里应该全部裁剪之后再进入，需要重构母函数
-    if (enable_ManualDocPerspectiveCorrector) {
-        auto [up, file] = _path.split_by_last_of("\\/");
-        ManualDocPerspectiveCorrector perspectiveCorrector(img, file.sysstring( ));
-        img = perspectiveCorrector.get_corrected_img( );
-    }
-
-    if (enable_ImageEnhancementAuto)
-        img = ImageEnhancement::remove_shandow(img);
-    else {
-        if (enable_ImageEnhancementRemoveShadow)
-            img = ImageEnhancement::remove_shadow_pixel_linear(img, 45);
-        if (enable_ImageEnhancementLightSharp)
-            img = ImageEnhancement::light_sharpen(img, 1);
-    }
+void load_sheet_from_img(myTable< chstring > &_sheet, const cv::Mat &img) {
 
     // ocr操作
     std::vector< std::vector< ppocr::OCRPredictResult > > ocrPR;    //[页][文字块]
     std::cout << U8C(u8"ppocr工作") << std::endl;
     ppocr::ocr(ocrPR, img.clone( ));    // 这里返回的text为utf8编码
     std::cout << std::endl
-              << U8C(u8"图片:\"") << _path << U8C(u8"\"加载结束...") << std::endl
+              << U8C(u8"图片加载结束...") << std::endl
               << std::endl;
 
     // 解析照片中表格的网格线
@@ -1030,6 +1010,40 @@ void load_sheet_from_img(myTable< chstring > &_sheet, const chstring &_path) {
     // 还原表格
     grid.fill_sheet(textBox);
     _sheet = grid.get_stringSheet( );
+}
+
+/*
+ * @brief 预读取照片，做预处理
+ * @param _inPaths 路径
+ * @param _outMats 输出的预处理照片
+ */
+void preload_imgs(
+    const std::map< chstring, myList< chstring >, chstring::CompareByUTF8Desc > &_inPaths,
+    std::map< chstring, myList< cv::Mat >, chstring::CompareByUTF8Desc >        &_outMats) {
+    for (const auto &aclass : _inPaths) {
+        for (const auto &p : aclass.second) {
+            cv::Mat img;
+            if (!_read_img(p.sysstring( ), img)) {
+                /*错误检查*/
+                return;
+            }
+            // @todo 这里应该全部裁剪之后再进入，需要重构母函数
+            if (enable_ManualDocPerspectiveCorrector) {
+                ManualDocPerspectiveCorrector perspectiveCorrector(img, p.splitout_file( ).sysstring( ));
+                img = perspectiveCorrector.get_corrected_img( );
+            }
+
+            if (enable_ImageEnhancementAuto)
+                img = ImageEnhancement::remove_shandow(img);
+            else {
+                if (enable_ImageEnhancementRemoveShadow)
+                    img = ImageEnhancement::remove_shadow_pixel_linear(img, 45);
+                if (enable_ImageEnhancementLightSharp)
+                    img = ImageEnhancement::light_sharpen(img, 1);
+            }
+            _outMats[aclass.first].push_back(img.clone( ));    // 必须深拷贝
+        }
+    }
 }
 ///////////////////////////////////////////关键函数//////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
