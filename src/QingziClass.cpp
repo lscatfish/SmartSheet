@@ -13,6 +13,7 @@
 #include <imgs.h>
 #include <iostream>
 #include <map>
+#include <opencv2/opencv.hpp>
 #include <pdf.h>
 #include <PersonnelInformation.h>
 #include <ppocr_API.h>
@@ -404,9 +405,11 @@ void DoQingziClass::stats_checkinners( ) {
      * ----------------------------------------------------------------- */
 
     std::map< chstring, myList< chstring >, chstring::CompareByUTF8Desc > classname__filepath;    // 班级名称与各班的签到表的匹配
-    myList< chstring >                                                    att_fileName;           // 图片的文件名(无后缀)
+    std::map< chstring, myList< cv::Mat >, chstring::CompareByUTF8Desc >  classname__imgs;        // 班级名称与各班的照片对应
     myList< chstring >                                                    att_filePathAndName;    // 图片-签到表文件的路径
     myList< DefPerson >                                                   att_person;             // 定义从签到表中获得的人员信息
+    att_filePathAndName.reserve(100);
+    att_person.reserve(2000);
 
     // lambda函数定义========================================================================================/
     /*
@@ -507,35 +510,33 @@ void DoQingziClass::stats_checkinners( ) {
 
     // 1.拉取文件夹中的所有照片的地址
 
-    file::DefFolder att_imgs = file::DefFolder(file::_INPUT_ATT_IMGS_DIR_, true);
-    att_filePathAndName      = att_imgs.get_filepath_list(myList< chstring >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
-                                                                              ".jpe", ".bmp", ".dib", ".webp", ".raw" });
-    att_fileName             = att_imgs.get_filename_list(myList< chstring >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
-                                                                              ".jpe", ".bmp", ".dib", ".webp", ".raw" });
+    file::DefFolder att_imgs(file::_INPUT_ATT_IMGS_DIR_, true);
+    att_filePathAndName = att_imgs.get_filepath_list(myList< chstring >{ ".jpg", ".png", ".jpeg", ".tiff", ".tif ",
+                                                                         ".jpe", ".bmp", ".dib", ".webp", ".raw" });
 
     // 2.解析班级的名字与名单的数量，储存到classname__filePathAndName中
-    for (auto it_att_fileName = att_fileName.begin( ), it_att_filePathAndName = att_filePathAndName.begin( );
-         it_att_fileName != att_fileName.end( ) && it_att_filePathAndName != att_filePathAndName.end( );
-         it_att_fileName++, it_att_filePathAndName++) {
-        auto [chinese, number] = it_att_fileName->split_chinese_and_number( );
-        std::cout << *it_att_fileName << chinese << std::endl;
+    for (auto it_att_filePathAndName = att_filePathAndName.begin( );
+         it_att_filePathAndName != att_filePathAndName.end( ); it_att_filePathAndName++) {
+        auto [chinese, number] = it_att_filePathAndName->splitout_filename( ).split_chinese_and_number( );
         classname__filepath[chinese].push_back(*it_att_filePathAndName);
     }
+    // 预读取照片
+    img::preload_imgs(classname__filepath, classname__imgs);
 
-    // 3.解析每个班的图片
-    for (auto it_cfp = classname__filepath.begin( ); it_cfp != classname__filepath.end( ); it_cfp++) {
+    // 解析每个班的图片
+    for (const auto &aclass : classname__imgs) {
         myTable< chstring > sh;
-        for (size_t i = 0; i < it_cfp->second.size( ); i++) {
+        for (const auto &aimg : aclass.second) {
             myTable< chstring > partSh;
-            img::load_sheet_from_img(partSh, it_cfp->second[i]);
+            img::load_sheet_from_img(partSh, aimg);
             sh = merge_table(sh, partSh);
             std::cout << U8C(u8"融合结束") << std::endl;
         }
         // 打印结果
         sheet_printer(sh);
-        std::cout << it_cfp->first << std::endl;
-        extract_attendance_to_vector(sh, it_cfp->first);
+        extract_attendance_to_vector(sh, aclass.first);
     }
+
     // 4.解析人员的签到情况到全人员表
     for (const auto &attper : att_person) {
         auto it_perstd = personStd_.end( );    // 哨兵值

@@ -415,6 +415,21 @@ std::pair< chstring, chstring > chstring::split_filename_and_extension( ) const 
     return { first, last };
 }
 
+// 获取文件
+chstring chstring::splitout_file( ) const {
+    auto [first, last] = split_by_last_of("\\/");
+    if (last.empty( )) {
+        return first;
+    }
+    return last;
+}
+
+// 获取文件名（无后缀）
+chstring chstring::splitout_filename( ) const {
+    auto [filename, ex] = this->splitout_file( ).split_by_last_of('.');
+    return filename;
+}
+
 // 是否都是数字
 bool chstring::is_all_digits( ) const {
     if (this->usingStr_.empty( )) return false;

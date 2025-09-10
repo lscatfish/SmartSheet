@@ -4,7 +4,9 @@
 
 #include <algorithm>
 #include <basic.hpp>
+#include <chstring.hpp>
 #include <Encoding.h>
+#include <map>
 #include <opencv2/opencv.hpp>
 #include <ppocr_API.h>
 #include <string>
@@ -327,9 +329,18 @@ private:
 /*
  * @brief 用于读取图片的表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
- * @param _path 文件的路径(系统编码格式)
+ * @param img 预处理好的照片
  */
-void load_sheet_from_img(myTable< chstring > &_sheet, const chstring &_path);
+void load_sheet_from_img(myTable< chstring > &_sheet, const cv::Mat &img);
+
+/*
+ * @brief 预读取照片，做预处理
+ * @param _inPaths 路径
+ * @param _outMats 输出的预处理照片
+ */
+void preload_imgs(
+    const std::map< chstring, myList< chstring >, chstring::CompareByUTF8Desc > &_inPaths,
+    std::map< chstring, myList< cv::Mat >, chstring::CompareByUTF8Desc >        &_outMats);
 
 }    // namespace img
 
