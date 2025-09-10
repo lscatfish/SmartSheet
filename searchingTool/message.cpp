@@ -40,7 +40,7 @@ MessageLogger::~MessageLogger( ) {
             line.push_back(p->nowtime);
         } else if (const MessagePDF *p = std::get_if< MessagePDF >(&amsg)) {
             line.push_back(p->targetWord.u8string( ));
-            line.push_back(U8C(u8"第") + std::to_string(p->page) + U8C("页"));
+            line.push_back(U8C(u8"第") + std::to_string(p->page) + U8C(u8"页"));
             line.push_back(p->textual.u8string( ));
             line.push_back(p->filepath.u8string( ));
             line.push_back(p->nowtime);
@@ -104,6 +104,7 @@ void MessageLogger::clear_temp_msgs( ) {
     tempMessageList_.clear( );
 }
 
+// 输入析构的方式
 void MessageLogger::in_deconstruct(const std::string &_in) {
     deconstruct_ = _in;
 }
@@ -156,7 +157,7 @@ std::string MessageLogger::get_current_time_with_ms( ) {
 }
 
 // 保存sheet
-void MessageLogger::save_xlsx(const myTable< std::string > &_sheet) {
+void MessageLogger::save_xlsx(const myTable< std::string > &_sheet) const {
     xlnt::workbook wb;
     auto           ws = wb.active_sheet( );
     ws.title("Sheet1");

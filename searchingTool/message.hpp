@@ -13,11 +13,12 @@
 
 
 // 消息记录器
+// 其实消息记录器应该保存指针或者引用，不然太浪费空间了
 class MessageLogger {
 public:
     std::string _SEARCH_LOG_ = "./search_log/";
 
-    // 全局访问点（懒汉式：首次调用时初始化）
+    // 全局访问点（首次调用时初始化）
     static MessageLogger &getInstance( ) {
         // C++11 后，局部静态变量初始化是线程安全的
         static MessageLogger instance;
@@ -82,6 +83,7 @@ public:
     // 清理临时消息列表
     void clear_temp_msgs( );
 
+    // 输入析构的方式
     void in_deconstruct(const std::string &);
 
     // 将当前时间转换为指定格式的字符串（本地时间）
@@ -100,7 +102,7 @@ private:
     MessageLogger &operator=(const MessageLogger &) = delete;
 
     // 保存sheet
-    void save_xlsx(const myTable< std::string > &_sheet);
+    void save_xlsx(const myTable< std::string > &_sheet) const;
 };
 
 typedef MessageLogger::MessageDOCX mDOCX;
