@@ -4,11 +4,14 @@
 #define QINGZICLASS_H
 
 #include <basic.hpp>
+#include <high.h>
 #include <map>
 #include <PersonnelInformation.h>
 #include <string>
 #include <vector>
 
+
+const extern size_t _NUMMAX_CLASS_;// 最大的青字班数量
 
 // 操作青字班的类
 class DoQingziClass {
@@ -48,14 +51,13 @@ public:
     };
 
 private:
-    myList< chstring >    className_;          // 班级名字
-    myList< chstring >  filePathAndName_;    // 每个标准xlsx文件的位置
-    myList< DefPerson >   personStd_;          // 定义的标准人员信息
+    myList< chstring >  className_;          // 班级名字
+    myList< DefPerson > personStd_;          // 定义的标准人员信息
 
     // 定义名单中不存在的人员
     struct DefUnknownPerson {
-        DefLine           personLine;
-        DefPerson         personStd;
+        DefLine             personLine;
+        DefPerson           personStd;
         myList< DefPerson > likelyPerson;    // 相似的人
         myList< double >    likelyRate;      // 相似度，学号相同相似度直接达到100%,此时直接修改此人信息
     };

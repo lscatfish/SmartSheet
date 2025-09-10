@@ -196,7 +196,7 @@ private:
      */
     void onMouse(int evt, int x, int y, int, void *);
 
-    //// 静态成员函数：作为 setMouseCallback 的回调（无 this 指针）
+    // 静态成员函数：作为 setMouseCallback 的回调（无 this 指针）
     static void staticOnMouse(int event, int x, int y, int flags, void *userdata);
 };
 
