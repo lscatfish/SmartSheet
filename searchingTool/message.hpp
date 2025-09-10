@@ -82,6 +82,8 @@ public:
     // 清理临时消息列表
     void clear_temp_msgs( );
 
+    void in_deconstruct(const std::string &);
+
     // 将当前时间转换为指定格式的字符串（本地时间）
     static std::string get_current_time_string(const std::string &format = "%Y-%m-%d %H:%M:%S");
 
@@ -91,6 +93,7 @@ public:
 private:
     myList< DefMessage > tempMessageList_;    // 临时消息列表
     myList< DefMessage > permMessageList_;    // 永久消息列表
+    std::string          deconstruct_;        // 析构方式
 
     // 禁用拷贝
     MessageLogger(const MessageLogger &)            = delete;
