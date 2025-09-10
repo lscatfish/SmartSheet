@@ -15,7 +15,8 @@
 #include <variant>
 #include <xlnt/xlnt.hpp>
 
-MessageLogger::MessageLogger( ) {
+MessageLogger::MessageLogger( )
+    : deconstruct_("$exit$") {
     permMessageList_.reserve(50);
     tempMessageList_.reserve(500);
     file::create_folder_recursive(_SEARCH_LOG_);
@@ -24,6 +25,7 @@ MessageLogger::MessageLogger( ) {
 
 // 析构函数保存搜索记录
 MessageLogger::~MessageLogger( ) {
+    if (deconstruct_ == "$exit$") return;
     myTable< std::string > sheet = {
         { U8C(u8"搜索目标"), U8C(u8"位置"), U8C(u8"原文"), U8C(u8"文件地址"), U8C(u8"时间") }
     };
@@ -100,6 +102,10 @@ void MessageLogger::clear_temp_msgs( ) {
     for (const auto &amsg : tempMessageList_)
         permMessageList_.push_back(amsg);
     tempMessageList_.clear( );
+}
+
+void MessageLogger::in_deconstruct(const std::string &_in) {
+    deconstruct_ = _in;
 }
 
 // 将当前时间转换为指定格式的字符串（本地时间）

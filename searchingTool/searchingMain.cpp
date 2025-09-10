@@ -26,7 +26,9 @@ int main( ) {
     while (true) {
         console::clear_console( );
         my_inputer(inputStr);
-        if (inputStr == "$exit$") {
+        if (inputStr == "$exit$" || inputStr == "$save$") {
+            msglogger.in_deconstruct(inputStr);
+            msglogger.~MessageLogger( );
             break;
         }
         std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl
