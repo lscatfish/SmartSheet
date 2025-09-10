@@ -13,7 +13,6 @@
 
 
 // 消息记录器
-// 其实消息记录器应该保存指针或者引用，不然太浪费空间了
 class MessageLogger {
 public:
     std::string _SEARCH_LOG_ = "./search_log/";

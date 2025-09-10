@@ -41,9 +41,7 @@ enum class FileType {
     IMG
 };
 
-/// <summary>
-/// 定义文本列表结构体
-/// </summary>
+// 定义文本列表结构体
 template < typename T >
 struct TextList {
     chstring path;         // 文件路径（按照系统编码）
@@ -56,9 +54,7 @@ struct TextList {
     bool is_value_exists(const chstring &_target);
 };
 
-/// <summary>
-/// 针对xlsx的特化版本
-/// </summary>
+// 针对xlsx的特化版本
 template <>
 struct TextList< xlnt::workbook > {
     // excel表格的一个单元格
@@ -132,9 +128,7 @@ struct TextList< xlnt::workbook > {
     }
 };
 
-/// <summary>
-/// 针对docx的特化版本
-/// </summary>
+// 针对docx的特化版本
 template <>
 struct TextList< docx::DefDocx > {
     chstring path;        // 文件路径（按照系统编码）
@@ -173,9 +167,7 @@ struct TextList< docx::DefDocx > {
     }
 };
 
-/// <summary>
-/// 针对pdf的特化版本
-/// </summary>
+// 针对pdf的特化版本
 template <>
 struct TextList< pdf::DefPdf > {
     chstring path;        // 文件路径（按照系统编码）
@@ -213,12 +205,7 @@ struct TextList< pdf::DefPdf > {
 class SearchingTool : public file::DefFolder {
 public:
     // 构造方式
-    SearchingTool( )
-        : file::DefFolder(file::_INPUT_DIR_, false) {
-        parse_list(xlsxList_, myList< chstring >{ ".xlsx" });
-        parse_list(pdfList_, myList< chstring >{ ".pdf", ".PDF" });
-        parse_list(docxList_, myList< chstring >{ ".docx", ".DOCX" });
-    };
+    SearchingTool( );
     ~SearchingTool( ) = default;
 
     // 全局访问点（懒汉式：首次调用时初始化）
@@ -277,6 +264,7 @@ private:
     SearchingTool(const SearchingTool &)            = delete;
     SearchingTool &operator=(const SearchingTool &) = delete;
 };
+
 #define searchingTool SearchingTool::getInstance( )
 
 // 输入器
