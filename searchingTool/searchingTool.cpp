@@ -1,16 +1,9 @@
 ﻿
-#include <basic.hpp>
 #include <chstring.hpp>
 #include <console.h>
-#include <Encoding.h>
-#include <Files.h>
-#include <helper.h>
-#include <high.h>
 #include <iostream>
-#include <pdf.h>
 #include <searchingTool/searchingTool.hpp>
 #include <string>
-#include <xlnt/workbook/workbook.hpp>
 
 // 输入器
 void my_inputer(std::string &inputStr) {
