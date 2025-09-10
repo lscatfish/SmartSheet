@@ -2,6 +2,8 @@
 #include <basic.hpp>
 #include <chstring.hpp>
 #include <console.h>
+#include <Files.h>
+#include <high.h>
 #include <iostream>
 #include <searchingTool/message.hpp>
 #include <searchingTool/searchingTool.hpp>
@@ -32,4 +34,11 @@ bool SearchingTool::search_value(const chstring &_target) {
     }
 
     return found;
+};
+
+SearchingTool::SearchingTool( )
+    : file::DefFolder(file::_INPUT_DIR_, false) {
+    parse_list(xlsxList_, myList< chstring >{ ".xlsx" });
+    parse_list(pdfList_, myList< chstring >{ ".pdf", ".PDF" });
+    parse_list(docxList_, myList< chstring >{ ".docx", ".DOCX" });
 };
