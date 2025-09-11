@@ -5,10 +5,21 @@
 #include <ErrorHandler/BaseException.hpp>
 #include <ErrorHandler/ErrorHandler.hpp>
 #include <exception>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <fstream>
+#include <string>
 
+/*
+ * 所有的错误信息都请使用英文书写
+ */
+
+const std::string _EXCEPTION_LOG_TXT_ = "exception_log.txt";
+
+ExceptionHandler &ExceptionHandler::getInstance( ) {
+    static ExceptionHandler instance;
+    return instance;
+}
 
 // 处理异常：打印信息并记录日志
 void ExceptionHandler::handle(const std::exception &e) {
@@ -28,7 +39,7 @@ void ExceptionHandler::handle(const std::exception &e) {
 
 // 日志记录：写入文件
 void ExceptionHandler::logToFile(const std::exception &e) {
-    std::ofstream logFile("exception_log.txt", std::ios::app);
+    std::ofstream logFile(_EXCEPTION_LOG_TXT_, std::ios::app);
     if (!logFile.is_open( )) {
         std::cerr << "Failed to open log file!\n";
         return;

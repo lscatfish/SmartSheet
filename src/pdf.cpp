@@ -4,8 +4,10 @@
 #include <chstring.hpp>
 #include <console.h>
 #include <cstdlib>
+#include <ErrorHandler/ErrorHandler.hpp>
 #include <Fuzzy.h>
 #include <helper.h>
+#include <high.h>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -31,23 +33,60 @@
 // pdf标准坐标系是左下角为原点，y轴向上
 namespace pdf {
 
+bool LineExtractor::upsideDown( ) {
+    return false;
+}
+bool LineExtractor::useDrawChar( ) {
+    return false;
+}
+bool LineExtractor::interpretType3Chars( ) {
+    return false;
+}
+void LineExtractor::stroke(GfxState *state) {
+    const GfxPath *path = state->getPath( );
+    if (!path) return;
+
+    for (int i = 0; i < path->getNumSubpaths( ); ++i) {
+        const GfxSubpath *sub = path->getSubpath(i);
+        if (!sub || sub->getNumPoints( ) < 2) continue;
+
+        for (int j = 1; j < sub->getNumPoints( ); ++j) {
+            if (sub->getCurve(j)) continue;    // 跳过贝塞尔曲线控制点
+
+            double x0 = sub->getX(j - 1);
+            double y0 = sub->getY(j - 1);
+            double x1 = sub->getX(j);
+            double y1 = sub->getY(j);
+
+            double tx0, ty0, tx1, ty1;
+            state->transform(x0, y0, &tx0, &ty0);
+            state->transform(x1, y1, &tx1, &ty1);
+
+            lines.push_back(LineSegment(tx0, ty0, tx1, ty1));
+        }
+    }
+}
+
 // 以文件地址进行构造
 // @todo 按理来说这里应该先检测文件是否存在
 DefPdf::DefPdf(const chstring &_path)
     : pdfdoc_(std::make_unique< GooString >(_path.u8string( ).c_str( ))) {
     path_     = _path;
     document_ = poppler::document::load_from_file(path_.u8string( ));
+    std::cout << "Parse PDF file: \"" << path_ << "\"";
     if (!document_) {
-        std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
+        // THROW_PDF_ERROR(errPDF_document, "Could not open PDF file's document, file: " + path_.sysstring( ));
+        std::cerr << " could not open!" << std::endl;
         isOK = false;
         return;
     }
     if (!pdfdoc_.isOk( )) {
-        std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
+        // THROW_PDF_ERROR(errPDF_render, "PDFDoc is not OK for file: " + path_.sysstring( ));
+        std::cerr << " could not open!" << std::endl;
         isOK = false;
         return;
     }
-    std::cout << "Parse PDF file: \"" << path_ << "\"";
+
     num_pages_ = pdfdoc_.getNumPages( );
     sheetType_ = SheetType::Others;
     isOK       = parse( );    // 解析
@@ -66,12 +105,14 @@ DefPdf::DefPdf(const chstring &_path, myList< myList< CELL > > &out)
     document_ = poppler::document::load_from_file(path_.u8string( ));
     std::cout << "Parse PDF file: \"" << path_ << "\"";
     if (!document_) {
-        std::cout << "Error: Could not open PDF file: " << path_ << std::endl;
+        // THROW_PDF_ERROR(errPDF_document, "Could not open PDF file's document, file: " + path_.sysstring( ));
+        std::cerr << " could not open!" << std::endl;
         isOK = false;
         return;
     }
     if (!pdfdoc_.isOk( )) {
-        std::cout << "Error: PDFDoc is not OK for file: " << path_ << std::endl;
+        // THROW_PDF_ERROR(errPDF_render, "PDFDoc is not OK for file: " + path_.sysstring( ));
+        std::cerr << " could not open!" << std::endl;
         isOK = false;
         return;
     }
@@ -256,7 +297,7 @@ myTable< CELL > DefPdf::parse_line_to_sheet(const myList< LineSegment > &_lineSe
  * @param _textBoxList 解析出的内容
  */
 myTable< CELL > DefPdf::parse_textbox_to_sheet(const myList< CELL > &_textBoxList) {
-    myTable< CELL > out;                   // 输出
+    myTable< CELL > out;                 // 输出
     out = cluster_rows(_textBoxList);    // 聚类
     // 按行排序
     sort_my_list(out, [](const myList< CELL > &a, const myList< CELL > &b) { return a[0].corePoint.y > b[0].corePoint.y; });
@@ -301,7 +342,7 @@ myTable< CELL > DefPdf::cluster_rows(myList< CELL > _textBoxList) {
         // 为每一个cell进行解析
         std::multiset< CELL, CELL::CompareByCorePointXAsc >  row;          // 每行中的内容要升序排列(从左到右)
         std::multiset< CELL, CELL::CompareByCorePointYDesc > rowHeight;    // 判断是否在同一行的set（从上到下）
-        myList< CELL >                                         r;            // 标准行
+        myList< CELL >                                       r;            // 标准行
         if (!_textBoxList[i].ifSelect) {
             row.insert(_textBoxList[i]);
             rowHeight.insert(_textBoxList[i]);
@@ -345,7 +386,6 @@ void DefPdf::fill_sheet(const myList< CELL > &_textBoxList) {
         CELL thisCc(c, deltaH);
         thisBox.push_back(thisCc);
     }
-
     for (const auto &t : thisBox) {
         for (auto &r : sheet_) {
             for (auto &c : r) {

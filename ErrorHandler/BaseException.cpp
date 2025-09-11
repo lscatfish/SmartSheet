@@ -3,6 +3,10 @@
 #include <string>
 #include <source_location>
 
+/*
+ * 所有的错误信息都请使用英文书写
+ */
+
 BaseException::BaseException(
     int                         code,
     const std::string          &msg,

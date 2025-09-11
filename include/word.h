@@ -63,6 +63,9 @@ public:
     // 打印带位置信息的表格
     void print_tables_with_position( );
 
+    //是否解析成功
+    bool ifOK( ) const;
+
     /* ======================================================================================================================= */
 
     /*
@@ -75,9 +78,10 @@ public:
     ~DefDocx( ) = default;
 
 private:
-    chstring                   path_;         // 此文件储存的路径
-    myList< myTable< TableCell > > tableList_;    // 解析出的表格
-    myTable< TableCell >         keyTable_;     // 关键表格
+    chstring                       path_;           // 此文件储存的路径
+    myList< myTable< TableCell > > tableList_;      // 解析出的表格
+    myTable< TableCell >           keyTable_;       // 关键表格
+    bool                           isOK = false;    // 是否解析成功
 };
 
 }    // namespace docx

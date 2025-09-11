@@ -4,6 +4,7 @@
 #include <Encoding.h>
 #include <Fuzzy.h>
 #include <helper.h>
+#include <high.h>
 #include <iostream>
 #include <PersonnelInformation.h>
 #include <pugiconfig.hpp>
@@ -24,7 +25,6 @@ TableCell::TableCell( ) {
     content = "";
 }
 
-
 /*
  * @brief 标准构造函数，输入一个docx文件的路径（按照系统编码）
  * @param _path docx文件的路径
@@ -37,6 +37,7 @@ DefDocx::DefDocx(const chstring &_path) {
     if (xml_data.empty( )) {
         // 空文件或者是错误
         std::cout << U8C(u8" 有概率损坏") << std::endl;
+        isOK = false;
         return;
     }
 
@@ -45,11 +46,14 @@ DefDocx::DefDocx(const chstring &_path) {
     if (tableList_.empty( )) {
         // 未解析到表格
         std::cout << U8C(u8" 无表格") << std::endl;
+        isOK = false;
+        return;
     }
 
     keyTable_ = get_table_with(myList< chstring >{ U8C(u8"姓名"), U8C(u8"学号") });
 
     std::cout << " - Done! " << std::endl;
+    isOK = true;
 }
 
 /*
@@ -169,6 +173,11 @@ void DefDocx::print_tables_with_position( ) {
         }
         std::cout << "----------------------------------------" << std::endl;
     }
+}
+
+// 是否解析成功
+bool DefDocx::ifOK( ) const {
+    return isOK;
 }
 
 /*

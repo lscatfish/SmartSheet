@@ -15,6 +15,13 @@
 #include <variant>
 #include <xlnt/xlnt.hpp>
 
+// 全局访问点（首次调用时初始化）
+MessageLogger &MessageLogger::getInstance( ) {
+    // C++11 后，局部静态变量初始化是线程安全的
+    static MessageLogger instance;
+    return instance;
+}
+
 MessageLogger::MessageLogger( )
     : deconstruct_("$exit$") {
     permMessageList_.reserve(50);

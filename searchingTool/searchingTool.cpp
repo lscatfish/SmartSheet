@@ -20,6 +20,12 @@ void my_inputer(std::string &inputStr) {
     std::cin >> inputStr;
 }
 
+SearchingTool &SearchingTool::getInstance( ) {
+    // C++11 后，局部静态变量初始化是线程安全的
+    static SearchingTool instance;
+    return instance;
+}
+
 // 搜索函数实现
 bool SearchingTool::search_value(const chstring &_target) {
     bool found = false;

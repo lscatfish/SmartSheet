@@ -61,18 +61,5 @@ public:
 };
 
 
-// 宏：简化异常抛出，自动携带当前位置信息
-#define THROW_EXCEPTION(EXCEPTION_TYPE, code, msg) \
-    throw EXCEPTION_TYPE(code, msg, std::source_location::current( ))
-
-#define THROW_PDF_ERROR(code, msg) \
-    THROW_EXCEPTION(PdfException, code, msg)
-#define THROW_DOCX_ERROR(code, msg) \
-    THROW_EXCEPTION(DocxException, code, msg)
-#define THROW_XLSX_ERROR(code, msg) \
-    THROW_EXCEPTION(XlsxException, code, msg)
-#define THROW_ENCODING_ERROR(code, msg) \
-    THROW_EXCEPTION(EncodingException, code, msg)
-
 
 #endif    // !BASEEXCEPTION_HPP
