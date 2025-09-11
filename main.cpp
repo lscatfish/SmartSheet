@@ -2,6 +2,7 @@
 #include <basic.hpp>
 #include <console.h>
 #include <Encoding.h>
+#include <ErrorHandler/BaseException.hpp>
 #include <helper.h>
 #include <iostream>
 #include <pdf.h>
@@ -16,11 +17,13 @@
 bool start_warning( );
 
 int main( ) {
-
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
     encoding::Init( );
 
 #if true
+
+
+    // BaseException aaa(0, "000000");
 
     pdf::Init( );    // 初始化poppler
     if (!start_warning( )) {

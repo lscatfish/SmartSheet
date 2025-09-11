@@ -88,14 +88,16 @@ include_directories("${THIRD_PARTY_LIB_DIR}/ftxui-6.1.9-win64/include")
 file(GLOB SOURCES   "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
                     "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
 )
-
-file(GLOB PY_WRAPPER "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
-                    "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
-                    "capi_wrapper/*.h" "capi_wrapper/*.cpp" "capi_wrapper/*.c"
+file(GLOB PY_WRAPPER    "src/*.cpp" "include/*.h" "include/*.hpp" "src/*.c"
+                        "test/*.h" "test/*.hpp" "test/*.c" "test/*.cpp"
+                        "capi_wrapper/*.h" "capi_wrapper/*.cpp" "capi_wrapper/*.c"
 )
-
 file(GLOB SEARCHINGTOOL_DIR "searchingTool/*.hpp" "searchingTool/*.h" 
-"searchingTool/*.cpp" "searchingTool/*.c")
+                            "searchingTool/*.cpp" "searchingTool/*.c"
+)
+file(GLOB ERRORHANDLER_DIR  "ErrorHandler/*.hpp" "ErrorHandler/*.cpp" 
+                            "ErrorHandler/*.h" "ErrorHandler/*.c"
+)
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
@@ -154,9 +156,7 @@ if(NOT EXISTS ${POPPLER_DLL_DIR})
     message(WARNING "poppler DLL directory not found: ${POPPLER_DLL_DIR}")
 else()
     # 使用LIST_DIRECTORIES false确保只获取文件
-    file(GLOB POPPLER_DLL_RELEASE_FILES LIST_DIRECTORIES false 
-    "${POPPLER_DLL_DIR}/*.dll"
-    )
+    file(GLOB POPPLER_DLL_RELEASE_FILES LIST_DIRECTORIES false "${POPPLER_DLL_DIR}/*.dll")
     
     # 验证是否找到了DLL文件
     if(NOT POPPLER_DLL_RELEASE_FILES)
@@ -169,7 +169,7 @@ endif()
 
 
 # 添加执行文件
-add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES})
+add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES} ${ERRORHANDLER_DIR})
 add_executable(SearchingTool 
 ${SEARCHINGTOOL_DIR}
 ${SOURCES}
