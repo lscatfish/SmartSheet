@@ -7,6 +7,8 @@
 #include <console.h>
 #include <cstdlib>
 #include <Encoding.h>
+#include <ErrorHandler/BaseException.hpp>
+#include <ErrorHandler/ErrorHandler.hpp>
 #include <Files.h>
 #include <Fuzzy.h>
 #include <helper.h>
@@ -648,58 +650,56 @@ void DoQingziClass::save_statisticsSheet( ) {
 
 // @brief 青字班报名
 void DoQingziClass::registration( ) {
-    file::DefFolder *aFolder = new file::DefFolder(file::_INPUT_SIGN_QC_ALL_DIR_, true);
-    if (!aFolder) {
-        std::cout << U8C(u8"内存分配失败") << std::endl;
-    }
+    file::DefFolder aFolder(file::_INPUT_SIGN_QC_ALL_DIR_, true);
 
-    myList< std::string > paths = aFolder->get_sysfilepath_list(myList< chstring >{ ".docx", ".DOCX" });    // 文件路径
+    myList< std::string > paths = aFolder.get_sysfilepath_list(myList< chstring >{ ".docx", ".DOCX" });    // 文件路径
     // 解析docx文件
     if (paths.size( ) != 0) {
         for (const auto &p : paths) {
             docx::DefDocx aDocx(p);
-            personStd_.push_back(aDocx.get_person( ));
+            if (aDocx.ifOK( ))
+                personStd_.push_back(aDocx.get_person( ));
         }
     }
 
     // 处理pdf
-    file::DefFolder pdfFiles(*aFolder, myList< chstring >{ ".pdf", ".PDF" });
+    file::DefFolder pdfFiles(aFolder, myList< chstring >{ ".pdf", ".PDF" });
     paths = pdfFiles.get_u8filepath_list( );    // 文件路径
     // 解析pdf文件
     if (paths.size( ) != 0) {
         for (const auto &u8p : paths) {
-            pdf::DefPdf aPdf(u8p);
-            if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {    // 应聘表
-                DefPerson per = aPdf.get_person( );
-                auto      it  = personStd_.end( );
-                search_person(it, per);
-                if (it != personStd_.end( )) {
-                    it->otherInformation[U8C(u8"文件地址")] += (u8p + " ; ");
-                    it->ifsign       = true;
-                    it->signPosition = per.signPosition;
-                    if (!pdfFiles.erase_with(u8p))
-                        pause( );
-                } else {
-                    per.ifsign                              = true;
-                    per.otherInformation[U8C(u8"文件地址")] = u8p;
-                    per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
-                    per.otherInformation[U8C(u8"备注")]     = U8C(u8"未找到docx文档");
-                    personStd_.push_back(per);
-                    if (!pdfFiles.erase_with(u8p))
-                        pause( );
-                }
-                // std::cout << per.name;
-                file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
-            } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
+            TRYANY(
+                pdf::DefPdf aPdf(u8p); if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Committee) {    // 应聘表
+                    DefPerson per = aPdf.get_person( );
+                    auto      it  = personStd_.end( );
+                    search_person(it, per);
+                    if (it != personStd_.end( )) {
+                        it->otherInformation[U8C(u8"文件地址")] += (u8p + " ; ");
+                        it->ifsign       = true;
+                        it->signPosition = per.signPosition;
+                        if (!pdfFiles.erase_with(u8p))
+                            pause( );
+                    } else {
+                        per.ifsign                              = true;
+                        per.otherInformation[U8C(u8"文件地址")] = u8p;
+                        per.otherInformation[U8C(u8"报名方式")] = U8C(u8"组织推荐");
+                        per.otherInformation[U8C(u8"备注")]     = U8C(u8"未找到docx文档");
+                        personStd_.push_back(per);
+                        if (!pdfFiles.erase_with(u8p))
+                            pause( );
+                    }
+                    // std::cout << per.name;
+                    file::copy_file_to_folder(encoding::utf8_to_sysdcode(u8p), file::_OUTPUT_SIGN_QC_CMT_DIR_);    // 复制到输出文件夹
+                } else if (aPdf.isOKed( ) && aPdf.get_sheet_type( ) == pdf::DefPdf::SheetType::Classmate) {
                 DefPerson per = aPdf.get_person( );
 
                 per.otherInformation[U8C(u8"文件地址")] = u8p;
                 personStd_.push_back(per);
-                pdfFiles.erase_with(u8p);
-            }
+                pdfFiles.erase_with(u8p); })
+            CATCH_PDF_ERROR( )
+            CATCH_STD_ERROR( )
         }
     }
-
     save_registrationSheet( );
 
     // 筛选pdf文件
@@ -712,8 +712,6 @@ void DoQingziClass::registration( ) {
               << U8C(u8"青字班报名表已输出到 ")
               << file::_OUTPUT_SIGN_QC_DIR_ << U8C(u8"报名.xlsx 中...")
               << std::endl;
-    delete aFolder;
-    aFolder = nullptr;    // 还是不要有野指针
 }
 
 // @brief 保存青字班的报名表

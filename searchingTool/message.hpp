@@ -17,13 +17,6 @@ class MessageLogger {
 public:
     std::string _SEARCH_LOG_ = "./search_log/";
 
-    // 全局访问点（首次调用时初始化）
-    static MessageLogger &getInstance( ) {
-        // C++11 后，局部静态变量初始化是线程安全的
-        static MessageLogger instance;
-        return instance;
-    }
-
     struct MessageXLSX {
         chstring    filepath;      // 文件路径
         chstring    targetWord;    // 搜索目标
@@ -69,6 +62,9 @@ public:
     };
 
     using DefMessage = std::variant< MessageXLSX, MessageDOCX, MessagePDF, MessagePath >;
+
+    // 全局访问点（首次调用时初始化）
+    static MessageLogger &getInstance( );
 
     // 获取chstring列表
     myList< chstring > get_tempmsgs_chstring( ) const;

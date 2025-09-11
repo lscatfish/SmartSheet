@@ -210,11 +210,7 @@ public:
     ~SearchingTool( ) = default;
 
     // 全局访问点（懒汉式：首次调用时初始化）
-    static SearchingTool &getInstance( ) {
-        // C++11 后，局部静态变量初始化是线程安全的
-        static SearchingTool instance;
-        return instance;
-    }
+    static SearchingTool &getInstance( );
 
     // 公开搜索函数
     bool search_value(const chstring &_target);

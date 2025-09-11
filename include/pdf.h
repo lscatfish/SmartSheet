@@ -11,6 +11,7 @@
 #include <basic.hpp>
 #include <chstring.hpp>
 #include <cstdlib>
+#include <high.h>
 #include <iostream>
 #include <memory>
 #include <PersonnelInformation.h>
@@ -31,40 +32,10 @@ class LineExtractor : public OutputDev {
 public:
     std::vector< LineSegment > lines;
 
-    bool upsideDown( ) override {
-        return false;
-    }
-    bool useDrawChar( ) override {
-        return false;
-    }
-    bool interpretType3Chars( ) override {
-        return false;
-    }
-
-    void stroke(GfxState *state) override {
-        const GfxPath *path = state->getPath( );
-        if (!path) return;
-
-        for (int i = 0; i < path->getNumSubpaths( ); ++i) {
-            const GfxSubpath *sub = path->getSubpath(i);
-            if (!sub || sub->getNumPoints( ) < 2) continue;
-
-            for (int j = 1; j < sub->getNumPoints( ); ++j) {
-                if (sub->getCurve(j)) continue;    // 跳过贝塞尔曲线控制点
-
-                double x0 = sub->getX(j - 1);
-                double y0 = sub->getY(j - 1);
-                double x1 = sub->getX(j);
-                double y1 = sub->getY(j);
-
-                double tx0, ty0, tx1, ty1;
-                state->transform(x0, y0, &tx0, &ty0);
-                state->transform(x1, y1, &tx1, &ty1);
-
-                lines.push_back(LineSegment(tx0, ty0, tx1, ty1));
-            }
-        }
-    }
+    bool upsideDown( ) override;
+    bool useDrawChar( ) override;
+    bool interpretType3Chars( ) override;
+    void stroke(GfxState *state) override;
 };
 
 // 此类用于处理pdf文件
@@ -88,9 +59,9 @@ public:
      */
     DefPdf(const chstring &_path, myList< myList< CELL > > &out);
 
-    /// 析构 DefPdf 对象，释放其占用的资源（如有）。
+    // 析构 DefPdf 对象，释放其占用的资源（如有）。
     ~DefPdf( ) = default;
-
+    /*-------------------------------------------------------------------------------*/
 
     // 返回解析出的表格
     myTable< chstring > get_sheet( );
@@ -111,7 +82,7 @@ private:
     chstring           path_;    // 文件所在的路径
     poppler::document *document_ = nullptr;
     PDFDoc             pdfdoc_;
-    myTable< CELL >      sheet_;        // 提取出的表格
+    myTable< CELL >    sheet_;        // 提取出的表格
     SheetType          sheetType_;    // 表格的类型
     int                num_pages_;
     bool               isOK;    // 是否解析成功
