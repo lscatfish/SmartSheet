@@ -1,9 +1,12 @@
 ﻿
 #include <basic.hpp>
 #include <chstring.hpp>
+#include <Encoding.h>
 #include <excel.h>
+#include <exception>
 #include <high.h>
 #include <iostream>
+#include <string>
 #include <xlnt/xlnt.hpp>
 
 
@@ -104,14 +107,19 @@ xlnt::border set_bolder(
 
 XlsxWrite::XlsxWrite(
     const myTable< chstring > &_sh,
+    const chstring            &_path,
+    const double               _heightRegular,
+    const myList< double >    &_widths,
     const xlnt::border        &_border,
     const xlnt::font          &_fontRegular,
     const xlnt::alignment     &_align,
     bool                       _hasTitle,
     const chstring            &_title,
     const xlnt::font          &_fontTitle,
+    const double               _heightTitle,
     bool                       _hasHeader,
-    const xlnt::font          &_fontHeader)
+    const xlnt::font          &_fontHeader,
+    const double               _heightHeader)
     : sheet_(_sh),
       title_(_title),
       borderCell_(_border),
@@ -120,17 +128,27 @@ XlsxWrite::XlsxWrite(
       fontTitle_(_fontTitle),
       fontHeader_(_fontHeader),
       hasTitle_(_hasTitle),
-      hasHeader_(_hasHeader) {}
+      hasHeader_(_hasHeader),
+      path_(_path),
+      widths_(_widths),
+      heightRegular_(_heightRegular),
+      heightTitle_(_heightTitle),
+      heightHeader_(_heightHeader) {}
 
 XlsxWrite::XlsxWrite( ) {
-    borderCell_  = set_bolder( );
-    fontRegular_ = set_font(U8C(u8"宋体"), 14);
-    alignment_   = set_alignment( );
-    hasTitle_    = false;
-    title_       = "";
-    fontTitle_   = set_font(U8C(u8"方正小标宋简体"), 24);
-    hasHeader_   = false;
-    fontHeader_  = set_font(U8C(u8"宋体"), 24, true);
+    borderCell_    = set_bolder( );
+    fontRegular_   = set_font(U8C(u8"宋体"), 14);
+    alignment_     = set_alignment( );
+    hasTitle_      = false;
+    title_         = "";
+    fontTitle_     = set_font(U8C(u8"方正小标宋简体"), 24);
+    hasHeader_     = false;
+    fontHeader_    = set_font(U8C(u8"宋体"), 24, true);
+    path_          = "";
+    widths_        = myList< double >{ };
+    heightRegular_ = 24;
+    heightHeader_  = 24;
+    heightTitle_   = 40;
 }
 
 // 设置正文字体
@@ -219,6 +237,123 @@ void XlsxWrite::sheet(const myTable< chstring > &_s) {
 // 返回表格
 myTable< chstring > XlsxWrite::sheet( ) const {
     return sheet_;
+}
+
+// 设置写入的路径
+void XlsxWrite::path(const chstring &_p) {
+    path_ = _p;
+}
+
+// 获取写入路径
+chstring XlsxWrite::path( ) const {
+    return path_;
+}
+
+// 设置正文行高
+void XlsxWrite::heightRegular(const double _h) {
+    heightRegular_ = _h;
+}
+
+// 获取正文行高
+double XlsxWrite::heightRegular( ) const {
+    return heightRegular_;
+}
+
+// 设置标题行高
+void XlsxWrite::heightTitle(const double _h) {
+    heightTitle_ = _h;
+}
+
+// 获取标题行高
+double XlsxWrite::heightTitle( ) const {
+    return heightTitle_;
+}
+
+// 设置表头行高
+void XlsxWrite::heightHeader(const double _h) {
+    heightHeader_ = _h;
+}
+
+// 获取表头行高
+double XlsxWrite::heightHeader( ) const {
+    return heightHeader_;
+}
+
+// 检查是否可写
+bool XlsxWrite::can_write( ) const {
+    if (sheet_.empty( ) || path_.empty( )) return false;
+    if (hasTitle_ && title_.empty( )) return false;
+    return true;
+}
+
+// 写入xlsx
+bool XlsxWrite::write( ) const {
+    if (!can_write( )) return false;
+    myTable< std::string > sh = chstring::get_u8table(sheet_);
+    encoding::repair_sheet_utf8_invalidity(sh);
+
+    xlnt::workbook wb;
+    make_workbook(wb, sh);    // 制表
+
+    // 保存
+    try {
+        wb.save(path_.u8string( ));
+    } catch (const std::exception &e) {
+        std::cerr << e.what( ) << std::endl;
+    }
+}
+
+// 制作workbook
+void XlsxWrite::make_workbook(xlnt::workbook &wb, const myTable< std::string > &sh) const {
+    xlnt::worksheet ws = wb.active_sheet( );
+    ws.title("Sheet1");
+
+    size_t maxCol = 1;    // sheet中列的数量
+    // 逐行逐列写入
+    for (size_t r = 0; r < sh.size( ); r++) {
+        for (size_t c = 0; c < sh[r].size( ); c++) {
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(sh[r][c]);
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(fontRegular_);
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(alignment_);
+            ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(borderCell_);
+        }
+        if (maxCol < sh[r].size( ))
+            maxCol = sh[r].size( );
+        ws.row_properties(r + 1).height        = heightRegular_;
+        ws.row_properties(r + 1).custom_height = true;
+    }
+    // 调整列宽
+    for (size_t i = 1; i <= maxCol && i <= widths_.size( ); i++) {
+        ws.column_properties(i).width        = widths_[i - 1];
+        ws.column_properties(i).custom_width = true;
+    }
+    if (hasHeader_) {
+        for (size_t c = 0; c < sh[0].size( ); c++)
+            ws.cell(xlnt::cell_reference(c + 1, 1)).font(fontHeader_);
+        ws.row_properties(1).height        = heightHeader_;
+        ws.row_properties(1).custom_height = true;
+    }
+    if (hasTitle_) {
+        ws.insert_rows(1, 1);
+
+        // 合并单元格
+        std::string end_col;
+        int         temp = maxCol;
+        while (temp > 0) {
+            int remainder = (temp - 1) % 26;
+            end_col       = char('A' + remainder) + end_col;
+            temp          = (temp - 1) / 26;
+        }
+        // 构建合并单元格的范围字符串
+        std::string merRange = "A1:" + end_col + "1";
+        ws.merge_cells(merRange);
+
+        ws.row_properties(1).height        = heightTitle_;    // 40pt
+        ws.row_properties(1).custom_height = true;
+        ws.cell("A1").value(title_.u8string( ));
+        ws.cell("A1").font(fontTitle_);
+        ws.cell("A1").alignment(alignment_);
+    }
 }
 
 }    // namespace xlsx
