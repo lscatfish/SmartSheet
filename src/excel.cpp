@@ -12,6 +12,15 @@
 
 // 用于解析xlsx的类
 namespace xlsx {
+// 定义部分常用字体
+xlnt::font                    stdfontRegular_attSheet = set_font(U8C(u8"宋体"), 14);
+xlnt::font                    stdfontTitle_attSheet   = set_font(U8C(u8"宋体"), 24);
+xlnt::font                    stdfontRegular_sttSheet = set_font(U8C(u8"宋体"), 16);
+xlnt::font                    stdfontHeader_sttSheet  = set_font(U8C(u8"宋体"), 16, true);
+xlnt::font                    stdfontTitle_sttSheet   = set_font(U8C(u8"方正小标宋简体"), 26);
+xlnt::border::border_property stdBorderProperty       = set_border_property( );
+xlnt::border                  stdBorder               = set_bolder( );
+xlnt::alignment               autoAlignment           = set_alignment( );
 
 /*
  * @brief 设置字体
@@ -96,15 +105,6 @@ xlnt::border set_bolder(
     return b;
 }
 
-
-// XlsxWrite::XlsxWrite(
-//     const myTable< chstring > &_sh,
-//     const chstring            &_title)
-//     : sheet_(_sh), title_(_title) {
-// }
-
-
-
 XlsxWrite::XlsxWrite(
     const myTable< chstring > &_sh,
     const chstring            &_path,
@@ -136,14 +136,14 @@ XlsxWrite::XlsxWrite(
       heightHeader_(_heightHeader) {}
 
 XlsxWrite::XlsxWrite( ) {
-    borderCell_    = set_bolder( );
-    fontRegular_   = set_font(U8C(u8"宋体"), 14);
-    alignment_     = set_alignment( );
+    borderCell_    = stdBorder;
+    fontRegular_   = stdfontRegular_sttSheet;
+    alignment_     = autoAlignment;
     hasTitle_      = false;
     title_         = "";
-    fontTitle_     = set_font(U8C(u8"方正小标宋简体"), 24);
+    fontTitle_     = stdfontTitle_sttSheet;
     hasHeader_     = false;
-    fontHeader_    = set_font(U8C(u8"宋体"), 24, true);
+    fontHeader_    = stdfontHeader_sttSheet;
     path_          = "";
     widths_        = myList< double >{ };
     heightRegular_ = 24;
@@ -173,7 +173,6 @@ xlnt::font XlsxWrite::fontHeader( ) const {
 void XlsxWrite::fontTitle(const xlnt::font &_f) {
     fontTitle_ = _f;
 }
-
 // 获取标题字体
 xlnt::font XlsxWrite::fontTitle( ) const {
     return fontTitle_;
@@ -183,7 +182,6 @@ xlnt::font XlsxWrite::fontTitle( ) const {
 void XlsxWrite::borderCell(const xlnt::border &_b) {
     borderCell_ = _b;
 }
-
 // 获取单元格边框格式
 xlnt::border XlsxWrite::borderCell( ) const {
     return borderCell_;
@@ -193,7 +191,6 @@ xlnt::border XlsxWrite::borderCell( ) const {
 void XlsxWrite::alignment(const xlnt::alignment &_a) {
     alignment_ = _a;
 }
-
 // 获取对齐方式
 xlnt::alignment XlsxWrite::alignment( ) const {
     return alignment_;
@@ -203,7 +200,6 @@ xlnt::alignment XlsxWrite::alignment( ) const {
 void XlsxWrite::hasTitle(const bool _t) {
     hasTitle_ = _t;
 }
-
 // 返回是否有标题
 bool XlsxWrite::hasTitlt( ) const {
     return hasTitle_;
@@ -213,7 +209,6 @@ bool XlsxWrite::hasTitlt( ) const {
 void XlsxWrite::hasHeader(const bool _h) {
     hasHeader_ = _h;
 }
-
 // 返回是否有表头
 bool XlsxWrite::hasHeader( ) const {
     return hasHeader_;
@@ -223,7 +218,6 @@ bool XlsxWrite::hasHeader( ) const {
 void XlsxWrite::title(const chstring &_t) {
     title_ = _t;
 }
-
 // 获取标题
 chstring XlsxWrite::title( ) const {
     return title_;
@@ -233,7 +227,6 @@ chstring XlsxWrite::title( ) const {
 void XlsxWrite::sheet(const myTable< chstring > &_s) {
     sheet_ = _s;
 }
-
 // 返回表格
 myTable< chstring > XlsxWrite::sheet( ) const {
     return sheet_;
@@ -243,7 +236,6 @@ myTable< chstring > XlsxWrite::sheet( ) const {
 void XlsxWrite::path(const chstring &_p) {
     path_ = _p;
 }
-
 // 获取写入路径
 chstring XlsxWrite::path( ) const {
     return path_;
@@ -253,7 +245,6 @@ chstring XlsxWrite::path( ) const {
 void XlsxWrite::heightRegular(const double _h) {
     heightRegular_ = _h;
 }
-
 // 获取正文行高
 double XlsxWrite::heightRegular( ) const {
     return heightRegular_;
@@ -263,7 +254,6 @@ double XlsxWrite::heightRegular( ) const {
 void XlsxWrite::heightTitle(const double _h) {
     heightTitle_ = _h;
 }
-
 // 获取标题行高
 double XlsxWrite::heightTitle( ) const {
     return heightTitle_;
@@ -273,7 +263,6 @@ double XlsxWrite::heightTitle( ) const {
 void XlsxWrite::heightHeader(const double _h) {
     heightHeader_ = _h;
 }
-
 // 获取表头行高
 double XlsxWrite::heightHeader( ) const {
     return heightHeader_;
@@ -354,6 +343,43 @@ void XlsxWrite::make_workbook(xlnt::workbook &wb, const myTable< std::string > &
         ws.cell("A1").font(fontTitle_);
         ws.cell("A1").alignment(alignment_);
     }
+}
+
+/* ================================================================================================================ */
+/* ================================================================================================================ */
+
+XlsxLoad::XlsxLoad(const chstring &_p)
+    : path_(_p) {
+    std::cout << "load xlsx file: \"" << path_ << "\"";
+    wb_.load(path_.u8string( ));
+    auto ws = wb_.active_sheet( );
+
+    // 按行遍历
+    for (auto row : ws.rows(false)) {
+        // 保存当前行所有单元格文本的临时向量
+        myList< chstring > aSingleRow;
+        // 遍历当前行的每个单元格
+        for (auto cell : row) {
+            // cell.to_string() 把数字、日期、公式等统一转为字符串
+            aSingleRow.push_back(cell.to_string( ));
+        }
+        sheet_.push_back(aSingleRow);
+    }
+
+    std::cout << " - Done!" << std::endl;
+}
+
+void XlsxLoad::path(const chstring &_p) {
+    path_ = _p;
+}
+
+chstring XlsxLoad::path( ) const {
+    return path_;
+}
+
+// 获取解析得到的表格
+myTable< chstring > XlsxLoad::get_sheet( ) const {
+    return sheet_;
 }
 
 }    // namespace xlsx

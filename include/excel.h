@@ -13,6 +13,15 @@
 // 用于解析xlsx的类
 namespace xlsx {
 
+extern xlnt::font                    stdfontRegular_attSheet;
+extern xlnt::font                    stdfontTitle_attSheet;
+extern xlnt::font                    stdfontRegular_sttSheet;
+extern xlnt::font                    stdfontHeader_sttSheet;
+extern xlnt::font                    stdfontTitle_sttSheet;
+extern xlnt::border::border_property stdBorderProperty;
+extern xlnt::border                  stdBorder;
+extern xlnt::alignment               autoAlignment;
+
 /*
  * @brief 设置字体
  * @param _name 字体名称
@@ -62,10 +71,10 @@ xlnt::border::border_property set_border_property(
  * @param _bottom 下
  */
 xlnt::border set_bolder(
-    const xlnt::border::border_property _start  = set_border_property( ),
-    const xlnt::border::border_property _end    = set_border_property( ),
-    const xlnt::border::border_property _top    = set_border_property( ),
-    const xlnt::border::border_property _bottom = set_border_property( ));
+    const xlnt::border::border_property _start  = stdBorderProperty,
+    const xlnt::border::border_property _end    = stdBorderProperty,
+    const xlnt::border::border_property _top    = stdBorderProperty,
+    const xlnt::border::border_property _bottom = stdBorderProperty);
 
 /* ================================================================================================================ */
 /* ================================================================================================================ */
@@ -78,17 +87,16 @@ public:
         const chstring            &_path,
         const double               _heightRegular = 24,
         const myList< double >    &_widths        = myList< double >{ },
-
-        const xlnt::border    &_border       = set_bolder( ),
-        const xlnt::font      &_fontRegular  = set_font(U8C(u8"宋体"), 14),
-        const xlnt::alignment &_align        = set_alignment( ),
-        bool                   _hasTitle     = false,
-        const chstring        &_title        = "",
-        const xlnt::font      &_fontTitle    = set_font(U8C(u8"方正小标宋简体"), 24),
-        const double           _heightTitle  = 40,
-        bool                   _hasHeader    = false,
-        const xlnt::font      &_fontHeader   = set_font(U8C(u8"宋体"), 24, true),
-        const double           _heightHeader = 24);
+        const xlnt::border        &_border        = stdBorder,
+        const xlnt::font          &_fontRegular   = stdfontRegular_sttSheet,
+        const xlnt::alignment     &_align         = autoAlignment,
+        bool                       _hasTitle      = false,
+        const chstring            &_title         = "",
+        const xlnt::font          &_fontTitle     = stdfontTitle_sttSheet,
+        const double               _heightTitle   = 40,
+        bool                       _hasHeader     = false,
+        const xlnt::font          &_fontHeader    = stdfontHeader_sttSheet,
+        const double               _heightHeader  = 24);
     XlsxWrite( );
     ~XlsxWrite( ) = default;
 
@@ -164,21 +172,20 @@ public:
     bool write( ) const;
 
 private:
-    myTable< chstring > sheet_;          // 正式的表格
-    chstring            title_;          // 标题
-    xlnt::font          fontRegular_;    // 正文字体
-    xlnt::font          fontTitle_;      // 标题字体
-    xlnt::font          fontHeader_;     // 表头字体
-    xlnt::border        borderCell_;     // 一个单元格的边框
-    chstring            path_;           // 路径
-    xlnt::alignment     alignment_;      // 对齐方式
-    bool                hasTitle_;       // 是否有标题
-    bool                hasHeader_;      // 是否有表头
-
-    double           heightRegular_;    // 正文行高
-    double           heightHeader_;     // 表头的行高
-    double           heightTitle_;      // 标题行高
-    myList< double > widths_;           // 列宽的列表
+    myTable< chstring > sheet_;            // 正式的表格
+    chstring            title_;            // 标题
+    xlnt::font          fontRegular_;      // 正文字体
+    xlnt::font          fontTitle_;        // 标题字体
+    xlnt::font          fontHeader_;       // 表头字体
+    xlnt::border        borderCell_;       // 一个单元格的边框
+    chstring            path_;             // 路径
+    xlnt::alignment     alignment_;        // 对齐方式
+    bool                hasTitle_;         // 是否有标题
+    bool                hasHeader_;        // 是否有表头
+    double              heightRegular_;    // 正文行高
+    double              heightHeader_;     // 表头的行高
+    double              heightTitle_;      // 标题行高
+    myList< double >    widths_;           // 列宽的列表
 
     // 制作workbook
     void make_workbook(xlnt::workbook &wb, const myTable< std::string > &sh) const;
@@ -190,29 +197,23 @@ private:
 // 解析xlsx
 class XlsxLoad {
 public:
-    XlsxLoad( )  = default;
+    XlsxLoad(const chstring &_p);
     ~XlsxLoad( ) = default;
 
+    void     path(const chstring &_p);
+    chstring path( ) const;
+
+    // 获取解析得到的表格
+    myTable< chstring > get_sheet( ) const;
+
 private:
+    chstring            path_;     // 文件路径
+    myTable< chstring > sheet_;    // 解析出的表格
+    xlnt::workbook      wb_;       // 内置解析得到的表格
 };
 
 /* ================================================================================================================ */
 /* ================================================================================================================ */
-
-class DefXlsx : public XlsxLoad, XlsxWrite {
-public:
-    DefXlsx( );
-    ~DefXlsx( );
-
-private:
-};
-
-DefXlsx::DefXlsx( ) {
-}
-
-DefXlsx::~DefXlsx( ) {
-}
-
 
 }    // namespace xlsx
 

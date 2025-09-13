@@ -805,7 +805,7 @@ void save_attSheet_to_xlsx(
 
     // 定义字体
     xlnt::font f;
-    f.name(U8C(u8"仿宋_GB2312"));
+    f.name(U8C(u8"宋体"));
     f.size(14);
 
     // 创建边框样式
