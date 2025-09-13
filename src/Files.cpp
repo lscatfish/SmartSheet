@@ -40,6 +40,7 @@
 #include <errno.h>    // 包含 errno、EBUSY 等错误码
 
 #endif
+#include <xlnt/styles/format.hpp>
 
 
 namespace file {

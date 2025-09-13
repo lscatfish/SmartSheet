@@ -4,6 +4,7 @@
 #include <Encoding.h>
 #include <ErrorHandler/BaseException.hpp>
 #include <ErrorHandler/ErrorHandler.hpp>
+#include <excel.h>
 #include <helper.h>
 #include <iostream>
 #include <pdf.h>
@@ -19,7 +20,7 @@ bool start_warning( );
 
 int main( ) {
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
-
+    //xlsx::set_alignment( );
 #if true
     TRYANY(
         encoding::Init( );
