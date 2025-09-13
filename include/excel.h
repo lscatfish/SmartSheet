@@ -7,6 +7,7 @@
 #include <chstring.hpp>
 #include <high.h>
 #include <iostream>
+#include <string>
 #include <xlnt/xlnt.hpp>
 
 // 用于解析xlsx的类
@@ -74,14 +75,20 @@ class XlsxWrite {
 public:
     XlsxWrite(
         const myTable< chstring > &_sh,
-        const xlnt::border        &_border      = set_bolder( ),
-        const xlnt::font          &_fontRegular = set_font(U8C(u8"宋体"), 14),
-        const xlnt::alignment     &_align       = set_alignment( ),
-        bool                       _hasTitle    = false,
-        const chstring            &_title       = "",
-        const xlnt::font          &_fontTitle   = set_font(U8C(u8"方正小标宋简体"), 24),
-        bool                       _hasHeader   = false,
-        const xlnt::font          &_fontHeader  = set_font(U8C(u8"宋体"), 24, true));
+        const chstring            &_path,
+        const double               _heightRegular = 24,
+        const myList< double >    &_widths        = myList< double >{ },
+
+        const xlnt::border    &_border       = set_bolder( ),
+        const xlnt::font      &_fontRegular  = set_font(U8C(u8"宋体"), 14),
+        const xlnt::alignment &_align        = set_alignment( ),
+        bool                   _hasTitle     = false,
+        const chstring        &_title        = "",
+        const xlnt::font      &_fontTitle    = set_font(U8C(u8"方正小标宋简体"), 24),
+        const double           _heightTitle  = 40,
+        bool                   _hasHeader    = false,
+        const xlnt::font      &_fontHeader   = set_font(U8C(u8"宋体"), 24, true),
+        const double           _heightHeader = 24);
     XlsxWrite( );
     ~XlsxWrite( ) = default;
 
@@ -125,24 +132,56 @@ public:
     // 获取标题
     chstring title( ) const;
 
-    //设置表格
+    // 设置表格内容
     void sheet(const myTable< chstring > &_s);
-    //返回表格
+    // 返回表格内容
     myTable< chstring > sheet( ) const;
 
+    // 设置写入的路径
+    void path(const chstring &_p);
+    // 获取写入路径
+    chstring path( ) const;
 
+    // 设置正文行高
+    void heightRegular(const double _h);
+    // 获取正文行高
+    double heightRegular( ) const;
+
+    // 设置标题行高
+    void heightTitle(const double _h);
+    // 获取标题行高
+    double heightTitle( ) const;
+
+    // 设置表头行高
+    void heightHeader(const double _h);
+    // 获取表头行高
+    double heightHeader( ) const;
+
+    // 检查是否可写
+    bool can_write( ) const;
+
+    // 写入xlsx
+    bool write( ) const;
 
 private:
-    myTable< chstring > sheet_;    // 正式的表格
-    chstring            title_;
+    myTable< chstring > sheet_;          // 正式的表格
+    chstring            title_;          // 标题
+    xlnt::font          fontRegular_;    // 正文字体
+    xlnt::font          fontTitle_;      // 标题字体
+    xlnt::font          fontHeader_;     // 表头字体
+    xlnt::border        borderCell_;     // 一个单元格的边框
+    chstring            path_;           // 路径
+    xlnt::alignment     alignment_;      // 对齐方式
+    bool                hasTitle_;       // 是否有标题
+    bool                hasHeader_;      // 是否有表头
 
-    xlnt::font      fontRegular_;    // 正文字体
-    xlnt::font      fontTitle_;      // 标题字体
-    xlnt::font      fontHeader_;     // 表头字体
-    xlnt::border    borderCell_;     // 一个单元格的边框
-    xlnt::alignment alignment_;      // 对齐方式
-    bool            hasTitle_;       // 是否有标题
-    bool            hasHeader_;      // 是否有表头
+    double           heightRegular_;    // 正文行高
+    double           heightHeader_;     // 表头的行高
+    double           heightTitle_;      // 标题行高
+    myList< double > widths_;           // 列宽的列表
+
+    // 制作workbook
+    void make_workbook(xlnt::workbook &wb, const myTable< std::string > &sh) const;
 };
 
 /* ================================================================================================================ */
@@ -156,6 +195,23 @@ public:
 
 private:
 };
+
+/* ================================================================================================================ */
+/* ================================================================================================================ */
+
+class DefXlsx : public XlsxLoad, XlsxWrite {
+public:
+    DefXlsx( );
+    ~DefXlsx( );
+
+private:
+};
+
+DefXlsx::DefXlsx( ) {
+}
+
+DefXlsx::~DefXlsx( ) {
+}
 
 
 }    // namespace xlsx
