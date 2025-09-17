@@ -13,7 +13,7 @@
 #dict=
 
 #是否开启手动裁剪图片，进行透视矫正
- ManualDocPerspectiveCorrector=true 			#只有两个值：true启用  false禁用
+# ManualDocPerspectiveCorrector=true 			#只有两个值：true启用  false禁用
 
 #是否启用图片增强功能
 #共有三个键值：
