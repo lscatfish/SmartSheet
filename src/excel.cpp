@@ -13,11 +13,11 @@
 // 用于解析xlsx的类
 namespace xlsx {
 // 定义部分常用字体
-xlnt::font                    stdfontRegular_attSheet = set_font(U8C(u8"宋体"), 14);
-xlnt::font                    stdfontTitle_attSheet   = set_font(U8C(u8"宋体"), 24);
-xlnt::font                    stdfontRegular_sttSheet = set_font(U8C(u8"宋体"), 16);
-xlnt::font                    stdfontHeader_sttSheet  = set_font(U8C(u8"宋体"), 16, true);
-xlnt::font                    stdfontTitle_sttSheet   = set_font(U8C(u8"方正小标宋简体"), 26);
+xlnt::font                    stdFontRegular_attSheet = set_font(U8C(u8"宋体"), 14);
+xlnt::font                    stdFontTitle_attSheet   = set_font(U8C(u8"宋体"), 24, true);
+xlnt::font                    stdFontRegular_sttSheet = set_font(U8C(u8"宋体"), 16);
+xlnt::font                    stdFontHeader_sttSheet  = set_font(U8C(u8"宋体"), 16, true);
+xlnt::font                    stdFontTitle_sttSheet   = set_font(U8C(u8"方正小标宋简体"), 26);
 xlnt::border::border_property stdBorderProperty       = set_border_property( );
 xlnt::border                  stdBorder               = set_bolder( );
 xlnt::alignment               autoAlignment           = set_alignment( );
@@ -137,13 +137,13 @@ XlsxWrite::XlsxWrite(
 
 XlsxWrite::XlsxWrite( ) {
     borderCell_    = stdBorder;
-    fontRegular_   = stdfontRegular_sttSheet;
+    fontRegular_   = stdFontRegular_sttSheet;
     alignment_     = autoAlignment;
     hasTitle_      = false;
     title_         = "";
-    fontTitle_     = stdfontTitle_sttSheet;
+    fontTitle_     = stdFontTitle_sttSheet;
     hasHeader_     = false;
-    fontHeader_    = stdfontHeader_sttSheet;
+    fontHeader_    = stdFontHeader_sttSheet;
     path_          = "";
     widths_        = myList< double >{ };
     heightRegular_ = 24;
@@ -268,6 +268,15 @@ double XlsxWrite::heightHeader( ) const {
     return heightHeader_;
 }
 
+// 设置行宽
+void XlsxWrite::widths(const myList< double > &_w) {
+    widths_ = _w;
+}
+// 获取行宽
+myList< double > XlsxWrite::widths( ) const {
+    return widths_;
+}
+
 // 检查是否可写
 bool XlsxWrite::can_write( ) const {
     if (sheet_.empty( ) || path_.empty( )) return false;
@@ -313,6 +322,15 @@ void XlsxWrite::make_workbook(xlnt::workbook &wb, const myTable< std::string > &
     }
     // 调整列宽
     for (size_t i = 1; i <= maxCol && i <= widths_.size( ); i++) {
+        if (widths_[i - 1] == -1) {
+            for (size_t j = i; j <= maxCol; j++) {
+                if (i - 2 >= 0) {
+                    ws.column_properties(j).width        = widths_[i - 2];
+                    ws.column_properties(j).custom_width = true;
+                }
+            }
+            break;
+        }
         ws.column_properties(i).width        = widths_[i - 1];
         ws.column_properties(i).custom_width = true;
     }
@@ -365,7 +383,6 @@ XlsxLoad::XlsxLoad(const chstring &_p)
         }
         sheet_.push_back(aSingleRow);
     }
-
     std::cout << " - Done!" << std::endl;
 }
 

@@ -13,11 +13,11 @@
 // 用于解析xlsx的类
 namespace xlsx {
 
-extern xlnt::font                    stdfontRegular_attSheet;
-extern xlnt::font                    stdfontTitle_attSheet;
-extern xlnt::font                    stdfontRegular_sttSheet;
-extern xlnt::font                    stdfontHeader_sttSheet;
-extern xlnt::font                    stdfontTitle_sttSheet;
+extern xlnt::font                    stdFontRegular_attSheet;
+extern xlnt::font                    stdFontTitle_attSheet;
+extern xlnt::font                    stdFontRegular_sttSheet;
+extern xlnt::font                    stdFontHeader_sttSheet;
+extern xlnt::font                    stdFontTitle_sttSheet;
 extern xlnt::border::border_property stdBorderProperty;
 extern xlnt::border                  stdBorder;
 extern xlnt::alignment               autoAlignment;
@@ -30,7 +30,7 @@ extern xlnt::alignment               autoAlignment;
  * @param _italic 是否为斜体
  * @param _strikethrough 是否取消删除线
  * @param _color 字体颜色
- * @param _underline_style 是否取消删除线
+ * @param _underline_style 是否有删除线
  */
 xlnt::font set_font(
     const chstring                   &_name,
@@ -39,7 +39,7 @@ xlnt::font set_font(
     const bool                        _italic          = false,
     const xlnt::color                &_color           = xlnt::color::black( ),
     const xlnt::font::underline_style _underline_style = xlnt::font::underline_style::none,
-    const bool                        _strikethrough   = true);
+    const bool                        _strikethrough   = false);
 
 /*
  * @brief 设置对齐方式
@@ -88,14 +88,14 @@ public:
         const double               _heightRegular = 24,
         const myList< double >    &_widths        = myList< double >{ },
         const xlnt::border        &_border        = stdBorder,
-        const xlnt::font          &_fontRegular   = stdfontRegular_sttSheet,
+        const xlnt::font          &_fontRegular   = stdFontRegular_sttSheet,
         const xlnt::alignment     &_align         = autoAlignment,
         bool                       _hasTitle      = false,
         const chstring            &_title         = "",
-        const xlnt::font          &_fontTitle     = stdfontTitle_sttSheet,
+        const xlnt::font          &_fontTitle     = stdFontTitle_sttSheet,
         const double               _heightTitle   = 40,
         bool                       _hasHeader     = false,
-        const xlnt::font          &_fontHeader    = stdfontHeader_sttSheet,
+        const xlnt::font          &_fontHeader    = stdFontHeader_sttSheet,
         const double               _heightHeader  = 24);
     XlsxWrite( );
     ~XlsxWrite( ) = default;
@@ -164,6 +164,11 @@ public:
     void heightHeader(const double _h);
     // 获取表头行高
     double heightHeader( ) const;
+
+    // 设置行宽
+    void widths(const myList< double > &_w);
+    // 获取行宽
+    myList< double > widths( ) const;
 
     // 检查是否可写
     bool can_write( ) const;
