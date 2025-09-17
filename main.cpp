@@ -15,14 +15,26 @@
 #include <test/test_for_chstring.h>
 #include <test/test_for_ui.h>
 
+#define __DELETE__QZC__(_IN_PTR) \
+    if (_IN_PTR) {               \
+        delete _IN_PTR;          \
+        _IN_PTR = nullptr;       \
+    }
+
+
+DoQingziClass *qClass = new DoQingziClass;
+
+
 // 开始前警告
 bool start_warning( );
 
+
 int main( ) {
     console::set_console_utf8( );    // 设置控制台为UTF-8编码
-    //xlsx::set_alignment( );
+    // xlsx::set_alignment( );
 #if true
     TRYANY(
+
         encoding::Init( );
         pdf::Init( );    // 初始化poppler
         if (!start_warning( )) {
@@ -31,34 +43,28 @@ int main( ) {
             pause( );
             return -1;    // 用户选择不继续，程序终止
         } settings::set_path( );
-
         console::clear_console( );
-        DoQingziClass *qClass = new DoQingziClass;
         if (!qClass) {
             std::cerr << U8C(u8"青字班模块初始化失败（内存分配失败），程序终止...") << std::endl;
-            delete qClass;
+            __DELETE__QZC__(qClass)
             pause( );
             return -1;
         } if (!qClass->self_check( )) {
             std::cout << std::endl;
             std::cerr << U8C(u8"青字班模块自检失败，程序终止...") << std::endl;
-            delete qClass;
+            __DELETE__QZC__(qClass)
             pause( );
             return -1;
-        }
-
-        qClass->start( );
-        delete qClass;)
-    CATCH_DOCX_ERROR( )
-    CATCH_PDF_ERROR( )
-    CATCH_STD_ERROR( )
-    CATCH_UNKNOWN_ERROR( )
+        } qClass->start( );
+        __DELETE__QZC__(qClass))
+    CATCH_DOCX_ERROR(__DELETE__QZC__(qClass))
+    CATCH_PDF_ERROR(__DELETE__QZC__(qClass))
+    CATCH_STD_ERROR(__DELETE__QZC__(qClass))
+    CATCH_UNKNOWN_ERROR(__DELETE__QZC__(qClass))
 
 #else
-
     test_for_ManualDocPerspectiveCorrector( );
     pause( );
-
 #endif    // true
 
     std::cout << std::endl
