@@ -3,6 +3,12 @@
 #ifndef EXCEL_H
 #define EXCEL_H
 
+/*
+ * @file
+ * 处理xlsx的类
+ * 为了适配xlnt
+ */
+
 #include <basic.hpp>
 #include <chstring.hpp>
 #include <high.h>
