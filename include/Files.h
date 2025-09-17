@@ -322,36 +322,6 @@ std::string combine_folderdir_and_filename(const std::string &_folder, const std
 bool copy_file_to_folder(const std::string &_sourcePath, const std::string &_destFolder);
 
 /*
- * @brief 从一个文件下获取所有符合后缀条件的文件
- * @param _name 返回的文件名（无格式后缀）
- * @param _path 返回的文件路径
- * @param _foldername 目标文件夹名称
- * @param _extension 文件的后缀集合
- * @return 错误返回false，读取成功返回true
- */
-//bool get_filepath_from_folder(
-//    myList< std::string >       &_name,
-//    myList< std::string >       &_path,
-//    std::string                _foldername,
-//    const myList< std::string > &_extension);
-//
-///*
-// * @brief 为了cv库,从一个文件下获取所有符合后缀条件的img
-// * @param _path 返回的文件路径，cv使用
-// * @param _u8name 返回的文件名（无格式后缀）
-// * @param _u8path 返回的文件路径
-// * @param _foldername 目标文件夹名称
-// * @param _extension 文件的后缀集合
-// * @return 错误返回false，读取成功返回true
-// */
-//bool get_imgpath_from_folder(
-//    myList< std::string >       &_path,
-//    myList< std::string >       &_u8name,
-//    myList< std::string >       &_u8path,
-//    std::string                _foldername,
-//    const myList< std::string > &_extension);
-
-/*
  * @brief 用于读取表格（utf8编码）
  * @param _sheet 储存表格的二维数组（按照row，column的形式）
  * @param _path 文件的路径
@@ -365,7 +335,7 @@ void load_sheet_from_xlsx(myTable< chstring > &_sheet, chstring _path);
  * @param _titleName 表格标题的名称
  */
 void save_attSheet_to_xlsx(
-    myTable< chstring > &_sheet,
+    const myTable< chstring > &_sheet,
     chstring           _path,
     chstring           _titleName);
 

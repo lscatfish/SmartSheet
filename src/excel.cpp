@@ -17,7 +17,7 @@ xlnt::font                    stdFontRegular_attSheet = set_font(U8C(u8"宋体")
 xlnt::font                    stdFontTitle_attSheet   = set_font(U8C(u8"宋体"), 24, true);
 xlnt::font                    stdFontRegular_sttSheet = set_font(U8C(u8"宋体"), 16);
 xlnt::font                    stdFontHeader_sttSheet  = set_font(U8C(u8"宋体"), 16, true);
-xlnt::font                    stdFontTitle_sttSheet   = set_font(U8C(u8"方正小标宋简体"), 26);
+xlnt::font                    stdFontTitle_sttSheet   = set_font(U8C(u8"方正小标宋简体"), 26, true);
 xlnt::border::border_property stdBorderProperty       = set_border_property( );
 xlnt::border                  stdBorder               = set_bolder( );
 xlnt::alignment               autoAlignment           = set_alignment( );
@@ -201,7 +201,7 @@ void XlsxWrite::hasTitle(const bool _t) {
     hasTitle_ = _t;
 }
 // 返回是否有标题
-bool XlsxWrite::hasTitlt( ) const {
+bool XlsxWrite::hasTitle( ) const {
     return hasTitle_;
 }
 
@@ -368,6 +368,11 @@ void XlsxWrite::make_workbook(xlnt::workbook &wb, const myTable< std::string > &
 
 XlsxLoad::XlsxLoad(const chstring &_p)
     : path_(_p) {
+
+
+
+
+
     std::cout << "load xlsx file: \"" << path_ << "\"";
     wb_.load(path_.u8string( ));
     auto ws = wb_.active_sheet( );
