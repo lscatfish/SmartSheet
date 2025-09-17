@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <Encoding.h>
 #include <errhandlingapi.h>
+#include <excel.h>
 #include <Files.h>
 #include <filesystem>
 #include <fstream>
@@ -800,88 +801,101 @@ void save_attSheet_to_xlsx(
     chstring             _path,
     chstring             _titleName) {
 
-    myTable< std::string > _sheet = chstring::get_u8table(_sheet1);
-    encoding::repair_sheet_utf8_invalidity(_sheet);
+    xlsx::XlsxWrite writter;
+    writter.path(_path);
+    writter.sheet(_sheet1);
+    writter.hasTitle(true);
+    writter.title(_titleName);
+    writter.fontTitle(xlsx::stdFontTitle_attSheet);
+    writter.fontRegular(xlsx::stdFontRegular_attSheet);
+    writter.heightRegular(24);
+    writter.heightTitle(40);
+    writter.widths({ 7.92, 23.92, -1 });    // 采用-1来默认之后的列宽为23.92
+    if (writter.can_write( ))
+        writter.write( );
 
-    // 定义字体
-    xlnt::font f;
-    f.name(U8C(u8"宋体"));
-    f.size(14);
+    // myTable< std::string > _sheet = chstring::get_u8table(_sheet1);
+    // encoding::repair_sheet_utf8_invalidity(_sheet);
 
-    // 创建边框样式
-    xlnt::border::border_property border_prop;
-    border_prop.style(xlnt::border_style::thin);    // 细线边框
-    border_prop.color(xlnt::color::black( ));
+    //// 定义字体
+    // xlnt::font f;
+    // f.name(U8C(u8"宋体"));
+    // f.size(14);
 
-    // 构造外侧框线
-    xlnt::border b;
-    b.side(xlnt::border_side::start, border_prop);
-    b.side(xlnt::border_side::end, border_prop);
-    b.side(xlnt::border_side::top, border_prop);
-    b.side(xlnt::border_side::bottom, border_prop);
+    //// 创建边框样式
+    // xlnt::border::border_property border_prop;
+    // border_prop.style(xlnt::border_style::thin);    // 细线边框
+    // border_prop.color(xlnt::color::black( ));
 
-    // 水平居中 + 垂直居中
-    xlnt::alignment align;
-    align.horizontal(xlnt::horizontal_alignment::center);
-    align.vertical(xlnt::vertical_alignment::center);
+    //// 构造外侧框线
+    // xlnt::border b;
+    // b.side(xlnt::border_side::start, border_prop);
+    // b.side(xlnt::border_side::end, border_prop);
+    // b.side(xlnt::border_side::top, border_prop);
+    // b.side(xlnt::border_side::bottom, border_prop);
 
-    xlnt::workbook wb;
-    auto           ws = wb.active_sheet( );
-    ws.title("Sheet1");
+    //// 水平居中 + 垂直居中
+    // xlnt::alignment align;
+    // align.horizontal(xlnt::horizontal_alignment::center);
+    // align.vertical(xlnt::vertical_alignment::center);
 
-    size_t maxCol = 1;    // sheet中列的数量
-    // 逐行逐列写入
-    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
-        for (std::size_t c = 0; c < _sheet[r].size( ); ++c) {
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(b);
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(f);
-            ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
-            // 注意 xlnt 行列从 1 开始
-        }
-        if (maxCol < _sheet[r].size( )) {
-            maxCol = _sheet[r].size( );
-        }
-    }
+    // xlnt::workbook wb;
+    // auto           ws = wb.active_sheet( );
+    // ws.title("Sheet1");
 
-    // 列宽
-    ws.column_properties(1).width        = 7.92;    // 8字符宽
-    ws.column_properties(1).custom_width = true;
-    for (int i = 2; i <= maxCol; i++) {
-        ws.column_properties(i).width        = 23.92;    // 24字符宽
-        ws.column_properties(i).custom_width = true;
-    }
+    // size_t maxCol = 1;    // sheet中列的数量
+    //// 逐行逐列写入
+    // for (std::size_t r = 0; r < _sheet.size( ); ++r) {
+    //     for (std::size_t c = 0; c < _sheet[r].size( ); ++c) {
+    //         ws.cell(xlnt::cell_reference(c + 1, r + 1)).value(_sheet[r][c]);
+    //         ws.cell(xlnt::cell_reference(c + 1, r + 1)).border(b);
+    //         ws.cell(xlnt::cell_reference(c + 1, r + 1)).font(f);
+    //         ws.cell(xlnt::cell_reference(c + 1, r + 1)).alignment(align);
+    //         // 注意 xlnt 行列从 1 开始
+    //     }
+    //     if (maxCol < _sheet[r].size( )) {
+    //         maxCol = _sheet[r].size( );
+    //     }
+    // }
 
-    for (std::size_t r = 0; r < _sheet.size( ); ++r) {
-        ws.row_properties(r + 1).height        = 24;    // 24pt
-        ws.row_properties(r + 1).custom_height = true;
-    }
+    //// 列宽
+    // ws.column_properties(1).width        = 7.92;    // 8字符宽
+    // ws.column_properties(1).custom_width = true;
+    // for (int i = 2; i <= maxCol; i++) {
+    //     ws.column_properties(i).width        = 23.92;    // 24字符宽
+    //     ws.column_properties(i).custom_width = true;
+    // }
 
-    // 插入表的标题
-    xlnt::font f_title;
-    f_title.name(U8C(u8"宋体"));
-    f_title.size(24);
-    ws.insert_rows(1, 1);    // 插入行
+    // for (std::size_t r = 0; r < _sheet.size( ); ++r) {
+    //     ws.row_properties(r + 1).height        = 24;    // 24pt
+    //     ws.row_properties(r + 1).custom_height = true;
+    // }
 
-    // 合并单元格
-    std::string end_col;
-    int         temp = maxCol;
-    while (temp > 0) {
-        int remainder = (temp - 1) % 26;
-        end_col       = char('A' + remainder) + end_col;
-        temp          = (temp - 1) / 26;
-    }
-    // 构建合并单元格的范围字符串
-    std::string merRange = "A1:" + end_col + "1";
-    ws.merge_cells(merRange);
+    //// 插入表的标题
+    // xlnt::font f_title;
+    // f_title.name(U8C(u8"宋体"));
+    // f_title.size(24);
+    // ws.insert_rows(1, 1);    // 插入行
 
-    ws.row_properties(1).height        = 40;    // 40pt
-    ws.row_properties(1).custom_height = true;
-    ws.cell("A1").value(_titleName.u8string( ));
-    ws.cell("A1").font(f_title);
-    ws.cell("A1").alignment(align);
+    //// 合并单元格
+    // std::string end_col;
+    // int         temp = maxCol;
+    // while (temp > 0) {
+    //     int remainder = (temp - 1) % 26;
+    //     end_col       = char('A' + remainder) + end_col;
+    //     temp          = (temp - 1) / 26;
+    // }
+    //// 构建合并单元格的范围字符串
+    // std::string merRange = "A1:" + end_col + "1";
+    // ws.merge_cells(merRange);
 
-    wb.save(_path.u8string( ));
+    // ws.row_properties(1).height        = 40;    // 40pt
+    // ws.row_properties(1).custom_height = true;
+    // ws.cell("A1").value(_titleName.u8string( ));
+    // ws.cell("A1").font(f_title);
+    // ws.cell("A1").alignment(align);
+
+    // wb.save(_path.u8string( ));
 }
 
 /*
