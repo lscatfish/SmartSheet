@@ -173,6 +173,7 @@ add_executable(${PROJECT_NAME} "main.cpp" ${SOURCES} ${ERRORHANDLER_DIR})
 add_executable(SearchingTool 
 ${SEARCHINGTOOL_DIR}
 ${SOURCES}
+${ERRORHANDLER_DIR}
 )
 
 #add_library(SM SHARED ${PY_WRAPPER})
