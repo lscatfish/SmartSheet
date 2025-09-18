@@ -19,6 +19,7 @@
 #include <chstring.hpp>
 #include <Encoding.h>
 #include <helper.h>
+#include <high.h>
 #include <iostream>
 #include <string>
 #include <utility>

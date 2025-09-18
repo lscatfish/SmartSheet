@@ -24,18 +24,11 @@
 #include <corecrt_wstring.h>
 #include <string>
 #include <utility>
+#include <vector>
+#include <high.h>
 
 // chstring不允许对单个char的大小进行操作
 class chstring {
-private:
-    // 表格
-    template < typename _T >
-    using myTable = std::vector< std::vector< _T > >;    // 如果冲突，请封装到namespace中，或者改名为 MyTable
-
-    // 一行（列）
-    template < typename _T >
-    using myList = std::vector< _T >;    // 如果冲突，请封装到namespace中，或者改名为 MyList
-
 public:
     enum class csType {
         UTF8 = 0,    // utf8编码
@@ -227,10 +220,10 @@ public:
     // 分离前后缀
     std::pair< chstring, chstring > split_filename_and_extension( ) const;
 
-    //获取文件
+    // 获取文件
     chstring splitout_file( ) const;
 
-    //获取文件名（无后缀）
+    // 获取文件名（无后缀）
     chstring splitout_filename( ) const;
 
     // 是否都是数字
@@ -238,7 +231,6 @@ public:
 
     // 是否含有子串
     bool has_subchstring(const chstring &_substr) const;
-
 
 private:
     std::string usingStr_;    // 当前使用的字符串（编码同usingType）

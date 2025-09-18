@@ -28,7 +28,6 @@ int main( ) {
         my_inputer(inputStr);
         if (inputStr == "$exit$" || inputStr == "$save$") {
             msglogger.in_deconstruct(inputStr);
-            msglogger.~MessageLogger( );
             break;
         }
         std::cout << "Searching for \"" << inputStr << "\" ..." << std::endl
@@ -44,6 +43,5 @@ int main( ) {
         pause( );
         msglogger.clear_temp_msgs( );
     }
-
     return 0;    // 程序正常结束
 }

@@ -368,11 +368,6 @@ void XlsxWrite::make_workbook(xlnt::workbook &wb, const myTable< std::string > &
 
 XlsxLoad::XlsxLoad(const chstring &_p)
     : path_(_p) {
-
-
-
-
-
     std::cout << "load xlsx file: \"" << path_ << "\"";
     wb_.load(path_.u8string( ));
     auto ws = wb_.active_sheet( );
