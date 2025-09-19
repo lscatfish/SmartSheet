@@ -316,11 +316,45 @@ int main() {
 ---
 
 # PDF
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.pdf`文件使用采用poppler库的表层和其底层pdf渲染器共同完成。其中表层（cpp对外开放的类）用于文字块的识别，底层pdf渲染器用于识别表格的框线。    
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在对pdf进行渲染的时候，会出现**非矢量线段无法识别**的问题，这点有待改进。此外，应当注意到底层与表层库的对pdf解析后得到的返回坐标存在数值上的误差（误差的来源未知，但是可以用修正量修正）。 
 
 ## 一、概述
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本项目提供了一套PDF解析工具，能够从PDF文件中提取表格结构及文本内容，并支持对特定类型表格（如班委应聘表、普通报名表）进行结构化信息提取，最终生成人员信息数据。
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.pdf`文件使用采用poppler库的表层和其底层pdf渲染器共同完成。其中表层（cpp对外开放的类）用于文字块的识别，底层pdf渲染器用于识别表格的框线。    
+### 存在问题 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在对pdf进行渲染的时候，会出现**非矢量线段无法识别**的问题，这点有待改进。此外，应当注意到底层与表层库的对pdf解析后得到的返回坐标存在数值上的误差（误差的来源未知，但是可以用修正量修正）。 
+```cpp
+/*
+ * @brief 填充解析出的表格
+ * @param _textBoxList 解析出的文字块
+ */
+void DefPdf::fill_sheet(const myList< CELL > &_textBoxList) {
+    // 填充之前对位置进行修正
+    double deltaH = 18000;    // 修正参数
+    for (const auto &c : _textBoxList) {
+        if (c.text == U8C(u8"姓名")) {
+            deltaH = sheet_[0][0].corePoint.y - c.corePoint.y;
+            break;
+        }
+    }
+
+    // 重构_textBoxList
+    myList< CELL > thisBox;
+    for (const auto &c : _textBoxList) {
+        CELL thisCc(c, deltaH);
+        thisBox.push_back(thisCc);
+    }
+    for (const auto &t : thisBox) {
+        for (auto &r : sheet_) {
+            for (auto &c : r) {
+                if (t.is_contained_for_pdf(c)) {
+                    c.text = c.text + t.text;
+                }
+            }
+        }
+    }
+}
+```
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这里我按照第一个框线中的文本应该是`姓名`来将文本块校正到单元格的中心。   
 
 ## 二、功能特点
 - 提取PDF中的文本块信息
@@ -410,7 +444,7 @@ for (const auto& pageBlocks : textBlocks) {
 ---
 
 
-## 作者累了，休息一下，有什么问题联系作者哦 
+## 作者累了，休息一下，有什么问题联系作者哦   
 
 
 
