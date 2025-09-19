@@ -25,7 +25,7 @@ Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： 
 	- zlib v1.3.1 &nbsp;&nbsp;&nbsp; 仓库地址：[官方地址](https://zlib.net/)
 	- ftxui v6.1.9 &nbsp;&nbsp;&nbsp; 仓库地址：[Github](https://github.com/ArthurSonzogni/FTXUI.git) *请手动编译到Rlease静态库*
 - **注意事项**：
-	请使用temp分支进行开发，开发前请联系管理员（2561925435@qq.com）
+	请使用temp分支进行开发；如果新增其他可执行文件或者封装层，请使用shared分支进行开发。开发前请联系管理员（2561925435@qq.com）
 
 ---
 
@@ -59,9 +59,12 @@ Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考虑率到测试数据包含极为敏感的个人信息，若实在需要测试数据，请联系[lscatfish](https://github.com/lscatfish)  
 
 ---
+---
+---
+---
 
-# 如何解析docx、pdf、xlsx等文件   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在此项目中，我们解析了docx、pdf、xlsx等文件，下面将讲解解析此类文件的思路。
+#  **如何解析docx、pdf、xlsx、图片等文件**   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在此项目中，我们解析了docx、pdf、xlsx、图片等文件，下面将讲解解析此类文件的思路。 
 
 ---
 
@@ -307,9 +310,111 @@ int main() {
 }
 ```
 
+# XLSX 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.xlsx`文件使用xlnt库解析，详细的使用方式可以参考xlnt库的[官方使用手册](https://github.com/xlnt-community/xlnt) 
+
+---
+
+# PDF
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`.pdf`文件使用采用poppler库的表层和其底层pdf渲染器共同完成。其中表层（cpp对外开放的类）用于文字块的识别，底层pdf渲染器用于识别表格的框线。    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在对pdf进行渲染的时候，会出现**非矢量线段无法识别**的问题，这点有待改进。此外，应当注意到底层与表层库的对pdf解析后得到的返回坐标存在数值上的误差（误差的来源未知，但是可以用修正量修正）。 
+
+## 一、概述
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本项目提供了一套PDF解析工具，能够从PDF文件中提取表格结构及文本内容，并支持对特定类型表格（如班委应聘表、普通报名表）进行结构化信息提取，最终生成人员信息数据。
+
+## 二、功能特点
+- 提取PDF中的文本块信息
+- 识别PDF中的表格线条并构建表格结构
+- 支持无表格线时通过文本聚类构建表格
+- 对特定类型表格进行结构化解析，提取人员信息（姓名、学号、联系方式等）
+- 支持多种表格类型识别（班委应聘表、普通报名表）
+
+## 三、核心组件
+
+### 数据结构定义
+- `LineSegment`：表示PDF中的线段，支持水平/垂直/其他类型判断
+- `GridPoint`：二维坐标点结构
+- `CELL`：表格单元格结构，包含顶点坐标、中心坐标、文本内容等信息
+- `myTable`：表格数据结构（二维向量）
+- `myList`：行/列数据结构（向量）
+
+### 主要类
+- `LineExtractor`：线段提取器，用于从PDF中提取线段信息
+- `DefPdf`：PDF解析主类，提供完整的PDF解析功能
+
+## 四、使用方法
+
+### 基本用法
+```cpp
+// 初始化PDF解析器
+pdf::Init();
+
+// 解析PDF文件
+chstring pdfPath = "path/to/your/file.pdf";
+pdf::DefPdf pdfDoc(pdfPath);
+
+// 检查解析是否成功
+if (pdfDoc.isOKed()) {
+    // 获取解析出的表格
+    auto sheet = pdfDoc.get_sheet();
+    
+    // 打印表格内容
+    pdfDoc.print_sheet();
+    
+    // 获取人员信息
+    DefPerson person = pdfDoc.get_person();
+}
+```
+
+### 批量提取文本块
+```cpp
+myList<myList<CELL>> textBlocks;
+pdf::DefPdf pdfDoc(pdfPath, textBlocks);
+
+// 处理提取到的文本块
+for (const auto& pageBlocks : textBlocks) {
+    for (const auto& cell : pageBlocks) {
+        // 处理单元格内容
+        std::cout << "Text: " << cell.text << std::endl;
+    }
+}
+```
+
+## 五、解析流程
+1. **初始化**：调用`pdf::Init()`初始化PDF解析环境
+2. **加载文件**：通过`DefPdf`构造函数加载PDF文件
+3. **内容提取**：
+   - 提取文本块（`extract_textblocks`）
+   - 提取线段（`extract_linesegments`）
+4. **表格构建**：
+   - 基于线段构建表格（`parse_line_to_sheet`）
+   - 或基于文本聚类构建表格（`parse_textbox_to_sheet`）
+5. **内容填充**：将文本块内容填充到表格单元格（`fill_sheet`）
+6. **信息提取**：从表格中提取结构化的人员信息（`get_person`）
+
+## 六、依赖项
+- Poppler：PDF渲染库，用于PDF内容提取
+- C++标准库
+
+## 七、注意事项
+- 输入文件路径需使用UTF-8编码
+- 目前主要支持两种表格类型：班委应聘表和普通报名表
+- 解析效果受PDF文件质量影响，清晰的表格线和规范的排版能获得更好的解析结果
+- 对于无表格线的PDF，通过文本聚类算法构建表格，可能存在一定误差
+
+
+---
+
 ---
 
 ---
 
 
 ## 作者累了，休息一下，有什么问题联系作者哦 
+
+
+
+
+
+
+
