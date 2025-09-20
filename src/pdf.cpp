@@ -339,9 +339,9 @@ myTable< CELL > DefPdf::cluster_rows(myList< CELL > _textBoxList) {
 
     // 解析
     for (size_t i = 0; i < _textBoxList.size( ); i++) {
-        // 为每一个cell进行解析
+        // 为每一个 cell 进行解析
         std::multiset< CELL, CELL::CompareByCorePointXAsc >  row;          // 每行中的内容要升序排列(从左到右)
-        std::multiset< CELL, CELL::CompareByCorePointYDesc > rowHeight;    // 判断是否在同一行的set（从上到下）
+        std::multiset< CELL, CELL::CompareByCorePointYDesc > rowHeight;    // 判断是否在同一行的 set （从上到下）
         myList< CELL >                                       r;            // 标准行
         if (!_textBoxList[i].ifSelect) {
             row.insert(_textBoxList[i]);

@@ -61,7 +61,6 @@ Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： 
 ---
 ---
 ---
----
 
 #  **如何解析docx、pdf、xlsx、图片等文件**   
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在此项目中，我们解析了docx、pdf、xlsx、图片等文件，下面将讲解解析此类文件的思路。 
@@ -438,11 +437,24 @@ for (const auto& pageBlocks : textBlocks) {
 
 
 ---
+---
+---
+# 图片解析方式 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本项目使用飞桨开发的文字识别库PaddleOCR，编译了一个动态链接文件`ppocr.dll`，使用时直接通过API调用`ppocr.dll`来进行文字识别。 
+
+## [PaddleOCR的使用](https://github.com/PaddlePaddle/PaddleOCR/blob/main/readme/README_cn.md) 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+
+
+
+
+
+
 
 ---
-
 ---
-
+---
+---
 
 ## 作者累了，休息一下，有什么问题联系作者哦   
 
