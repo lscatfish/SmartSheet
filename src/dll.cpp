@@ -16,8 +16,6 @@
 #include <vector>                // STL 容器
 #include <Windows.h>             // Windows API
 
-
-
 namespace dll {
 
 /*========================================================

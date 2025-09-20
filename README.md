@@ -53,16 +53,17 @@ Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： 
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;编译生成Release版本的程序即可。  
 
----
-
 ## 测试数据集
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考虑率到测试数据包含极为敏感的个人信息，若实在需要测试数据，请联系[lscatfish](https://github.com/lscatfish)  
 
+## TODO 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ppocr希望可以使用动态链接库，而不是直接链接到`.dll`文件。 
+
 ---
 ---
 ---
 
-#  **如何解析docx、pdf、xlsx、图片等文件**   
+# 如何解析docx、pdf、xlsx、图片等文件  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;在此项目中，我们解析了docx、pdf、xlsx、图片等文件，下面将讲解解析此类文件的思路。 
 
 ---

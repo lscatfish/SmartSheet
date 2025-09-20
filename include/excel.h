@@ -104,6 +104,7 @@ public:
         const xlnt::font          &_fontHeader    = stdFontHeader_sttSheet,
         const double               _heightHeader  = 24);
     XlsxWrite( );
+    XlsxWrite(const chstring &_p);
     ~XlsxWrite( ) = default;
 
     // 设置正文字体
@@ -225,6 +226,126 @@ private:
 
 /* ================================================================================================================ */
 /* ================================================================================================================ */
+//
+//// 使用请采用此类
+//class DefXlsx {
+//public:
+//    // 调用方式
+//    enum class xType {
+//        write = 0,
+//        load
+//    };
+//
+//    /*
+//     * @param _xt 调用方式
+//     * @param _p 地址
+//     */
+//    DefXlsx(const xType _xt, const chstring &_p);
+//
+//    // @brief 默认采用写方式
+//    DefXlsx(const myTable< chstring > &_sh,
+//            const chstring            &_path,
+//            const double               _heightRegular = 24,
+//            const myList< double >    &_widths        = myList< double >{ },
+//            const xlnt::border        &_border        = stdBorder,
+//            const xlnt::font          &_fontRegular   = stdFontRegular_sttSheet,
+//            const xlnt::alignment     &_align         = autoAlignment,
+//            bool                       _hasTitle      = false,
+//            const chstring            &_title         = "",
+//            const xlnt::font          &_fontTitle     = stdFontTitle_sttSheet,
+//            const double               _heightTitle   = 40,
+//            bool                       _hasHeader     = false,
+//            const xlnt::font          &_fontHeader    = stdFontHeader_sttSheet,
+//            const double               _heightHeader  = 24);
+//
+//    ~DefXlsx( );
+//
+//    // 设置正文字体
+//    void fontRegular(const xlnt::font &_f);
+//    // 获取正文字体
+//    xlnt::font fontRegular( ) const;
+//
+//    // 设置表头字体
+//    void fontHeader(const xlnt::font &_f);
+//    // 获取正文字体
+//    xlnt::font fontHeader( ) const;
+//
+//    // 设置标题字体
+//    void fontTitle(const xlnt::font &_f);
+//    // 获取标题字体
+//    xlnt::font fontTitle( ) const;
+//
+//    // 设置单元格边框格式
+//    void borderCell(const xlnt::border &_b);
+//    // 获取单元格边框格式
+//    xlnt::border borderCell( ) const;
+//
+//    // 设置对齐方式
+//    void alignment(const xlnt::alignment &_a);
+//    // 获取对齐方式
+//    xlnt::alignment alignment( ) const;
+//
+//    // 设置是否有标题
+//    void hasTitle(const bool _t);
+//    // 返回是否有标题
+//    bool hasTitle( ) const;
+//
+//    // 设置是否有表头
+//    void hasHeader(const bool _h);
+//    // 返回是否有表头
+//    bool hasHeader( ) const;
+//
+//    // 设置标题
+//    void title(const chstring &_t);
+//    // 获取标题
+//    chstring title( ) const;
+//
+//    // 设置表格内容
+//    void sheet(const myTable< chstring > &_s);
+//    // 返回表格内容
+//    myTable< chstring > sheet( ) const;
+//
+//    // 设置写入的路径
+//    void path(const chstring &_p);
+//    // 获取写入路径
+//    chstring path( ) const;
+//
+//    // 设置正文行高
+//    void heightRegular(const double _h);
+//    // 获取正文行高
+//    double heightRegular( ) const;
+//
+//    // 设置标题行高
+//    void heightTitle(const double _h);
+//    // 获取标题行高
+//    double heightTitle( ) const;
+//
+//    // 设置表头行高
+//    void heightHeader(const double _h);
+//    // 获取表头行高
+//    double heightHeader( ) const;
+//
+//    // 设置行宽
+//    void widths(const myList< double > &_w);
+//    // 获取行宽
+//    myList< double > widths( ) const;
+//
+//    // 检查是否可写
+//    bool can_write( ) const;
+//
+//    // 写入xlsx
+//    bool write( ) const;
+//
+//private:
+//    XlsxWrite *writter = nullptr;    // 写方法
+//    XlsxLoad  *loader  = nullptr;    // 读取方法
+//    chstring   path_;                // 路径
+//    xType      xtype_;               // 调用defxlsx的方式
+//};
+
+/* ================================================================================================================ */
+/* ================================================================================================================ */
+
 }    // namespace xlsx
 
 
