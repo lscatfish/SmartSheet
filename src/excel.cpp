@@ -2,6 +2,8 @@
 #include <basic.hpp>
 #include <chstring.hpp>
 #include <Encoding.h>
+#include <ErrorHandler/BaseException.hpp>
+#include <ErrorHandler/ErrorHandler.hpp>
 #include <excel.h>
 #include <exception>
 #include <high.h>
@@ -145,6 +147,22 @@ XlsxWrite::XlsxWrite( ) {
     hasHeader_     = false;
     fontHeader_    = stdFontHeader_sttSheet;
     path_          = "";
+    widths_        = myList< double >{ };
+    heightRegular_ = 24;
+    heightHeader_  = 24;
+    heightTitle_   = 40;
+}
+
+XlsxWrite::XlsxWrite(const chstring &_p)
+    : path_(_p) {
+    borderCell_    = stdBorder;
+    fontRegular_   = stdFontRegular_sttSheet;
+    alignment_     = autoAlignment;
+    hasTitle_      = false;
+    title_         = "";
+    fontTitle_     = stdFontTitle_sttSheet;
+    hasHeader_     = false;
+    fontHeader_    = stdFontHeader_sttSheet;
     widths_        = myList< double >{ };
     heightRegular_ = 24;
     heightHeader_  = 24;
@@ -398,5 +416,61 @@ chstring XlsxLoad::path( ) const {
 myTable< chstring > XlsxLoad::get_sheet( ) const {
     return sheet_;
 }
+
+/* ================================================================================================================ */
+/* ================================================================================================================ */
+//
+///*
+// * @param _xt 调用方式
+// * @param _p 地址
+// */
+//DefXlsx::DefXlsx(const xType _xt, const chstring &_p)
+//    : path_(_p),
+//      xtype_(_xt) {
+//    if (xtype_ == xType::load) {    // 按照加载方式构造
+//        loader = new XlsxLoad(_p);
+//        if (!loader) THROW_XLSX_ERROR(errXlsx_newloader, "xlsx loader error: new XlsxLoad failed!!!");
+//    } else if (xtype_ == xType::write) {
+//        writter = new XlsxWrite(_p);
+//        if (!writter) THROW_XLSX_ERROR(errXlsx_newwritter, "xlsx writter error: new XlsxWrite failed!!!");
+//    }
+//}
+//
+///*
+// * @brief 默认采用写方式
+// */
+//DefXlsx::DefXlsx(
+//    const myTable< chstring > &_sh,
+//    const chstring            &_path,
+//    const double               _heightRegular,
+//    const myList< double >    &_widths,
+//    const xlnt::border        &_border,
+//    const xlnt::font          &_fontRegular,
+//    const xlnt::alignment     &_align,
+//    bool                       _hasTitle,
+//    const chstring            &_title,
+//    const xlnt::font          &_fontTitle,
+//    const double               _heightTitle,
+//    bool                       _hasHeader,
+//    const xlnt::font          &_fontHeader,
+//    const double               _heightHeader)
+//    : path_(_path),
+//      xtype_(xType::write) {
+//    writter = new XlsxWrite(_sh, _path, _heightRegular, _widths, _border, _fontRegular,
+//                            _align, _hasTitle, _title, _fontTitle, _heightTitle,
+//                            _hasHeader, _fontHeader, _heightHeader);
+//    if (!writter) THROW_XLSX_ERROR(errXlsx_newwritter, "xlsx writter error: new XlsxWrite failed!!!");
+//}
+//
+//DefXlsx::~DefXlsx( ) {
+//    if (writter) {
+//        delete writter;
+//        writter = nullptr;
+//    }
+//    if (loader) {
+//        delete loader;
+//        loader = nullptr;
+//    }
+//}
 
 }    // namespace xlsx
