@@ -25,10 +25,14 @@ void DefPerson::optimize( ) {
         else if (this->politicaloutlook.has_subchstring(U8C(u8"团")))
             this->politicaloutlook = U8C(u8"共青团员");
         else if (this->politicaloutlook.has_subchstring(U8C(u8"党")))
-            this->politicaloutlook = U8C(u8"中共党员");
+            if (this->politicaloutlook.has_subchstring(U8C(u8"预")))
+                this->politicaloutlook = U8C(u8"中共预备党员");
+            else
+                this->politicaloutlook = U8C(u8"中共党员");
     }
     if (this->studentID.size( ) >= 4) {
         // 应当检查（0，4）是否都是数字
+        // 可以优化
         auto imp = this->studentID.substr(0, 4);
         if (!imp.is_all_digits( )) {    // 啥都不干
         } else if (!this->grade.empty( )) {

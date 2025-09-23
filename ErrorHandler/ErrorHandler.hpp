@@ -79,7 +79,7 @@ private:
 #define THROW_ENCODING_ERROR(code, msg) \
     THROW_EXCEPTION(EncodingException, code, msg)
 // 为xlsx分配错误码（201-300），请使用宏表达
-//#define errXlsx_newloader  201    // 分配loader空间失败
-//#define errXlsx_newwritter 202    // 分配writter空间失败
+// #define errXlsx_newloader  201    // 分配loader空间失败
+// #define errXlsx_newwritter 202    // 分配writter空间失败
 
 #endif    // !ERRORHANDLER_HPP
