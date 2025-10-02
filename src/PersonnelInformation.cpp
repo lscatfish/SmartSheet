@@ -25,7 +25,9 @@ void DefPerson::optimize( ) {
         else if (this->politicaloutlook.has_subchstring(U8C(u8"团")))
             this->politicaloutlook = U8C(u8"共青团员");
         else if (this->politicaloutlook.has_subchstring(U8C(u8"党")))
-            if (this->politicaloutlook.has_subchstring(U8C(u8"预")))
+            if (this->politicaloutlook.has_subchstring(U8C(u8"积极")))
+                this->politicaloutlook = U8C(u8"入党积极分子");
+            else if (this->politicaloutlook.has_subchstring(U8C(u8"预")))
                 this->politicaloutlook = U8C(u8"中共预备党员");
             else
                 this->politicaloutlook = U8C(u8"中共党员");
