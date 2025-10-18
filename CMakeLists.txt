@@ -361,9 +361,9 @@ function(copy_files_to_target TARGET_NAME)
 endfunction()
 
 # -------------------------- 关键：为两个目标调用复制函数 --------------------------
-copy_files_to_target(${PROJECT_NAME})   # 为 SmartSheet 复制文件
-copy_files_to_target(SearchingTool)     # 为 SearchingTool 复制文件
-#copy_files_to_target(SM)     # 为 SM 复制文件
+copy_files_to_target(${PROJECT_NAME})   # 为SmartSheet复制文件
+copy_files_to_target(SearchingTool)     # 为SearchingTool复制文件
+#copy_files_to_target(SM)     # 为SM复制文件
 
 ########################################Windows下可运行，linux下需要重新写##########################################
 ########################################Windows下可运行，linux下需要重新写##########################################
