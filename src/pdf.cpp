@@ -423,7 +423,11 @@ DefPdf::SheetType DefPdf::get_sheet_type( ) const {
     return sheetType_;
 }
 
-// 获取人员的信息
+
+/*
+ * 获取人员的信息
+ * 这个函数确实是屎山，复用性很差，可读性很差，可以考虑重构
+ */
 DefPerson DefPdf::get_person( ) const {
     if (sheet_.size( ) == 0) {
         return DefPerson( );
