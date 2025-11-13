@@ -1,4 +1,4 @@
-﻿#	SmartSheet-v0.8.0
+﻿#	SmartSheet-v0.9.3
 ###	仓库地址：
 GitHub标准仓库地址： [GitHub](https://github.com/lscatfish/SmartSheet.git)  
 Gitee国内镜像仓库地址： [Gitee](https://gitee.com/sicheng-liu/SmartSheet.git)    
@@ -57,7 +57,9 @@ Gitcode国内镜像仓库地址（推荐使用此仓库，直接下载zip）： 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;考虑率到测试数据包含极为敏感的个人信息，若实在需要测试数据，请联系[lscatfish](https://github.com/lscatfish)  
 
 ## TODO 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ppocr希望可以使用动态链接库，而不是直接链接到`.dll`文件。 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ppocr希望可以使用动态链接库，而不是直接链接到`.dll`文件。   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;手动或透视检测的vector数据溢出   
+
 
 ---
 ---
