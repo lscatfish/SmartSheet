@@ -18,6 +18,7 @@
 *.pdb
 
 # Compiled Dynamic libraries
+*.dll
 
 # Fortran module files
 *.mod
